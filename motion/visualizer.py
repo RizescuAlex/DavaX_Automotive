@@ -39,3 +39,39 @@ def draw_hand(frame, hand) -> None:
             (0, 0, 255),
             -1,
         )
+
+
+def draw_gesture(
+    frame,
+    hand,
+    gesture,
+) -> None:
+    height, width, _ = frame.shape
+
+    wrist = hand.landmarks[0]
+
+    x = int(wrist.x * width)
+    y = int(wrist.y * height)
+
+    status = (
+        "STABLE"
+        if gesture.stable
+        else "detecting"
+    )
+
+    text = (
+        f"{gesture.handedness}: "
+        f"{gesture.label} "
+        f"{gesture.confidence:.2f} "
+        f"[{status}]"
+    )
+
+    cv2.putText(
+        frame,
+        text,
+        (x, max(y - 30, 20)),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.65,
+        (255, 255, 0),
+        2,
+    )

@@ -7,11 +7,12 @@ class Landmark:
     x: float
     y: float
     z: float
-    visibility: float = 1.0
 
 
 @dataclass
-class HandResult:
+class GestureResult:
     landmarks: List[Landmark]
     handedness: str
-    confidence: float
+    handedness_confidence: float
+    gesture: str
+    gesture_confidence: float
