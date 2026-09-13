@@ -1,7 +1,38 @@
-.venv/
-.venv*/
+# Dependencies
+node_modules/
 __pycache__/
 *.pyc
-.idea/
-.vscode/
+.venv/
+.venv*/
+venv/
+
+# Build artifacts
+frontend/dist/
+*.egg-info/
+
+# Environment
 .env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+
+# Docker
+docker-compose.override.yml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+htmlcov/
+.coverage
+.pytest_cache/
+
+# ML Models
+backend/ml_models/
+
+# Firebase
+firebase-adminsdk.json
