@@ -388,6 +388,7 @@ a:hover {
 
 /* ── Car Panel (Left) ── */
 .car-panel {
+  position: relative;
   width: 50%;
   display: flex;
   flex-direction: column;
@@ -418,6 +419,7 @@ a:hover {
   gap: var(--space-4);
   width: 100%;
   max-width: 320px;
+  transform: translateY(30px);
 }
 
 .car-viz-title {
@@ -972,3 +974,78 @@ a:hover {
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }
+
+/* Spotify widget */
+.spotify-widget {
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-4);
+  right: var(--space-4);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  min-height: 150px;
+  padding: var(--space-6);
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.spotify-disconnected { justify-content: space-between; }
+
+.spotify-art {
+  width: 104px;
+  height: 104px;
+  flex: none;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+
+.spotify-details {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.spotify-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #1db954;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.spotify-details strong,
+.spotify-details > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spotify-details strong { font-size: var(--font-size-xl); }
+.spotify-details > span:last-child { color: var(--text-muted); font-size: var(--font-size-md); }
+
+.spotify-actions { display: flex; gap: var(--space-2); }
+
+.spotify-actions button,
+.spotify-connect-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.spotify-actions button { width: 46px; height: 46px; }
+.spotify-actions button:hover,
+.spotify-connect-btn:hover { color: #1db954; border-color: #1db954; }
+.spotify-connect-btn { padding: 10px 16px; font-size: var(--font-size-sm); white-space: nowrap; }
+.spotify-error { position: absolute; top: 100%; left: 0; right: 0; padding-top: 4px; color: var(--color-error); font-size: var(--font-size-xs); }

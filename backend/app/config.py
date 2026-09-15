@@ -22,6 +22,13 @@ class Settings(BaseSettings):
     MAPBOX_ACCESS_TOKEN: str = ""
     OPENWEATHERMAP_API_KEY: str = ""
 
+    # Spotify
+    SPOTIFY_CLIENT_ID: str = ""
+    SPOTIFY_CLIENT_SECRET: str = ""
+    SPOTIFY_REDIRECT_URI: str = "http://127.0.0.1:8000/api/v1/spotify/callback"
+    SPOTIFY_CACHE_PATH: str = ".spotify_cache"
+    FRONTEND_URL: str = "http://localhost:5173"
+
     # JWT (custom email/password auth)
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str = "HS256"
