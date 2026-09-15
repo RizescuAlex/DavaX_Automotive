@@ -64,7 +64,6 @@ FINGER_DIRECTION = ((-0.030, -0.100), (-0.010, -0.115),
 
 
 def make_hand(pose: str, *, seed: int, shift=(0.0, 0.0)) -> Hand:
-    """Create a coherent 21-point hand and add small sensor-like noise."""
     rng = random.Random(seed)
     points = [Point(0.5 + shift[0], 0.55 + shift[1], 0.10)]
     points.extend([
@@ -209,6 +208,11 @@ if __name__ == "__main__":
 
     if wants_report or wants_visualize:
         sys.argv = [sys.argv[0]]
+        run_seed = (
+            parsed_arguments.seed
+            if parsed_arguments.seed is not None
+            else random.SystemRandom().randrange(1_000_000_000)
+        )
 
         def evaluate(label, expected, make_recognizer, make_frames, trials=20):
             correct = 0
@@ -233,9 +237,10 @@ if __name__ == "__main__":
         ]
 
         total_correct = total_trials = 0
-        print("Gesture detection accuracy (sequence-level)")
+        print(f"Gesture detection accuracy (sequence-level)    Seed: {run_seed}")
         for label, expected, factory, frames in cases:
-            correct, trials = evaluate(label, expected, factory, frames)
+            correct, trials = evaluate(label, expected, factory,
+                                       lambda seed, frames=frames: frames(run_seed + seed))
             total_correct += correct
             total_trials += trials
             print(f"  {label:14} {correct:2}/{trials:2} = {100 * correct / trials:5.1f}%")
@@ -250,7 +255,7 @@ if __name__ == "__main__":
             outputs = []
             for frame in range(8):
                 outputs.append(recognizer.update(
-                    make_hand("two", seed=5000 + trial * 100 + frame)
+                    make_hand("two", seed=run_seed + 5000 + trial * 100 + frame)
                 ))
                 clock.tick(0.05)
             hold_correct += expected_was_detected("PLAY_PAUSE", outputs)
@@ -299,7 +304,6 @@ if __name__ == "__main__":
                         tracked_point = Point(palm_x, palm_y, 0.0)
                     trial_path.append((tracked_point.x, tracked_point.y))
                 trial_data.append((expected, trial_seed, trial_frames, trial_outputs, trial_path))
-
             frames = [frame for _, _, trial_frames, _, _ in trial_data for frame in trial_frames]
             frame_meta = [
                 (trial_number, frame_number)
@@ -334,7 +338,6 @@ if __name__ == "__main__":
                     f"Frame: {trial_frame + 1}/{len(trial_path)}    Seed: {trial_seed}"
                 )
                 return dots, path, status
-
             animation = FuncAnimation(
                 fig, draw, frames=len(frames), interval=100, repeat=False
             )
