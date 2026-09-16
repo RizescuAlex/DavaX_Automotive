@@ -1,7 +1,7 @@
 import json
 import socket
 
-from .models import HandResult, Landmark
+from motion.models import HandResult, Landmark
 
 
 class IPhoneReceiver:

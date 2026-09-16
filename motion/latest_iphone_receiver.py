@@ -1,7 +1,7 @@
 import threading
 import time
 
-from .iphone_receiver import IPhoneReceiver
+from motion.iphone_receiver import IPhoneReceiver
 
 
 class LatestIPhoneReceiver:
