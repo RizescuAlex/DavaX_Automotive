@@ -74,6 +74,11 @@ SWIPE_COOLDOWN = 0.30
 TWO_FINGER_HOLD_TIME = 0.20
 
 
+# Pose gestures recognized directly from the phone landmark stream.
+THUMB_VERTICAL_MARGIN = 0.08
+THUMB_HISTORY = 5
+
+
 # ------------------------------------------------------------
 # Spotify
 # ------------------------------------------------------------
@@ -489,6 +494,60 @@ def two_finger_pose(hand):
         and not ring_extended
         and not little_extended
     )
+
+
+def thumb_gesture(hand):
+    """Return THUMB_UP, THUMB_DOWN, or None from 21 hand landmarks."""
+    lm = hand.landmarks
+    if len(lm) != 21:
+        return None
+
+    other_fingers_folded = all(
+        not finger_extended(lm, tip_id, pip_id, mcp_id)
+        for tip_id, pip_id, mcp_id in (
+            (8, 6, 5), (12, 10, 9), (16, 14, 13), (20, 18, 17)
+        )
+    )
+    if not other_fingers_folded:
+        return None
+
+    _, palm_y, _ = palm_center(hand)
+    thumb_tip = lm[4]
+    thumb_ip = lm[3]
+
+    if (thumb_tip.y < palm_y - THUMB_VERTICAL_MARGIN
+            and thumb_tip.y < thumb_ip.y):
+        return "THUMB_UP"
+    if (thumb_tip.y > palm_y + THUMB_VERTICAL_MARGIN
+            and thumb_tip.y > thumb_ip.y):
+        return "THUMB_DOWN"
+    return None
+
+
+class ThumbGestureRecognizer:
+    """Debounce thumb poses and emit each pose once until released."""
+
+    def __init__(self, history_size=THUMB_HISTORY):
+        self.history = deque(maxlen=history_size)
+        self.triggered = False
+
+    def reset(self):
+        self.history.clear()
+        self.triggered = False
+
+    def update(self, hand):
+        gesture = thumb_gesture(hand)
+        self.history.append(gesture)
+        if gesture is None:
+            self.triggered = False
+            return "Waiting"
+
+        stable = (len(self.history) == self.history.maxlen
+                  and all(previous == gesture for previous in self.history))
+        if stable and not self.triggered:
+            self.triggered = True
+            return gesture
+        return "Triggered" if self.triggered else "Holding"
 
 
 # ============================================================
@@ -1231,6 +1290,8 @@ def main():
         TwoFingerGestureRecognizer()
     )
 
+    thumb_recognizer = ThumbGestureRecognizer()
+
 
     window_name = (
         "DavaX BMW Gesture Control"
@@ -1249,6 +1310,8 @@ def main():
     swipe_state = "Waiting"
 
     two_finger_state = "Waiting"
+
+    thumb_state = "Waiting"
 
     last_action = "None"
 
@@ -1398,6 +1461,16 @@ def main():
                     # Check this first.
                     # -----------------------------------------
 
+                    thumb_result = thumb_recognizer.update(hand)
+                    thumb_state = thumb_result
+
+                    if thumb_result in ("THUMB_UP", "THUMB_DOWN"):
+                        last_action = thumb_result
+                        action_display_until = time.monotonic() + 0.75
+                        two_finger_recognizer.reset()
+                        circle_recognizer.reset_tracking()
+                        swipe_recognizer.reset_tracking()
+
                     two_finger_result = (
                         two_finger_recognizer.update(
                             hand
@@ -1409,7 +1482,10 @@ def main():
                     )
 
 
-                    if (
+                    if thumb_result in ("THUMB_UP", "THUMB_DOWN"):
+                        pass
+
+                    elif (
                         two_finger_result
                         == "PLAY_PAUSE"
                     ):

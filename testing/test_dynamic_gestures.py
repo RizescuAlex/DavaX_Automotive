@@ -16,16 +16,18 @@ def load_bmw_module():
     motion = types.ModuleType("motion")
     receiver = types.ModuleType("motion.latest_iphone_receiver")
 
-    class LatestIPhoneReceiver:  # pragma: no cover - only satisfies import
+    class LatestIPhoneReceiver:
         pass
 
     receiver.LatestIPhoneReceiver = LatestIPhoneReceiver
     motion.latest_iphone_receiver = receiver
-    sys.modules.setdefault("motion", motion)
+    sys.modules.setdefault("../motion", motion)
     sys.modules.setdefault("motion.latest_iphone_receiver", receiver)
 
     test_dir = Path(__file__).resolve().parent
+
     candidate_paths = (
+        test_dir.parent / "motion" / "bmw_gestures.py",
         test_dir / "bmw_gestures.py",
         test_dir / "upload" / "bmw_gestures.py",
     )
@@ -57,20 +59,26 @@ class Hand:
 
 FINGER_IDS = ((5, 6, 7, 8), (9, 10, 11, 12),
               (13, 14, 15, 16), (17, 18, 19, 20))
-FINGER_MCP = ((-0.060, 0.000), (-0.020, -0.005),
-              (0.020, -0.005), (0.060, 0.005))
+FINGER_MCP = ((-0.080, -0.020), (-0.027, -0.050),
+              (0.027, -0.050), (0.080, -0.020))
 FINGER_DIRECTION = ((-0.030, -0.100), (-0.010, -0.115),
                     (0.015, -0.110), (0.040, -0.095))
 
 
 def make_hand(pose: str, *, seed: int, shift=(0.0, 0.0)) -> Hand:
     rng = random.Random(seed)
-    points = [Point(0.5 + shift[0], 0.55 + shift[1], 0.10)]
+    thumb_tip_y = {
+        "thumb_up": 0.35,
+        "thumb_down": 0.75,
+    }.get(pose, 0.51)
+    thumb_ip_y = (0.45 if pose == "thumb_up"
+                  else 0.65 if pose == "thumb_down" else 0.52)
+    points = [Point(0.5 + shift[0], 0.60 + shift[1], 0.10)]
     points.extend([
-        Point(0.44 + shift[0], 0.55 + shift[1], 0.10),  # thumb chain
+        Point(0.44 + shift[0], 0.55 + shift[1], 0.10),
         Point(0.42 + shift[0], 0.53 + shift[1], 0.10),
-        Point(0.40 + shift[0], 0.52 + shift[1], 0.10),
-        Point(0.38 + shift[0], 0.51 + shift[1], 0.10),
+        Point(0.40 + shift[0], thumb_ip_y + shift[1], 0.10),
+        Point(0.38 + shift[0], thumb_tip_y + shift[1], 0.10),
     ])
 
     for finger_no, (mcp_id, pip_id, dip_id, tip_id) in enumerate(FINGER_IDS):
@@ -94,9 +102,9 @@ def make_hand(pose: str, *, seed: int, shift=(0.0, 0.0)) -> Hand:
         for point_id, (x, y) in zip((mcp_id, pip_id, dip_id, tip_id), coords):
             points.append(None)
             points[point_id] = Point(
-                0.5 + shift[0] + x + rng.uniform(-0.0015, 0.0015),
-                0.55 + shift[1] + y + rng.uniform(-0.0015, 0.0015),
-                0.10 + rng.uniform(-0.002, 0.002),
+                0.5 + shift[0] + x + rng.uniform(-0.0025, 0.0025),
+                0.55 + shift[1] + y + rng.uniform(-0.0025, 0.0025),
+                0.10 + rng.uniform(-0.003, 0.003),
             )
 
     return Hand(points)
@@ -109,7 +117,7 @@ def translated_hand(pose: str, shift, seed: int) -> Hand:
 def circle_sequence(direction: int, seed_offset: int = 0, imperfect=True):
     rng = random.Random(seed_offset + 7919)
     center = (0.54, 0.42)
-    steps = [rng.uniform(0.65, 1.35) for _ in range(23)] if imperfect else [1.0] * 23
+    steps = [rng.uniform(0.40, 1.60) for _ in range(23)] if imperfect else [1.0] * 23
     step_total = sum(steps)
     frames = []
     angle = 0.0
@@ -118,9 +126,9 @@ def circle_sequence(direction: int, seed_offset: int = 0, imperfect=True):
         if frame:
             angle += direction * math.tau * steps[frame - 1] / step_total
             if imperfect:
-                drift_x += rng.gauss(0.0, 0.0018)
-                drift_y += rng.gauss(0.0, 0.0018)
-        radius = 0.09 * (rng.uniform(0.88, 1.12) if imperfect else 1.0)
+                drift_x += rng.gauss(0.0, 0.0035)
+                drift_y += rng.gauss(0.0, 0.0035)
+        radius = 0.09 * (rng.uniform(0.75, 1.25) if imperfect else 1.0)
         tip = (center[0] + drift_x + radius * math.cos(angle),
                center[1] + drift_y + radius * math.sin(angle))
         frames.append(translated_hand(
@@ -136,8 +144,8 @@ def swipe_sequence(xs, seed_offset: int = 0, imperfect=True):
         progress = frame / 11
         eased = progress * progress * (3.0 - 2.0 * progress)
         x = xs[0] + (xs[1] - xs[0]) * eased
-        x += rng.gauss(0.0, 0.006) if imperfect else 0.0
-        y = rng.gauss(0.0, 0.012) if imperfect else 0.0
+        x += rng.gauss(0.0, 0.010) if imperfect else 0.0
+        y = rng.gauss(0.0, 0.020) if imperfect else 0.0
         frames.append(translated_hand("open", (x - 0.50, y), seed_offset + frame))
     return frames
 
@@ -148,7 +156,10 @@ def run_sequence(recognizer, frames):
 
 
 def expected_was_detected(expected: str | None, outputs) -> bool:
-    actions = {"VOLUME_UP", "VOLUME_DOWN", "NEXT_SONG", "PREVIOUS_SONG", "PLAY_PAUSE"}
+    actions = {
+        "VOLUME_UP", "VOLUME_DOWN", "NEXT_SONG", "PREVIOUS_SONG",
+        "PLAY_PAUSE", "THUMB_UP", "THUMB_DOWN",
+    }
     detected_actions = actions.intersection(outputs)
     return detected_actions == ({expected} if expected else set())
 
@@ -165,6 +176,21 @@ class FakeClock:
 
 
 class DynamicGestureTests(unittest.TestCase):
+    def test_thumb_up_and_down_are_labeled_once(self):
+        for expected, pose in (("THUMB_UP", "thumb_up"),
+                               ("THUMB_DOWN", "thumb_down")):
+            recognizer = bmw.ThumbGestureRecognizer()
+            outputs, _ = run_sequence(
+                recognizer,
+                [make_hand(pose, seed=400 + frame) for frame in range(8)],
+            )
+            self.assertTrue(expected_was_detected(expected, outputs))
+            self.assertEqual(outputs.count(expected), 1)
+            self.assertEqual(
+                recognizer.update(make_hand("open", seed=500)),
+                "Waiting",
+            )
+
     def test_circle_labels_volume_up_and_down(self):
         for expected, direction in (("VOLUME_UP", 1), ("VOLUME_DOWN", -1)):
             recognizer = bmw.CircularGestureRecognizer()
@@ -214,7 +240,7 @@ if __name__ == "__main__":
             else random.SystemRandom().randrange(1_000_000_000)
         )
 
-        def evaluate(label, expected, make_recognizer, make_frames, trials=20):
+        def evaluate(label, expected, make_recognizer, make_frames, trials=100):
             correct = 0
             for trial in range(trials):
                 outputs, _ = run_sequence(
@@ -232,6 +258,10 @@ if __name__ == "__main__":
              lambda seed: swipe_sequence((0.30, 0.70), seed)),
             ("PREVIOUS_SONG", "PREVIOUS_SONG", bmw.SwipeGestureRecognizer,
              lambda seed: swipe_sequence((0.70, 0.30), seed)),
+            ("THUMB_UP", "THUMB_UP", bmw.ThumbGestureRecognizer,
+             lambda seed: [make_hand("thumb_up", seed=seed + i) for i in range(8)]),
+            ("THUMB_DOWN", "THUMB_DOWN", bmw.ThumbGestureRecognizer,
+             lambda seed: [make_hand("thumb_down", seed=seed + i) for i in range(8)]),
             ("NOTHING", None, bmw.SwipeGestureRecognizer,
              lambda seed: [make_hand("open", seed=seed + i) for i in range(12)]),
         ]
@@ -246,7 +276,7 @@ if __name__ == "__main__":
             print(f"  {label:14} {correct:2}/{trials:2} = {100 * correct / trials:5.1f}%")
 
         hold_correct = 0
-        hold_trials = 20
+        hold_trials = 100
         original_clock = bmw.time.monotonic
         for trial in range(hold_trials):
             clock = FakeClock()
@@ -285,18 +315,30 @@ if __name__ == "__main__":
                  lambda seed: swipe_sequence((0.30, 0.70), seed)),
                 ("PREVIOUS_SONG", bmw.SwipeGestureRecognizer,
                  lambda seed: swipe_sequence((0.70, 0.30), seed)),
+                ("PLAY_PAUSE", bmw.TwoFingerGestureRecognizer,
+                 lambda seed: [make_hand("two", seed=seed + i) for i in range(8)]),
+                ("THUMB_UP", bmw.ThumbGestureRecognizer,
+                 lambda seed: [make_hand("thumb_up", seed=seed + i) for i in range(8)]),
+                ("THUMB_DOWN", bmw.ThumbGestureRecognizer,
+                 lambda seed: [make_hand("thumb_down", seed=seed + i) for i in range(8)]),
+                ("NOTHING", bmw.SwipeGestureRecognizer,
+                 lambda seed: [make_hand("open", seed=seed + i) for i in range(12)]),
             ]
-            visual_rng = random.Random(visual_seed)
             trial_data = []
-            for trial_number in range(5):
-                expected, recognizer_factory, frame_factory = visual_rng.choice(visual_cases)
+            for trial_number, (expected, recognizer_factory, frame_factory) in enumerate(visual_cases):
                 trial_seed = visual_seed + trial_number
                 trial_frames = frame_factory(trial_seed)
                 recognizer = recognizer_factory()
                 trial_outputs = []
                 trial_path = []
+                trial_clock = None
+                if expected == "PLAY_PAUSE":
+                    trial_clock = FakeClock()
+                    bmw.time.monotonic = trial_clock.monotonic
                 for frame in trial_frames:
                     trial_outputs.append(recognizer.update(frame))
+                    if trial_clock is not None:
+                        trial_clock.tick(0.05)
                     if expected.startswith("VOLUME"):
                         tracked_point = frame.landmarks[8]
                     else:
@@ -304,6 +346,8 @@ if __name__ == "__main__":
                         tracked_point = Point(palm_x, palm_y, 0.0)
                     trial_path.append((tracked_point.x, tracked_point.y))
                 trial_data.append((expected, trial_seed, trial_frames, trial_outputs, trial_path))
+            bmw.time.monotonic = original_clock
+
             frames = [frame for _, _, trial_frames, _, _ in trial_data for frame in trial_frames]
             frame_meta = [
                 (trial_number, frame_number)
@@ -321,23 +365,39 @@ if __name__ == "__main__":
                           title="Tracked-point trajectory", xlabel="x", ylabel="y")
             hand_axis.set_aspect("equal")
             path_axis.set_aspect("equal")
+            palm = hand_axis.fill([], [], color="#8ecae6", alpha=0.35,
+                                  zorder=0)[0]
             dots, = hand_axis.plot([], [], "o", ms=5)
+            bones = [
+                hand_axis.plot([], [], "-", color="0.35", lw=1.5)[0]
+                for _ in bmw.HAND_CONNECTIONS
+            ]
             path, = path_axis.plot([], [], "o-", ms=4)
             status = fig.text(0.5, 0.02, "", ha="center")
 
             def draw(frame_number):
                 hand = frames[frame_number]
+                palm_points = [hand.landmarks[index] for index in (0, 5, 9, 13, 17)]
+                palm.set_xy([(point.x, point.y) for point in palm_points])
                 dots.set_data([p.x for p in hand.landmarks], [p.y for p in hand.landmarks])
+                for line, (start, end) in zip(bones, bmw.HAND_CONNECTIONS):
+                    start_point = hand.landmarks[start]
+                    end_point = hand.landmarks[end]
+                    line.set_data(
+                        [start_point.x, end_point.x],
+                        [start_point.y, end_point.y],
+                    )
                 trial_number, trial_frame = frame_meta[frame_number]
                 expected, trial_seed, _, trial_outputs, trial_path = trial_data[trial_number]
                 current_path = trial_path[:trial_frame + 1]
                 path.set_data([p[0] for p in current_path], [p[1] for p in current_path])
                 status.set_text(
-                    f"Trial: {trial_number + 1}/5    Expected: {expected}    "
+                    f"Trial: {trial_number + 1}/{len(trial_data)}    Expected: {expected}    "
                     f"Output: {trial_outputs[trial_frame]}    "
                     f"Frame: {trial_frame + 1}/{len(trial_path)}    Seed: {trial_seed}"
                 )
-                return dots, path, status
+                return palm, dots, *bones, path, status
+
             animation = FuncAnimation(
                 fig, draw, frames=len(frames), interval=100, repeat=False
             )
