@@ -1657,6 +1657,10 @@ def main():
                     "No hand"
                 )
 
+                thumb_state = (
+                    "No hand"
+                )
+
 
             # =================================================
             # DEBUG UI
@@ -1714,6 +1718,21 @@ def main():
                     f"{two_finger_state}"
                 ),
                 (25, 165),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.54,
+                (70, 70, 70),
+                2,
+                cv2.LINE_AA,
+            )
+
+
+            cv2.putText(
+                frame,
+                (
+                    "Thumb gesture: "
+                    f"{thumb_state}"
+                ),
+                (25, 465),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.54,
                 (70, 70, 70),
@@ -1909,6 +1928,24 @@ def main():
 
                     display_text = (
                         "PLAY / PAUSE"
+                    )
+
+                elif (
+                    last_action
+                    == "THUMB_UP"
+                ):
+
+                    display_text = (
+                        "THUMBS UP"
+                    )
+
+                elif (
+                    last_action
+                    == "THUMB_DOWN"
+                ):
+
+                    display_text = (
+                        "THUMBS DOWN"
                     )
 
                 else:

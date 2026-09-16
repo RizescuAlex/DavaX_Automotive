@@ -1,7 +1,7 @@
 import json
 import socket
 
-from .models import HandResult, Landmark
+from .models import GestureResult, Landmark
 
 
 class IPhoneReceiver:
@@ -42,30 +42,26 @@ class IPhoneReceiver:
                     x=float(point["x"]),
                     y=float(point["y"]),
                     z=float(point["z"]),
-                    visibility=float(
-                        point.get(
-                            "confidence",
-                            1.0,
-                        )
-                    ),
                 )
                 for point
                 in hand_data["landmarks"]
             ]
 
             hands.append(
-                HandResult(
+                GestureResult(
                     landmarks=landmarks,
                     handedness=hand_data.get(
                         "handedness",
                         "Unknown",
                     ),
-                    confidence=float(
+                    handedness_confidence=float(
                         hand_data.get(
                             "confidence",
                             1.0,
                         )
                     ),
+                    gesture="None",
+                    gesture_confidence=0.0,
                 )
             )
 
