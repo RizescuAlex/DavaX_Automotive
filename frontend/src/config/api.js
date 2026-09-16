@@ -1,5 +1,19 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api/v1";
 
+function getApiErrorMessage(error, status) {
+  if (typeof error.detail === "string") {
+    return error.detail;
+  }
+
+  if (Array.isArray(error.detail)) {
+    return error.detail
+      .map((item) => item.msg || "Validation error")
+      .join("; ");
+  }
+
+  return `API error: ${status}`;
+}
+
 /**
  * Fetch wrapper that automatically attaches the correct auth token:
  * - Firebase ID token  →  for Google sign-in users
@@ -32,9 +46,8 @@ export async function apiFetch(path, options = {}) {
   });
 
   if (!response.ok) {
-    // Attempt to parse the exact error message from FastAPI
     const error = await response.json().catch(() => ({}));
-    const errorMessage = error.detail || `API error: ${response.status}`;
+    const errorMessage = getApiErrorMessage(error, response.status); // changed from  error.detail || `API error: ${response.status}`;
 
     // Handle 401 Unauthorized (Expired token, wrong credentials)
     // Handle 403 Forbidden (Account disabled/banned)
