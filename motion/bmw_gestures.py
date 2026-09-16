@@ -1665,6 +1665,19 @@ def main():
             # =================================================
             # DEBUG UI
             # =================================================
+            cv2.putText(
+                frame,
+                (
+                    "Thumb gesture: "
+                    f"{thumb_state}"
+                ),
+                (25, 465),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.54,
+                (70, 70, 70),
+                2,
+                cv2.LINE_AA,
+            )
 
             cv2.putText(
                 frame,
@@ -1724,22 +1737,6 @@ def main():
                 2,
                 cv2.LINE_AA,
             )
-
-
-            cv2.putText(
-                frame,
-                (
-                    "Thumb gesture: "
-                    f"{thumb_state}"
-                ),
-                (25, 465),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.54,
-                (70, 70, 70),
-                2,
-                cv2.LINE_AA,
-            )
-
 
             cv2.putText(
                 frame,
