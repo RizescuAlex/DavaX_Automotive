@@ -5,9 +5,6 @@ __pycache__/
 .idea/
 .vscode/
 .env
-<<<<<<< HEAD
 
 training/data/*.csv
-=======
 .DS_Store
->>>>>>> b23a15d7e0bb9324e443999f9fe6173fb0470c90
