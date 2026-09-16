@@ -1671,7 +1671,7 @@ def main():
                     "Thumb gesture: "
                     f"{thumb_state}"
                 ),
-                (25, 465),
+                (25, 57),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.54,
                 (70, 70, 70),
