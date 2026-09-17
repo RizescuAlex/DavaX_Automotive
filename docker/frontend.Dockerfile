@@ -3,9 +3,9 @@ FROM node:20-alpine
 WORKDIR /app
 
 COPY frontend/package.json frontend/package-lock.json* ./
-# RUN npm install --include=optional \
-#     && npm install --no-save --include=optional @rolldown/binding-linux-x64-musl@1.2.8
-RUN npm install
+RUN npm install --include=optional \
+    && npm install --no-save --include=optional @rolldown/binding-linux-x64-musl@1.2.8 
+# RUN npm install
 
 COPY frontend/ .
 

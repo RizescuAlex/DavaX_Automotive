@@ -38,3 +38,6 @@ backend/ml_models/
 
 # Firebase
 firebase-adminsdk.json
+
+training/data/*.csv
+.DS_Store
