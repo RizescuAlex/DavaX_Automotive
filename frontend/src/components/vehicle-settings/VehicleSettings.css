@@ -1,0 +1,90 @@
+.vehicle-settings-shell {
+  min-height: 100vh;
+  background: #eef0f3;
+  color: #1f2937;
+}
+
+.vehicle-settings-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 42px 32px 64px;
+}
+
+.vehicle-settings-card {
+  background: #ffffff;
+  border: 1px solid #e1e5ea;
+  border-radius: 20px;
+  padding: 34px;
+  box-shadow: 0 8px 24px rgba(31, 41, 55, 0.08);
+}
+
+.vehicle-settings-header {
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.vehicle-settings-header h1 {
+  margin: 0 0 8px;
+  color: #1d2939;
+  font-size: 2rem;
+}
+
+.vehicle-settings-header p {
+  margin: 0;
+  color: #667085;
+}
+
+.vehicle-settings-form {
+  display: grid;
+  gap: 22px;
+}
+
+.settings-section {
+  padding: 22px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+}
+
+.settings-section h2 {
+  margin: 0 0 18px;
+  color: #344054;
+  font-size: 1.15rem;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 18px;
+}
+
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #475467;
+}
+
+.settings-field input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 11px 12px;
+  color: #1d2939;
+  background: #ffffff;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+}
+
+.settings-save-button {
+  width: fit-content;
+  padding: 12px 22px;
+  color: white;
+  background: #1683f7;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.settings-save-button:disabled {
+  opacity: 0.6;
+}

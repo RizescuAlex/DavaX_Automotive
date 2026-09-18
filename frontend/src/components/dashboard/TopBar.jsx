@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { LogOut, Sun, Cloud, CloudRain, User } from "lucide-react";
+import { Link } from "react-router-dom";
+import { LogOut, Sun, Cloud, CloudRain, User, Settings } from "lucide-react";
 import { APP_NAME } from "../../config/constants";
 
 function getGreeting() {
@@ -67,6 +68,10 @@ export default function TopBar({ user, onLogout }) {
         </div>
       </div>
       <div className="top-bar-right">
+        <Link to="/vehicle-settings" className="btn btn-secondary btn-sm">
+          <Settings size={14} />
+           Vehicle Preferences
+        </Link>
         <WeatherBadge />
         <div className="top-bar-user">
           <div className="avatar">
