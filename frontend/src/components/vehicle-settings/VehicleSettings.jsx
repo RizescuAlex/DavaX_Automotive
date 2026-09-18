@@ -1,9 +1,14 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../../config/api";
+import { useAuth } from "../../auth/useAuth";
+import TopBar from "../dashboard/TopBar";
+import "./VehicleSettings.css";
 
 const DEFAULT_SETTINGS = {
   profile_name: "default",
-  climate_settings: { target_temperature: 21.5 },
+  climate_settings: {
+    target_temperature: 21.5,
+  },
   seat_position: {
     height: 0,
     distance: 0,
@@ -17,6 +22,8 @@ const DEFAULT_SETTINGS = {
 };
 
 export default function VehicleSettings() {
+  const { user, logout } = useAuth();
+
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -86,101 +93,151 @@ export default function VehicleSettings() {
     }
   };
 
-  if (loading) {
-    return <p>Loading vehicle preferences...</p>;
-  }
-
   return (
-    <main>
-      <h1>Vehicle Preferences</h1>
+    <div className="vehicle-settings-shell">
+      <TopBar user={user} onLogout={logout} />
 
-      {error && <p role="alert">{error}</p>}
-      {message && <p>{message}</p>}
+      <main className="vehicle-settings-page">
+        <div className="vehicle-settings-card">
+          <div className="vehicle-settings-header">
+            <h1>Vehicle Preferences</h1>
+            <p>Personalize your comfort and driving position.</p>
+          </div>
 
-      <form onSubmit={handleSave}>
-        <h2>Climate</h2>
+          {loading ? (
+            <p>Loading vehicle preferences...</p>
+          ) : (
+            <>
+              {error && <div className="settings-error">{error}</div>}
+              {message && <div className="settings-success">{message}</div>}
 
-        <label>
-          Target temperature
-          <input
-            type="number"
-            min="15"
-            max="30"
-            step="0.5"
-            value={settings.climate_settings.target_temperature}
-            onChange={(event) =>
-              updateSetting(
-                "climate_settings",
-                "target_temperature",
-                event.target.value
-              )
-            }
-          />
-        </label>
+              <form
+                className="vehicle-settings-form"
+                onSubmit={handleSave}
+              >
+                <section className="settings-section">
+                  <h2>Climate</h2>
 
-        <h2>Seat position</h2>
+                  <label className="settings-field">
+                    Target temperature
+                    <input
+                      type="number"
+                      min="15"
+                      max="30"
+                      step="0.5"
+                      value={
+                        settings.climate_settings.target_temperature
+                      }
+                      onChange={(event) =>
+                        updateSetting(
+                          "climate_settings",
+                          "target_temperature",
+                          event.target.value
+                        )
+                      }
+                    />
+                  </label>
+                </section>
 
-        <label>
-          Height
-          <input
-            type="number"
-            value={settings.seat_position.height}
-            onChange={(event) =>
-              updateSetting("seat_position", "height", event.target.value)
-            }
-          />
-        </label>
+                <section className="settings-section">
+                  <h2>Seat position</h2>
 
-        <label>
-          Distance
-          <input
-            type="number"
-            value={settings.seat_position.distance}
-            onChange={(event) =>
-              updateSetting("seat_position", "distance", event.target.value)
-            }
-          />
-        </label>
+                  <div className="settings-grid">
+                    <label className="settings-field">
+                      Height
+                      <input
+                        type="number"
+                        value={settings.seat_position.height}
+                        onChange={(event) =>
+                          updateSetting(
+                            "seat_position",
+                            "height",
+                            event.target.value
+                          )
+                        }
+                      />
+                    </label>
 
-        <label>
-          Recline
-          <input
-            type="number"
-            value={settings.seat_position.recline}
-            onChange={(event) =>
-              updateSetting("seat_position", "recline", event.target.value)
-            }
-          />
-        </label>
+                    <label className="settings-field">
+                      Distance
+                      <input
+                        type="number"
+                        value={settings.seat_position.distance}
+                        onChange={(event) =>
+                          updateSetting(
+                            "seat_position",
+                            "distance",
+                            event.target.value
+                          )
+                        }
+                      />
+                    </label>
 
-        <h2>Steering wheel</h2>
+                    <label className="settings-field">
+                      Recline
+                      <input
+                        type="number"
+                        value={settings.seat_position.recline}
+                        onChange={(event) =>
+                          updateSetting(
+                            "seat_position",
+                            "recline",
+                            event.target.value
+                          )
+                        }
+                      />
+                    </label>
+                  </div>
+                </section>
 
-        <label>
-          Height
-          <input
-            type="number"
-            value={settings.steering_position.height}
-            onChange={(event) =>
-              updateSetting("steering_position", "height", event.target.value)
-            }
-          />
-        </label>
+                <section className="settings-section">
+                  <h2>Steering wheel</h2>
 
-        <label>
-          Depth
-          <input
-            type="number"
-            value={settings.steering_position.depth}
-            onChange={(event) =>
-              updateSetting("steering_position", "depth", event.target.value)
-            }
-          />
-        </label>
+                  <div className="settings-grid">
+                    <label className="settings-field">
+                      Height
+                      <input
+                        type="number"
+                        value={settings.steering_position.height}
+                        onChange={(event) =>
+                          updateSetting(
+                            "steering_position",
+                            "height",
+                            event.target.value
+                          )
+                        }
+                      />
+                    </label>
 
-        <button type="submit" disabled={saving}>
-          {saving ? "Saving..." : "Save preferences"}
-        </button>
-      </form>
-    </main>
+                    <label className="settings-field">
+                      Depth
+                      <input
+                        type="number"
+                        value={settings.steering_position.depth}
+                        onChange={(event) =>
+                          updateSetting(
+                            "steering_position",
+                            "depth",
+                            event.target.value
+                          )
+                        }
+                      />
+                    </label>
+                  </div>
+                </section>
+
+                <button
+                  className="settings-save-button"
+                  type="submit"
+                  disabled={saving}
+                >
+                  {saving ? "Saving..." : "Save preferences"}
+                </button>
+              </form>
+            </>
+          )}
+        </div>
+      </main>
+    </div>
   );
 }
