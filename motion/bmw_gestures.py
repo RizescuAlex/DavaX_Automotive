@@ -1,11 +1,12 @@
 import cv2
 import math
 import time
-import subprocess
+import os
 import numpy as np
 
 from collections import deque
 
+from motion.platform_backend_client import PlatformBackendClient
 from motion.latest_iphone_receiver import LatestIPhoneReceiver
 
 
@@ -18,10 +19,23 @@ WINDOW_HEIGHT = 900
 
 
 # ------------------------------------------------------------
-# CAMERA ORIENTATION
+# PLATFORM BACKEND
 #
-# If passenger-side swipe gives PREVIOUS instead of NEXT:
-# change 1 to -1.
+# Change this if your FastAPI backend runs somewhere else.
+#
+# You can also set:
+#
+# export DAVAX_API_BASE="http://localhost:8000"
+# ------------------------------------------------------------
+
+API_BASE = os.getenv(
+    "DAVAX_API_BASE",
+    "http://localhost:8000/api/v1",
+)
+
+
+# ------------------------------------------------------------
+# CAMERA ORIENTATION
 # ------------------------------------------------------------
 
 CAMERA_X_TO_PASSENGER = 1
@@ -29,9 +43,6 @@ CAMERA_X_TO_PASSENGER = 1
 
 # ------------------------------------------------------------
 # CIRCLE ORIENTATION
-#
-# If physical clockwise decreases volume:
-# change 1 to -1.
 # ------------------------------------------------------------
 
 CIRCLE_DIRECTION = 1
@@ -64,26 +75,18 @@ SWIPE_COOLDOWN = 0.30
 
 
 # ------------------------------------------------------------
-# TWO-FINGER PLAY/PAUSE
-#
-# Pose must remain valid for this long before triggering.
-# After triggering, user must leave the pose before it
-# can trigger again.
+# TWO-FINGER PLAY / PAUSE
 # ------------------------------------------------------------
 
 TWO_FINGER_HOLD_TIME = 0.20
 
 
-# Pose gestures recognized directly from the phone landmark stream.
+# ------------------------------------------------------------
+# THUMB POSES
+# ------------------------------------------------------------
+
 THUMB_VERTICAL_MARGIN = 0.08
 THUMB_HISTORY = 5
-
-
-# ------------------------------------------------------------
-# Spotify
-# ------------------------------------------------------------
-
-SPOTIFY_VOLUME_STEP = 5
 
 
 # ============================================================
@@ -91,144 +94,33 @@ SPOTIFY_VOLUME_STEP = 5
 # ============================================================
 
 HAND_CONNECTIONS = [
-    # Thumb
     (0, 1),
     (1, 2),
     (2, 3),
     (3, 4),
 
-    # Index
     (0, 5),
     (5, 6),
     (6, 7),
     (7, 8),
 
-    # Middle
     (5, 9),
     (9, 10),
     (10, 11),
     (11, 12),
 
-    # Ring
     (9, 13),
     (13, 14),
     (14, 15),
     (15, 16),
 
-    # Little
     (13, 17),
     (17, 18),
     (18, 19),
     (19, 20),
 
-    # Palm
     (0, 17),
 ]
-
-
-# ============================================================
-# SPOTIFY CONTROLLER
-# ============================================================
-
-class SpotifyController:
-
-    def __init__(self):
-        self.last_command_time = 0.0
-
-    def _run_script(self, script):
-
-        try:
-            subprocess.Popen(
-                [
-                    "osascript",
-                    "-e",
-                    script,
-                ],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-
-        except Exception as error:
-            print(
-                "Spotify command error:",
-                error,
-            )
-
-    def play_pause(self):
-
-        print(
-            "SPOTIFY: PLAY / PAUSE"
-        )
-
-        self._run_script(
-            'tell application "Spotify" to playpause'
-        )
-
-    def next_track(self):
-
-        print(
-            "SPOTIFY: NEXT TRACK"
-        )
-
-        self._run_script(
-            'tell application "Spotify" to next track'
-        )
-
-    def previous_track(self):
-
-        print(
-            "SPOTIFY: PREVIOUS TRACK"
-        )
-
-        self._run_script(
-            'tell application "Spotify" to previous track'
-        )
-
-    def volume_up(self):
-
-        print(
-            "SPOTIFY: VOLUME UP"
-        )
-
-        script = f'''
-        tell application "Spotify"
-            set currentVolume to sound volume
-            set newVolume to currentVolume + {SPOTIFY_VOLUME_STEP}
-
-            if newVolume > 100 then
-                set newVolume to 100
-            end if
-
-            set sound volume to newVolume
-        end tell
-        '''
-
-        self._run_script(
-            script
-        )
-
-    def volume_down(self):
-
-        print(
-            "SPOTIFY: VOLUME DOWN"
-        )
-
-        script = f'''
-        tell application "Spotify"
-            set currentVolume to sound volume
-            set newVolume to currentVolume - {SPOTIFY_VOLUME_STEP}
-
-            if newVolume < 0 then
-                set newVolume to 0
-            end if
-
-            set sound volume to newVolume
-        end tell
-        '''
-
-        self._run_script(
-            script
-        )
 
 
 # ============================================================
@@ -447,10 +339,7 @@ def open_hand_pose(hand):
 
 
 # ============================================================
-# TWO FINGER POSE
-#
-# Index + middle extended
-# Ring + little folded
+# TWO-FINGER POSE
 # ============================================================
 
 def two_finger_pose(hand):
@@ -496,62 +385,128 @@ def two_finger_pose(hand):
     )
 
 
+# ============================================================
+# THUMB POSE
+# ============================================================
+
 def thumb_gesture(hand):
-    """Return THUMB_UP, THUMB_DOWN, or None from 21 hand landmarks."""
+
     lm = hand.landmarks
+
     if len(lm) != 21:
         return None
 
     other_fingers_folded = all(
-        not finger_extended(lm, tip_id, pip_id, mcp_id)
-        for tip_id, pip_id, mcp_id in (
-            (8, 6, 5), (12, 10, 9), (16, 14, 13), (20, 18, 17)
+        not finger_extended(
+            lm,
+            tip_id,
+            pip_id,
+            mcp_id,
+        )
+        for (
+            tip_id,
+            pip_id,
+            mcp_id,
+        ) in (
+            (8, 6, 5),
+            (12, 10, 9),
+            (16, 14, 13),
+            (20, 18, 17),
         )
     )
+
     if not other_fingers_folded:
         return None
 
-    _, palm_y, _ = palm_center(hand)
+    _, palm_y, _ = palm_center(
+        hand
+    )
+
     thumb_tip = lm[4]
     thumb_ip = lm[3]
 
-    if (thumb_tip.y < palm_y - THUMB_VERTICAL_MARGIN
-            and thumb_tip.y < thumb_ip.y):
+    if (
+        thumb_tip.y
+        < palm_y - THUMB_VERTICAL_MARGIN
+        and thumb_tip.y
+        < thumb_ip.y
+    ):
+
         return "THUMB_UP"
-    if (thumb_tip.y > palm_y + THUMB_VERTICAL_MARGIN
-            and thumb_tip.y > thumb_ip.y):
+
+    if (
+        thumb_tip.y
+        > palm_y + THUMB_VERTICAL_MARGIN
+        and thumb_tip.y
+        > thumb_ip.y
+    ):
+
         return "THUMB_DOWN"
+
     return None
 
 
 class ThumbGestureRecognizer:
-    """Debounce thumb poses and emit each pose once until released."""
 
-    def __init__(self, history_size=THUMB_HISTORY):
-        self.history = deque(maxlen=history_size)
+    def __init__(
+        self,
+        history_size=THUMB_HISTORY,
+    ):
+
+        self.history = deque(
+            maxlen=history_size
+        )
+
         self.triggered = False
 
     def reset(self):
+
         self.history.clear()
         self.triggered = False
 
     def update(self, hand):
-        gesture = thumb_gesture(hand)
-        self.history.append(gesture)
+
+        gesture = thumb_gesture(
+            hand
+        )
+
+        self.history.append(
+            gesture
+        )
+
         if gesture is None:
+
             self.triggered = False
+
             return "Waiting"
 
-        stable = (len(self.history) == self.history.maxlen
-                  and all(previous == gesture for previous in self.history))
-        if stable and not self.triggered:
+        stable = (
+            len(self.history)
+            == self.history.maxlen
+            and all(
+                previous == gesture
+                for previous in self.history
+            )
+        )
+
+        if (
+            stable
+            and not self.triggered
+        ):
+
             self.triggered = True
+
             return gesture
-        return "Triggered" if self.triggered else "Holding"
+
+        if self.triggered:
+
+            return "Triggered"
+
+        return "Holding"
 
 
 # ============================================================
-# TWO FINGER PLAY/PAUSE RECOGNIZER
+# TWO-FINGER PLAY / PAUSE
 # ============================================================
 
 class TwoFingerGestureRecognizer:
@@ -559,9 +514,7 @@ class TwoFingerGestureRecognizer:
     def __init__(self):
 
         self.pose_start_time = None
-
         self.triggered = False
-
         self.progress = 0.0
 
     def reset(self):
@@ -578,9 +531,6 @@ class TwoFingerGestureRecognizer:
 
         now = time.monotonic()
 
-        # User left the pose.
-        #
-        # Rearm for the next play/pause gesture.
         if not pose:
 
             self.pose_start_time = None
@@ -591,7 +541,6 @@ class TwoFingerGestureRecognizer:
 
             return "Waiting"
 
-        # First frame of pose.
         if self.pose_start_time is None:
 
             self.pose_start_time = now
@@ -609,9 +558,6 @@ class TwoFingerGestureRecognizer:
             1.0,
         )
 
-        # Already triggered.
-        # Do not repeatedly toggle Spotify while user
-        # continues holding two fingers up.
         if self.triggered:
 
             return "Triggered"
@@ -645,7 +591,6 @@ class CircularGestureRecognizer:
         )
 
         self.rotation_degrees = 0.0
-
         self.radius = 0.0
 
         self.cooldown_until = 0.0
@@ -653,11 +598,9 @@ class CircularGestureRecognizer:
     def reset_tracking(self):
 
         self.points.clear()
-
         self.depths.clear()
 
         self.rotation_degrees = 0.0
-
         self.radius = 0.0
 
     def in_cooldown(self):
@@ -685,13 +628,9 @@ class CircularGestureRecognizer:
 
             self.reset_tracking()
 
-            return (
-                "Waiting for pointing"
-            )
+            return "Waiting for pointing"
 
-        index_tip = (
-            hand.landmarks[8]
-        )
+        index_tip = hand.landmarks[8]
 
         self.points.append(
             (
@@ -714,9 +653,7 @@ class CircularGestureRecognizer:
             < CIRCLE_MIN_POINTS
         ):
 
-            return (
-                "Tracking circle"
-            )
+            return "Tracking circle"
 
         points = np.array(
             self.points,
@@ -728,15 +665,12 @@ class CircularGestureRecognizer:
         )
 
         centered = (
-            points
-            - center
+            points - center
         )
 
-        distances = (
-            np.linalg.norm(
-                centered,
-                axis=1,
-            )
+        distances = np.linalg.norm(
+            centered,
+            axis=1,
         )
 
         self.radius = float(
@@ -748,9 +682,7 @@ class CircularGestureRecognizer:
             < CIRCLE_MIN_RADIUS
         ):
 
-            return (
-                "Tracking circle"
-            )
+            return "Tracking circle"
 
         x_range = float(
             points[:, 0].max()
@@ -765,17 +697,13 @@ class CircularGestureRecognizer:
         if (
             x_range
             < CIRCLE_MIN_AXIS_RANGE
-            or
-            y_range
+            or y_range
             < CIRCLE_MIN_AXIS_RANGE
         ):
 
-            return (
-                "Tracking circle"
-            )
+            return "Tracking circle"
 
         total_angle = 0.0
-
         previous_angle = None
 
         for point in centered:
@@ -792,17 +720,13 @@ class CircularGestureRecognizer:
                     - previous_angle
                 )
 
-                while (
-                    delta > math.pi
-                ):
+                while delta > math.pi:
 
                     delta -= (
                         2 * math.pi
                     )
 
-                while (
-                    delta < -math.pi
-                ):
+                while delta < -math.pi:
 
                     delta += (
                         2 * math.pi
@@ -812,9 +736,7 @@ class CircularGestureRecognizer:
                     delta
                 )
 
-            previous_angle = (
-                angle
-            )
+            previous_angle = angle
 
         raw_degrees = (
             math.degrees(
@@ -826,10 +748,6 @@ class CircularGestureRecognizer:
             raw_degrees
             * CIRCLE_DIRECTION
         )
-
-        # -----------------------------------------
-        # LiDAR stability
-        # -----------------------------------------
 
         if len(self.depths) >= 6:
 
@@ -843,13 +761,7 @@ class CircularGestureRecognizer:
                 > CIRCLE_MAX_DEPTH_CHANGE
             ):
 
-                return (
-                    "Tracking circle"
-                )
-
-        # -----------------------------------------
-        # Trigger
-        # -----------------------------------------
+                return "Tracking circle"
 
         if (
             abs(
@@ -863,15 +775,11 @@ class CircularGestureRecognizer:
                 > 0
             ):
 
-                result = (
-                    "VOLUME_UP"
-                )
+                result = "VOLUME_UP"
 
             else:
 
-                result = (
-                    "VOLUME_DOWN"
-                )
+                result = "VOLUME_DOWN"
 
             self.cooldown_until = (
                 time.monotonic()
@@ -897,37 +805,19 @@ class SwipeGestureRecognizer:
             maxlen=SWIPE_HISTORY
         )
 
-        self.horizontal_movement = (
-            0.0
-        )
+        self.horizontal_movement = 0.0
+        self.vertical_movement = 0.0
+        self.depth_movement = 0.0
 
-        self.vertical_movement = (
-            0.0
-        )
-
-        self.depth_movement = (
-            0.0
-        )
-
-        self.cooldown_until = (
-            0.0
-        )
+        self.cooldown_until = 0.0
 
     def reset_tracking(self):
 
         self.points.clear()
 
-        self.horizontal_movement = (
-            0.0
-        )
-
-        self.vertical_movement = (
-            0.0
-        )
-
-        self.depth_movement = (
-            0.0
-        )
+        self.horizontal_movement = 0.0
+        self.vertical_movement = 0.0
+        self.depth_movement = 0.0
 
     def in_cooldown(self):
 
@@ -954,9 +844,7 @@ class SwipeGestureRecognizer:
 
             self.reset_tracking()
 
-            return (
-                "Waiting for open hand"
-            )
+            return "Waiting for open hand"
 
         x, y, z = palm_center(
             hand
@@ -975,9 +863,7 @@ class SwipeGestureRecognizer:
             < SWIPE_MIN_POINTS
         ):
 
-            return (
-                "Tracking swipe"
-            )
+            return "Tracking swipe"
 
         (
             first_x,
@@ -1020,26 +906,16 @@ class SwipeGestureRecognizer:
 
             dz = 0.0
 
-        self.horizontal_movement = (
-            dx
-        )
-
-        self.vertical_movement = (
-            dy
-        )
-
-        self.depth_movement = (
-            dz
-        )
+        self.horizontal_movement = dx
+        self.vertical_movement = dy
+        self.depth_movement = dz
 
         if (
             abs(dx)
             < SWIPE_MIN_DISTANCE
         ):
 
-            return (
-                "Tracking swipe"
-            )
+            return "Tracking swipe"
 
         if (
             abs(dy)
@@ -1048,9 +924,7 @@ class SwipeGestureRecognizer:
 
             self.reset_tracking()
 
-            return (
-                "Rejected: vertical"
-            )
+            return "Rejected: vertical"
 
         if (
             abs(dz)
@@ -1059,21 +933,15 @@ class SwipeGestureRecognizer:
 
             self.reset_tracking()
 
-            return (
-                "Rejected: depth"
-            )
+            return "Rejected: depth"
 
         if dx > 0:
 
-            result = (
-                "NEXT_SONG"
-            )
+            result = "NEXT_SONG"
 
         else:
 
-            result = (
-                "PREVIOUS_SONG"
-            )
+            result = "PREVIOUS_SONG"
 
         self.cooldown_until = (
             time.monotonic()
@@ -1180,10 +1048,10 @@ def draw_circle_trajectory(
     recognizer,
 ):
 
-    if (
-        len(recognizer.points)
-        < 2
-    ):
+    if len(
+        recognizer.points
+    ) < 2:
+
         return
 
     trajectory = []
@@ -1223,10 +1091,10 @@ def draw_swipe_trajectory(
     recognizer,
 ):
 
-    if (
-        len(recognizer.points)
-        < 2
-    ):
+    if len(
+        recognizer.points
+    ) < 2:
+
         return
 
     trajectory = []
@@ -1267,6 +1135,10 @@ def draw_swipe_trajectory(
 
 def main():
 
+    # --------------------------------------------------------
+    # iPhone UDP input
+    # --------------------------------------------------------
+
     receiver = LatestIPhoneReceiver(
         host="0.0.0.0",
         port=5005,
@@ -1275,8 +1147,21 @@ def main():
     receiver.start()
 
 
-    spotify = SpotifyController()
+    # --------------------------------------------------------
+    # Platform backend
+    #
+    # Spotify is now controlled through your FastAPI backend.
+    # --------------------------------------------------------
 
+    backend = PlatformBackendClient(
+        api_base=API_BASE,
+        cooldown=0.30,
+    )
+
+
+    # --------------------------------------------------------
+    # Gesture recognizers
+    # --------------------------------------------------------
 
     circle_recognizer = (
         CircularGestureRecognizer()
@@ -1290,8 +1175,14 @@ def main():
         TwoFingerGestureRecognizer()
     )
 
-    thumb_recognizer = ThumbGestureRecognizer()
+    thumb_recognizer = (
+        ThumbGestureRecognizer()
+    )
 
+
+    # --------------------------------------------------------
+    # OpenCV
+    # --------------------------------------------------------
 
     window_name = (
         "DavaX BMW Gesture Control"
@@ -1306,11 +1197,8 @@ def main():
     last_processed_packet = -1
 
     circle_state = "Waiting"
-
     swipe_state = "Waiting"
-
     two_finger_state = "Waiting"
-
     thumb_state = "Waiting"
 
     last_action = "None"
@@ -1358,7 +1246,7 @@ def main():
 
             cv2.putText(
                 frame,
-                "DavaX - BMW Style Spotify Control",
+                "DavaX - BMW Gesture Control",
                 (25, 35),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.75,
@@ -1369,13 +1257,10 @@ def main():
 
 
             pointing = False
-
             open_hand = False
-
             two_fingers = False
 
             index_depth_text = "--"
-
             palm_depth_text = "--"
 
 
@@ -1423,8 +1308,7 @@ def main():
                     )
 
                     if (
-                        index_tip.z
-                        is not None
+                        index_tip.z is not None
                         and index_tip.z > 0
                     ):
 
@@ -1449,27 +1333,54 @@ def main():
                         )
 
 
-                # =============================================
+                # =================================================
                 # ONLY PROCESS NEW SENSOR PACKETS
-                # =============================================
+                # =================================================
 
                 if new_packet:
 
-                    # -----------------------------------------
-                    # TWO-FINGER PLAY / PAUSE
+                    # ------------------------------------------------
+                    # THUMB
                     #
-                    # Check this first.
-                    # -----------------------------------------
+                    # Currently visual/debug only.
+                    # No Spotify action has been assigned yet.
+                    # ------------------------------------------------
 
-                    thumb_result = thumb_recognizer.update(hand)
-                    thumb_state = thumb_result
+                    thumb_result = (
+                        thumb_recognizer.update(
+                            hand
+                        )
+                    )
 
-                    if thumb_result in ("THUMB_UP", "THUMB_DOWN"):
-                        last_action = thumb_result
-                        action_display_until = time.monotonic() + 0.75
+                    thumb_state = (
+                        thumb_result
+                    )
+
+
+                    if thumb_result in (
+                        "THUMB_UP",
+                        "THUMB_DOWN",
+                    ):
+
+                        last_action = (
+                            thumb_result
+                        )
+
+                        action_display_until = (
+                            time.monotonic()
+                            + 0.75
+                        )
+
                         two_finger_recognizer.reset()
+
                         circle_recognizer.reset_tracking()
+
                         swipe_recognizer.reset_tracking()
+
+
+                    # ------------------------------------------------
+                    # TWO FINGERS
+                    # ------------------------------------------------
 
                     two_finger_result = (
                         two_finger_recognizer.update(
@@ -1482,8 +1393,14 @@ def main():
                     )
 
 
-                    if thumb_result in ("THUMB_UP", "THUMB_DOWN"):
+                    if thumb_result in (
+                        "THUMB_UP",
+                        "THUMB_DOWN",
+                    ):
+
+                        # Thumb pose wins this frame.
                         pass
+
 
                     elif (
                         two_finger_result
@@ -1503,14 +1420,19 @@ def main():
 
                         swipe_recognizer.reset_tracking()
 
-                        spotify.play_pause()
+
+                        # =============================================
+                        # BACKEND CALL
+                        # =============================================
+
+                        backend.play_pause()
 
 
                     else:
 
-                        # -------------------------------------
+                        # =============================================
                         # CIRCLE
-                        # -------------------------------------
+                        # =============================================
 
                         circle_result = (
                             circle_recognizer.update(
@@ -1523,9 +1445,9 @@ def main():
                         )
 
 
-                        # -------------------------------------
+                        # =============================================
                         # SWIPE
-                        # -------------------------------------
+                        # =============================================
 
                         swipe_result = (
                             swipe_recognizer.update(
@@ -1538,11 +1460,17 @@ def main():
                         )
 
 
-                        # =====================================
-                        # VOLUME ACTION
-                        # =====================================
+                        # =============================================
+                        # VOLUME UP
+                        #
+                        # Only call backend if you add a
+                        # /spotify/volume-up endpoint.
+                        # =============================================
 
-                        if circle_result == "VOLUME_UP":
+                        if (
+                            circle_result
+                            == "VOLUME_UP"
+                        ):
 
                             last_action = (
                                 "VOLUME_UP"
@@ -1555,8 +1483,20 @@ def main():
 
                             swipe_recognizer.reset_tracking()
 
-                            spotify.volume_up()
 
+                            print(
+                                "GESTURE: VOLUME UP"
+                            )
+
+                            # Enable this after adding
+                            # the backend route:
+                            #
+                            # backend.volume_up()
+
+
+                        # =============================================
+                        # VOLUME DOWN
+                        # =============================================
 
                         elif (
                             circle_result
@@ -1574,12 +1514,20 @@ def main():
 
                             swipe_recognizer.reset_tracking()
 
-                            spotify.volume_down()
+
+                            print(
+                                "GESTURE: VOLUME DOWN"
+                            )
+
+                            # Enable this after adding
+                            # the backend route:
+                            #
+                            # backend.volume_down()
 
 
-                        # =====================================
+                        # =============================================
                         # NEXT SONG
-                        # =====================================
+                        # =============================================
 
                         elif (
                             swipe_result
@@ -1597,12 +1545,17 @@ def main():
 
                             circle_recognizer.reset_tracking()
 
-                            spotify.next_track()
+
+                            # =============================================
+                            # BACKEND CALL
+                            # =============================================
+
+                            backend.next_track()
 
 
-                        # =====================================
+                        # =============================================
                         # PREVIOUS SONG
-                        # =====================================
+                        # =============================================
 
                         elif (
                             swipe_result
@@ -1620,12 +1573,17 @@ def main():
 
                             circle_recognizer.reset_tracking()
 
-                            spotify.previous_track()
+
+                            # =============================================
+                            # BACKEND CALL
+                            # =============================================
+
+                            backend.previous_track()
 
 
-                # =============================================
+                # =====================================================
                 # TRAJECTORIES
-                # =============================================
+                # =====================================================
 
                 if pointing:
 
@@ -1645,39 +1603,45 @@ def main():
 
             else:
 
-                circle_state = (
-                    "No hand"
-                )
-
-                swipe_state = (
-                    "No hand"
-                )
-
-                two_finger_state = (
-                    "No hand"
-                )
-
-                thumb_state = (
-                    "No hand"
-                )
+                circle_state = "No hand"
+                swipe_state = "No hand"
+                two_finger_state = "No hand"
+                thumb_state = "No hand"
 
 
-            # =================================================
+            # =========================================================
             # DEBUG UI
-            # =================================================
+            # =========================================================
+
             cv2.putText(
                 frame,
                 (
-                    "Thumb gesture: "
-                    f"{thumb_state}"
+                    "Backend: "
+                    f"{API_BASE}"
                 ),
                 (25, 57),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.54,
+                0.42,
+                (100, 100, 100),
+                1,
+                cv2.LINE_AA,
+            )
+
+
+            cv2.putText(
+                frame,
+                (
+                    "Thumb: "
+                    f"{thumb_state}"
+                ),
+                (25, 80),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.52,
                 (70, 70, 70),
                 2,
                 cv2.LINE_AA,
             )
+
 
             cv2.putText(
                 frame,
@@ -1685,9 +1649,9 @@ def main():
                     "Index pointing: "
                     f"{pointing}"
                 ),
-                (25, 75),
+                (25, 105),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.54,
+                0.52,
                 (70, 70, 70),
                 2,
                 cv2.LINE_AA,
@@ -1700,9 +1664,9 @@ def main():
                     "Open hand: "
                     f"{open_hand}"
                 ),
-                (25, 105),
+                (25, 130),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.54,
+                0.52,
                 (70, 70, 70),
                 2,
                 cv2.LINE_AA,
@@ -1715,9 +1679,9 @@ def main():
                     "Two fingers: "
                     f"{two_fingers}"
                 ),
-                (25, 135),
+                (25, 155),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.54,
+                0.52,
                 (70, 70, 70),
                 2,
                 cv2.LINE_AA,
@@ -1730,13 +1694,29 @@ def main():
                     "Play/Pause: "
                     f"{two_finger_state}"
                 ),
-                (25, 165),
+                (25, 180),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.54,
+                0.52,
                 (70, 70, 70),
                 2,
                 cv2.LINE_AA,
             )
+
+
+            cv2.putText(
+                frame,
+                (
+                    "Circle: "
+                    f"{circle_state}"
+                ),
+                (25, 205),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.52,
+                (70, 70, 70),
+                2,
+                cv2.LINE_AA,
+            )
+
 
             cv2.putText(
                 frame,
@@ -1744,9 +1724,9 @@ def main():
                     "Circle rotation: "
                     f"{circle_recognizer.rotation_degrees:.0f} deg"
                 ),
-                (25, 195),
+                (25, 230),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.54,
+                0.52,
                 (70, 70, 70),
                 2,
                 cv2.LINE_AA,
@@ -1756,12 +1736,12 @@ def main():
             cv2.putText(
                 frame,
                 (
-                    "Circle state: "
-                    f"{circle_state}"
+                    "Swipe: "
+                    f"{swipe_state}"
                 ),
-                (25, 225),
+                (25, 255),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.54,
+                0.52,
                 (70, 70, 70),
                 2,
                 cv2.LINE_AA,
@@ -1774,9 +1754,9 @@ def main():
                     "Swipe X: "
                     f"{swipe_recognizer.horizontal_movement:.3f}"
                 ),
-                (25, 255),
+                (25, 280),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.54,
+                0.52,
                 (70, 70, 70),
                 2,
                 cv2.LINE_AA,
@@ -1789,9 +1769,9 @@ def main():
                     "Swipe Y: "
                     f"{swipe_recognizer.vertical_movement:.3f}"
                 ),
-                (25, 285),
+                (25, 305),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.54,
+                0.52,
                 (70, 70, 70),
                 2,
                 cv2.LINE_AA,
@@ -1804,24 +1784,9 @@ def main():
                     "Swipe Z: "
                     f"{swipe_recognizer.depth_movement:.3f} m"
                 ),
-                (25, 315),
+                (25, 330),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.54,
-                (70, 70, 70),
-                2,
-                cv2.LINE_AA,
-            )
-
-
-            cv2.putText(
-                frame,
-                (
-                    "Swipe state: "
-                    f"{swipe_state}"
-                ),
-                (25, 345),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.54,
+                0.52,
                 (70, 70, 70),
                 2,
                 cv2.LINE_AA,
@@ -1834,9 +1799,9 @@ def main():
                     "Index depth: "
                     f"{index_depth_text}"
                 ),
-                (25, 375),
+                (25, 355),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.54,
+                0.52,
                 (70, 70, 70),
                 2,
                 cv2.LINE_AA,
@@ -1849,9 +1814,9 @@ def main():
                     "Palm depth: "
                     f"{palm_depth_text}"
                 ),
-                (25, 405),
+                (25, 380),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.54,
+                0.52,
                 (70, 70, 70),
                 2,
                 cv2.LINE_AA,
@@ -1864,7 +1829,7 @@ def main():
                     "UDP packets: "
                     f"{packet_number}"
                 ),
-                (25, 435),
+                (25, 405),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.50,
                 (100, 100, 100),
@@ -1873,82 +1838,44 @@ def main():
             )
 
 
-            # =================================================
-            # BIG ACTION MESSAGE
-            # =================================================
+            # =========================================================
+            # BIG ACTION
+            # =========================================================
 
             if (
                 time.monotonic()
                 < action_display_until
             ):
 
-                if (
-                    last_action
-                    == "VOLUME_UP"
-                ):
+                action_names = {
+                    "VOLUME_UP":
+                        "VOLUME UP",
 
-                    display_text = (
-                        "VOLUME UP"
+                    "VOLUME_DOWN":
+                        "VOLUME DOWN",
+
+                    "NEXT_SONG":
+                        "NEXT SONG",
+
+                    "PREVIOUS_SONG":
+                        "PREVIOUS SONG",
+
+                    "PLAY_PAUSE":
+                        "PLAY / PAUSE",
+
+                    "THUMB_UP":
+                        "THUMBS UP",
+
+                    "THUMB_DOWN":
+                        "THUMBS DOWN",
+                }
+
+                display_text = (
+                    action_names.get(
+                        last_action,
+                        "",
                     )
-
-                elif (
-                    last_action
-                    == "VOLUME_DOWN"
-                ):
-
-                    display_text = (
-                        "VOLUME DOWN"
-                    )
-
-                elif (
-                    last_action
-                    == "NEXT_SONG"
-                ):
-
-                    display_text = (
-                        "NEXT SONG"
-                    )
-
-                elif (
-                    last_action
-                    == "PREVIOUS_SONG"
-                ):
-
-                    display_text = (
-                        "PREVIOUS SONG"
-                    )
-
-                elif (
-                    last_action
-                    == "PLAY_PAUSE"
-                ):
-
-                    display_text = (
-                        "PLAY / PAUSE"
-                    )
-
-                elif (
-                    last_action
-                    == "THUMB_UP"
-                ):
-
-                    display_text = (
-                        "THUMBS UP"
-                    )
-
-                elif (
-                    last_action
-                    == "THUMB_DOWN"
-                ):
-
-                    display_text = (
-                        "THUMBS DOWN"
-                    )
-
-                else:
-
-                    display_text = ""
-
+                )
 
                 if display_text:
 
@@ -1972,7 +1899,7 @@ def main():
                         display_text,
                         (
                             text_x,
-                            505,
+                            475,
                         ),
                         cv2.FONT_HERSHEY_SIMPLEX,
                         1.20,
@@ -1982,13 +1909,13 @@ def main():
                     )
 
 
-            # =================================================
+            # =========================================================
             # INSTRUCTIONS
-            # =================================================
+            # =========================================================
 
             cv2.putText(
                 frame,
-                "INDEX CIRCLE: Spotify volume",
+                "INDEX CIRCLE: volume gesture",
                 (
                     25,
                     WINDOW_HEIGHT - 145,
@@ -2061,9 +1988,9 @@ def main():
             )
 
 
-            # =================================================
+            # =========================================================
             # RENDER
-            # =================================================
+            # =========================================================
 
             cv2.imshow(
                 window_name,
@@ -2078,6 +2005,7 @@ def main():
 
 
             if key == ord("q"):
+
                 break
 
 
@@ -2094,4 +2022,5 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()
