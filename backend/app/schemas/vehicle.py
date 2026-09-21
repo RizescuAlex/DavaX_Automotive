@@ -1,22 +1,13 @@
-from sqlalchemy import ForeignKey, SmallInteger, String, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-
-from app.models.base import Base
+from pydantic import BaseModel, Field
 
 
-class Vehicle(Base):
-    __tablename__ = "vehicles"
+class VehicleInput(BaseModel):
+    model_year: int = Field(ge=2015, le=2020)
+    make: str = Field(min_length=1, max_length=100)
+    model: str = Field(min_length=1, max_length=100)
 
-    user_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
-    )
-    model_year: Mapped[int] = mapped_column(SmallInteger, nullable=False)
-    make: Mapped[str] = mapped_column(String(100), nullable=False)
-    model: Mapped[str] = mapped_column(String(100), nullable=False)
 
-    __table_args__ = (
-        UniqueConstraint("user_id", name="uq_vehicle_user"),
-    )
+class VehicleOut(VehicleInput):
+    id: str
 
-    user = relationship("User", back_populates="vehicle")
+    model_config = {"from_attributes": True}
