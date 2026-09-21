@@ -1,5 +1,5 @@
 import { useAppStore } from "../../store";
-import { Gauge, Fuel, Thermometer } from "lucide-react";
+import { Fuel, Thermometer } from "lucide-react";
 
 function GaugeCard({ icon: Icon, label, value, unit, percentage, color }) {
   return (
@@ -25,8 +25,14 @@ function GaugeCard({ icon: Icon, label, value, unit, percentage, color }) {
   );
 }
 
+/**
+ * The rail's live readings.
+ *
+ * Speed is deliberately absent: it already appears under the car and again in
+ * the dock. Climate moved to the dock's temperature control, where it is
+ * reachable without giving a whole column over to it.
+ */
 export default function VehicleGauges() {
-  const speed = useAppStore((s) => s.speed);
   const fuelLevel = useAppStore((s) => s.fuelLevel);
   const engineTemp = useAppStore((s) => s.engineTemp);
 
@@ -42,14 +48,6 @@ export default function VehicleGauges() {
 
   return (
     <div className="vehicle-gauges">
-      <GaugeCard
-        icon={Gauge}
-        label="Speed"
-        value={Math.round(speed)}
-        unit="km/h"
-        percentage={(speed / 240) * 100}
-        color="var(--accent-primary)"
-      />
       <GaugeCard
         icon={Fuel}
         label="Fuel Level"
