@@ -30,7 +30,14 @@ function applyTheme(theme) {
 const initialTheme = readStoredTheme();
 applyTheme(initialTheme);
 
-/** Mirrors ClimateSettings in backend/app/schemas/vehicle.py. */
+/**
+ * The climate shape lives here.
+ *
+ * /vehicle-settings/me stores climate_settings as an untyped JSONB dict, so
+ * these bounds are the only thing enforcing them — every write goes through
+ * clamp() below. Worth moving into the shared schema if the backend ever
+ * types that column.
+ */
 export const CLIMATE_LIMITS = {
   TEMP_MIN: 16,
   TEMP_MAX: 28,
@@ -41,8 +48,11 @@ export const CLIMATE_LIMITS = {
   AC_MAX: 3,
 };
 
+// target_temperature (not target_temp) because the Vehicle Preferences page
+// already writes that key into the same climate_settings blob — two names for
+// one value would leave the dock and that page permanently disagreeing.
 const CLIMATE_DEFAULTS = {
-  targetTemp: 21,
+  targetTemp: 21.5,
   fanSpeed: 2,
   acLevel: 2,
   autoMode: true,
@@ -125,7 +135,7 @@ export const useAppStore = create((set, get) => ({
       const climate = settings?.climate_settings;
       if (climate) {
         set({
-          targetTemp: climate.target_temp,
+          targetTemp: climate.target_temperature ?? 21.5,
           fanSpeed: climate.fan_speed,
           acLevel: climate.ac_level ?? 2,
           autoMode: climate.auto_mode,
@@ -157,7 +167,7 @@ export const useAppStore = create((set, get) => ({
         seatHeatLeft, seatHeatRight, frontDefrost, rearDefrost,
       } = get();
       saveClimateSettings({
-        target_temp: targetTemp,
+        target_temperature: targetTemp,
         fan_speed: fanSpeed,
         ac_level: acLevel,
         auto_mode: autoMode,

@@ -3,6 +3,7 @@ import LoginPage from "./auth/LoginPage";
 import ProtectedRoute from "./auth/ProtectedRoute";
 import Dashboard from "./components/dashboard/Dashboard";
 import OnboardingWizard from "./components/onboarding/OnboardingWizard";
+import VehicleSettings from "./components/vehicle-settings/VehicleSettings";
 
 export default function App() {
   return (
@@ -24,6 +25,14 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+      <Route
+      path="/vehicle-settings"
+      element={
+        <ProtectedRoute>
+          <VehicleSettings />
+        </ProtectedRoute>
+      }
+/>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
