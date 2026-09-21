@@ -1,3 +1,5 @@
+import uuid
+
 from pydantic import BaseModel, Field
 
 
@@ -8,6 +10,6 @@ class VehicleInput(BaseModel):
 
 
 class VehicleOut(VehicleInput):
-    id: str
+    id: uuid.UUID
 
     model_config = {"from_attributes": True}
