@@ -5,19 +5,36 @@ import MapSearch from "./MapSearch";
 import { apiFetch } from "../../config/api"; 
 
 const mapContainerStyle = { width: "100%", height: "100%" };
+/* Dark map styling tuned to the "Stormy morning" palette, so the map reads as
+   part of the cockpit rather than a bright rectangle punched through it. */
+const MAP_STYLE_DARK = [
+  { elementType: "geometry", stylers: [{ color: "#2b3744" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#a8c0d6" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#222c36" }] },
+  { featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] },
+  { featureType: "administrative", elementType: "geometry", stylers: [{ color: "#526c85" }] },
+  { featureType: "administrative.land_parcel", stylers: [{ visibility: "off" }] },
+  { featureType: "landscape.natural", elementType: "geometry", stylers: [{ color: "#31404e" }] },
+  { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#2f4741" }] },
+  { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#6fd3a3" }] },
+  { featureType: "road", elementType: "geometry", stylers: [{ color: "#3f5264" }] },
+  { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#2b3744" }] },
+  { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#bdddfc" }] },
+  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#546f8a" }] },
+  { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#222c36" }] },
+  { featureType: "transit", elementType: "geometry", stylers: [{ color: "#3a4c5e" }] },
+  { featureType: "transit.station", elementType: "labels.text.fill", stylers: [{ color: "#a8c0d6" }] },
+  { featureType: "water", elementType: "geometry", stylers: [{ color: "#1f2a35" }] },
+  { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#6a89a7" }] },
+];
+
 const mapOptions = {
   disableDefaultUI: false,
   zoomControl: true,
-  streetViewControl: true,
-  mapTypeControl: true,
-  fullscreenControl: true,
-  styles: [
-    {
-      featureType: "poi",
-      elementType: "labels",
-      stylers: [{ visibility: "off" }],
-    },
-  ],
+  streetViewControl: false,
+  mapTypeControl: false,
+  fullscreenControl: false,
+  styles: MAP_STYLE_DARK,
 };
 
 const LIBRARIES = ["places", "geometry"];
@@ -108,8 +125,8 @@ export default function MapPanel() {
       
       polylineRef.current = new window.google.maps.Polyline({
         path: fullPath,
-        strokeColor: "#4285F4",
-        strokeOpacity: 0.8,
+        strokeColor: "#88bdf2",
+        strokeOpacity: 0.9,
         strokeWeight: 6,
         map: mapRef.current
       });
@@ -154,10 +171,10 @@ export default function MapPanel() {
             icon={{
               path: window.google.maps.SymbolPath.CIRCLE,
               scale: 8,
-              fillColor: "#4285F4",
+              fillColor: "#88bdf2",
               fillOpacity: 1,
               strokeWeight: 2,
-              strokeColor: "#ffffff",
+              strokeColor: "#16212b",
             }}
             zIndex={2}
           />
@@ -170,10 +187,10 @@ export default function MapPanel() {
       {routeData && (
         <div style={{
           position: "absolute", bottom: "30px", left: "50%", transform: "translateX(-50%)",
-          background: "rgba(10, 10, 15, 0.85)", padding: "14px 28px", borderRadius: "30px",
-          color: "white", display: "flex", gap: "24px", fontWeight: "600",
+          background: "var(--surface-primary)", padding: "14px 28px", borderRadius: "30px",
+          color: "var(--text-primary)", display: "flex", gap: "24px", fontWeight: "600",
           boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)", backdropFilter: "blur(12px)",
-          border: "1px solid rgba(255,255,255,0.1)", zIndex: 10
+          border: "1px solid var(--border-default)", zIndex: 10
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <span style={{ fontSize: "1.2rem" }}>🚗</span> {routeData.duration}

@@ -4,44 +4,65 @@
    ═══════════════════════════════════════════════════════════ */
 
 /* ── Design Tokens ── */
+/*
+   Palette: "Stormy morning"
+     #384959  deep slate   — app chrome and panels
+     #6A89A7  muted slate  — borders and dividers
+     #88BDF2  sky blue     — accent / active state
+     #BDDDFC  pale ice     — primary text
+
+   Text colours are derived from the palette rather than taken from it
+   directly, so every text/background pair clears WCAG AA (4.5:1). Measured
+   against --surface-primary #384959: pale ice 6.5:1, muted ice 4.9:1,
+   sky blue 4.6:1. #6A89A7 sits at 2.7:1, so it is used only for borders
+   and never for text.
+*/
 :root {
-  /* Surfaces */
-  --surface-primary: #ffffff;
-  --surface-secondary: #f8f9fa;
-  --surface-tertiary: #f1f3f5;
-  --surface-elevated: #ffffff;
+  /* Surfaces — darkest at the back, lifting toward the viewer */
+  --surface-base: #2b3744;
+  --surface-primary: #384959;
+  --surface-secondary: #3f5264;
+  --surface-tertiary: #42566b;
+  --surface-elevated: #42566b;
+  --surface-hover: #4e6480;
+  --surface-sunken: #222c36;
 
   /* Borders */
-  --border-default: #e9ecef;
-  --border-subtle: #f1f3f5;
-  --border-strong: #dee2e6;
+  --border-subtle: #44596d;
+  --border-default: #526c85;
+  --border-strong: #6a89a7;
 
   /* Accent */
-  --accent-primary: #228be6;
-  --accent-primary-hover: #1c7ed6;
-  --accent-primary-light: #e7f5ff;
-  --accent-secondary: #15aabf;
-  --accent-secondary-hover: #1098ad;
+  --accent-primary: #88bdf2;
+  --accent-primary-hover: #a5cdf6;
+  --accent-primary-active: #6fa9e4;
+  --accent-primary-light: rgba(136, 189, 242, 0.16);
+  --accent-primary-glow: rgba(136, 189, 242, 0.34);
+  --accent-secondary: #bdddfc;
+  --accent-secondary-hover: #d6ebfe;
+  /* Text that sits on top of an accent fill */
+  --on-accent: #16212b;
 
   /* Text */
-  --text-primary: #212529;
-  --text-secondary: #495057;
-  --text-muted: #adb5bd;
-  --text-inverse: #ffffff;
+  --text-primary: #e8f2fc;
+  --text-secondary: #bdddfc;
+  --text-muted: #a8c0d6;
+  --text-inverse: #16212b;
 
   /* Semantic */
-  --color-success: #40c057;
-  --color-success-light: #ebfbee;
-  --color-warning: #fcc419;
-  --color-warning-light: #fff9db;
-  --color-error: #fa5252;
-  --color-error-light: #fff5f5;
+  --color-success: #6fd3a3;
+  --color-success-light: rgba(111, 211, 163, 0.16);
+  --color-warning: #f2c57c;
+  --color-warning-light: rgba(242, 197, 124, 0.16);
+  --color-error: #f28b82;
+  --color-error-light: rgba(242, 139, 130, 0.16);
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-xl: 0 8px 24px rgba(0, 0, 0, 0.1);
+  /* Shadows — deeper than the light theme, since dark UI needs more
+     separation to read as layered rather than flat */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.36);
+  --shadow-lg: 0 6px 18px rgba(0, 0, 0, 0.44);
+  --shadow-xl: 0 12px 34px rgba(0, 0, 0, 0.52);
 
   /* Typography */
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -78,6 +99,12 @@
   --radius-lg: 12px;
   --radius-xl: 16px;
   --radius-full: 9999px;
+
+  /* Layout — Tesla-style dashboard shell */
+  --rail-width: 300px;
+  --gauge-width: 236px;
+  --dock-height: 60px;
+  --topbar-height: 44px;
 
   /* Transitions */
   --transition-fast: 120ms ease;
@@ -1049,3 +1076,648 @@ a:hover {
 .spotify-connect-btn:hover { color: #1db954; border-color: #1db954; }
 .spotify-connect-btn { padding: 10px 16px; font-size: var(--font-size-sm); white-space: nowrap; }
 .spotify-error { position: absolute; top: 100%; left: 0; right: 0; padding-top: 4px; color: var(--color-error); font-size: var(--font-size-xs); }
+
+/* ═══════════════════════════════════════════════════════════
+   Cockpit shell — rail · nav · content · dock
+   Appended after the original rules so it overrides them; the
+   light-theme selectors above that are no longer referenced by
+   any component simply go unused.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Shell grid ── */
+.dashboard {
+  height: 100vh;
+  display: grid;
+  grid-template-rows: var(--topbar-height) 1fr var(--dock-height);
+  background: var(--surface-base);
+  overflow: hidden;
+}
+
+.dashboard-body {
+  display: grid;
+  grid-template-columns: var(--rail-width) var(--gauge-width) 1fr;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── Top strip ── */
+.top-bar {
+  height: var(--topbar-height);
+  padding: 0 var(--space-4);
+  background: var(--surface-sunken);
+  border-bottom: 1px solid var(--border-subtle);
+  box-shadow: none;
+}
+
+.top-bar-logo {
+  font-size: var(--font-size-md);
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.top-bar-logo span { color: var(--accent-primary); }
+
+.top-bar-greeting {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.top-bar-greeting strong { color: var(--text-secondary); }
+
+.top-bar-user .avatar {
+  background: var(--surface-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+.weather-badge {
+  background: var(--surface-tertiary);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+/* ── Left rail ── */
+.dash-rail {
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  min-height: 0;
+  padding: var(--space-4);
+  gap: var(--space-3);
+  background: var(--surface-primary);
+  border-right: 1px solid var(--border-subtle);
+}
+
+.dash-rail-media { flex-shrink: 0; }
+
+.car-viz {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.car-viz-container {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.car-svg {
+  height: 100%;
+  max-height: 100%;
+  width: auto;
+  overflow: visible;
+}
+
+/* ── Car bodywork ── */
+.car-body {
+  fill: var(--accent-primary);
+  stroke: var(--accent-primary-active);
+  stroke-width: 1.5;
+}
+
+.car-body-sheen { pointer-events: none; }
+
+/* The roof is painted metal, not glass — keeping it body-coloured is what
+   separates the windscreen and rear screen into two distinct dark panes
+   instead of one slab running the length of the car. */
+.car-roof {
+  fill: var(--accent-primary-active);
+  stroke: var(--accent-primary-active);
+  stroke-width: 1;
+}
+
+.car-glass {
+  fill: #1c2730;
+  stroke: #16212b;
+  stroke-width: 1;
+}
+
+.car-seam {
+  stroke: var(--accent-primary-active);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  opacity: 0.55;
+  fill: none;
+}
+
+.car-wheel { fill: #1b242d; }
+
+.car-mirror { fill: var(--accent-primary-active); }
+
+.car-headlight {
+  fill: var(--surface-secondary);
+  stroke: var(--border-default);
+  stroke-width: 0.8;
+  transition: fill var(--transition-base);
+}
+
+.car-headlight.on {
+  fill: var(--accent-secondary);
+  filter: drop-shadow(0 0 7px var(--accent-primary-glow));
+}
+
+.car-taillight {
+  fill: #c9483f;
+  opacity: 0.9;
+}
+
+.car-signal rect {
+  fill: var(--surface-secondary);
+  stroke: var(--border-default);
+  stroke-width: 0.8;
+}
+
+.car-signal.blinking rect {
+  fill: var(--color-warning);
+  stroke: var(--color-warning);
+  animation: signal-blink 700ms steps(1, end) infinite;
+}
+
+@keyframes signal-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.15; }
+}
+
+.car-beams { pointer-events: none; }
+
+.car-speed-value {
+  fill: var(--on-accent);
+  font-family: var(--font-mono);
+  font-size: 34px;
+  font-weight: var(--font-weight-bold);
+}
+
+.car-speed-unit {
+  fill: var(--on-accent);
+  opacity: 0.7;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.14em;
+}
+
+/* ── Gauge column ──
+   Sits where the section nav used to. The three readings stack rather than
+   flowing into a grid, because at this width a row would clip the numbers. */
+.dash-gauges {
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-4) var(--space-3);
+  background: var(--surface-primary);
+  border-right: 1px solid var(--border-subtle);
+}
+
+/* ── Content area ── */
+.dash-content {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  background: var(--surface-base);
+}
+
+.panel {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  overflow-y: auto;
+  padding: var(--space-6);
+  background: var(--surface-base);
+}
+
+.panel-header { margin-bottom: var(--space-5); }
+
+.panel-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.panel-subtitle {
+  margin-top: var(--space-1);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+/* ── Gauges ── */
+.vehicle-gauges {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-auto-rows: minmax(0, 1fr);
+  height: 100%;
+  gap: var(--space-3);
+  overflow: visible;
+}
+
+/* The three cards split the column evenly, so the content is centred in each
+   rather than pinned to the top of a tall box. */
+.gauge-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--surface-elevated);
+}
+
+.gauge-label {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.gauge-icon { color: var(--accent-primary); }
+
+.gauge-number {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.gauge-unit { color: var(--text-muted); }
+
+.gauge-bar-track {
+  background: var(--surface-sunken);
+  border-radius: var(--radius-full);
+}
+
+/* ── Dock ── */
+.dock {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: 0 var(--space-4);
+  background: var(--surface-sunken);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.dock-section {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1;
+}
+
+.dock-center { justify-content: center; }
+.dock-right { justify-content: flex-end; }
+
+.dock-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+}
+
+.dock-badge small {
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-regular);
+}
+
+.dock-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-success);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.dock-btn {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.dock-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.dock-btn:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.dock-btn.on {
+  background: var(--accent-primary);
+  color: var(--on-accent);
+}
+
+.dock-date {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.dock-time {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ── Map, in the dark shell ── */
+/* Centred over the map, matching the geolocation notice at the foot. */
+.map-search {
+  top: var(--space-3);
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  max-width: 300px;
+}
+
+.car-speed-value { font-size: 26px; }
+.car-speed-unit { font-size: 9px; }
+
+.map-panel {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  border: none;
+  background: var(--surface-base);
+}
+
+.map-search {
+  background: var(--surface-primary);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-lg);
+}
+
+.map-search input,
+.map-search-input {
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.map-search input::placeholder,
+.map-search-input::placeholder { color: var(--text-muted); }
+
+.map-loading,
+.map-error {
+  color: var(--text-muted);
+  background: var(--surface-base);
+}
+
+.map-geo-notice {
+  background: var(--color-warning-light);
+  border: 1px solid var(--color-warning);
+  color: var(--color-warning);
+}
+
+/* ── Media card in the rail ──
+   The original widget floated over the car panel (position: absolute, white
+   fill). In the rail it is a normal block at the foot of the column. */
+.spotify-widget {
+  position: static;
+  z-index: auto;
+  min-height: 0;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: none;
+  color: var(--text-secondary);
+}
+
+.spotify-art {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+}
+
+.spotify-details { min-width: 0; }
+
+.spotify-details strong,
+.spotify-details > span:last-child {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spotify-details strong {
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+}
+
+.spotify-details > span:last-child {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.spotify-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.spotify-actions button,
+.spotify-connect-btn {
+  background: var(--surface-tertiary);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.spotify-actions button { width: 34px; height: 34px; }
+
+.spotify-error { position: static; padding-top: var(--space-1); }
+
+/* ── Narrow screens ── */
+@media (max-width: 1100px) {
+  :root { --rail-width: 240px; --gauge-width: 204px; }
+}
+
+@media (max-width: 860px) {
+  .dashboard { grid-template-rows: var(--topbar-height) 1fr auto var(--dock-height); }
+  .dashboard-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(220px, 34vh) auto 1fr;
+    overflow-y: auto;
+  }
+  .dash-rail { flex-direction: row; border-right: none; border-bottom: 1px solid var(--border-subtle); }
+  .dash-rail-media { flex: 1; align-self: center; }
+  .dash-gauges { border-right: none; border-bottom: 1px solid var(--border-subtle); }
+  .vehicle-gauges {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: auto;
+    height: auto;
+  }
+  .dock-left .dock-status { display: none; }
+}
+
+/* ── Vehicle illustration (imported 3/4 view) ── */
+.car-viz {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-2);
+  overflow: hidden;
+  /* The original rule nudged this block down 30px to sit over the old car
+     panel. In the rail that offset pushes the indicator lamps onto the media
+     card, so it is cleared here. */
+  transform: none;
+  max-width: none;
+}
+
+/* The car stands on the street scene rather than on flat panel fill. The
+   artwork is 4:3 and the rail is not, so it is cropped around the centre,
+   biased downward to hold the asphalt — not the verge — under the wheels. */
+.car-viz-stage {
+  position: relative;
+  flex: 1;
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background-color: var(--surface-sunken);
+  background-image: url("./assets/street-bg.svg");
+  background-size: cover;
+  background-position: center 62%;
+  background-repeat: no-repeat;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.45);
+}
+
+/* Darkens the crop toward the frame so the scene fades into the card edge
+   instead of ending on a hard rectangle. */
+.car-viz-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 58%,
+    transparent 38%,
+    rgba(22, 32, 42, 0.62) 100%
+  );
+}
+
+.car-photo {
+  position: relative;
+  z-index: 2;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 14px rgba(9, 14, 19, 0.55));
+}
+
+/* Contact shadow — without it the car reads as pasted over the asphalt */
+.car-shadow {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 74%;
+  width: 72%;
+  height: 16%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(10, 15, 20, 0.7) 0%,
+    transparent 70%
+  );
+}
+
+/* Pool of light under the nose when the headlights are on */
+.car-glow {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 52%;
+  width: 78%;
+  height: 46%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    var(--accent-primary-glow) 0%,
+    transparent 68%
+  );
+  opacity: 0;
+  transition: opacity var(--transition-slow);
+}
+
+.car-glow.on { opacity: 1; }
+
+.car-readout {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.car-speed-num {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.car-speed-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.car-lamps {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.car-lamp {
+  width: 38px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.car-lamp.on {
+  background: var(--accent-primary-light);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.car-lamp.blink {
+  background: var(--color-warning-light);
+  border-color: var(--color-warning);
+  color: var(--color-warning);
+  animation: signal-blink 700ms steps(1, end) infinite;
+}

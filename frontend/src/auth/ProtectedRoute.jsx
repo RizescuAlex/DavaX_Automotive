@@ -2,11 +2,18 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "./useAuth";
 import { useAppStore } from "../store";
 import { ROUTES } from "../config/constants";
+import { DESIGN_PREVIEW } from "../config/devPreview";
 
 export default function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
   const { backendUser, customUser } = useAppStore();
   const location = useLocation();
+
+  // Design preview: render every protected screen directly, no auth, no
+  // onboarding redirects — so /dashboard and /onboarding are both reachable.
+  if (DESIGN_PREVIEW) {
+    return children;
+  }
 
   if (loading) {
     return <div className="spinner" />;

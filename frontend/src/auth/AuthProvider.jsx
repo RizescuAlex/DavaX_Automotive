@@ -2,6 +2,7 @@ import { createContext, useEffect, useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../config/firebase";
 import { useAppStore } from "../store";
+import { DESIGN_PREVIEW, MOCK_USER, MOCK_BACKEND_USER } from "../config/devPreview";
 
 export const AuthContext = createContext(null);
 
@@ -12,6 +13,13 @@ export function AuthProvider({ children }) {
   const { customUser, customToken, clearCustomAuth, setBackendUser, clearBackendUser } = useAppStore();
 
   useEffect(() => {
+    // Design preview: skip Firebase entirely and seed a mock profile.
+    if (DESIGN_PREVIEW) {
+      setBackendUser(MOCK_BACKEND_USER);
+      setLoading(false);
+      return;
+    }
+
     // Firebase listener for Google sign-in state
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
       setFirebaseUser(fbUser);
@@ -36,6 +44,10 @@ export function AuthProvider({ children }) {
   }, [customToken, setBackendUser, clearBackendUser]);
 
   const logout = async () => {
+    if (DESIGN_PREVIEW) {
+      console.warn("[design-preview] Sign out is a no-op — there is no real session.");
+      return;
+    }
     try {
       await signOut(auth);
     } catch (e) {
@@ -51,14 +63,23 @@ export function AuthProvider({ children }) {
   const user = firebaseUser ?? (customToken ? customUser : null);
   const isAuthenticated = !!user;
 
-  const value = {
-    user,
-    firebaseUser,
-    customUser: customToken ? customUser : null,
-    loading,
-    logout,
-    isAuthenticated,
-  };
+  const value = DESIGN_PREVIEW
+    ? {
+        user: MOCK_USER,
+        firebaseUser: null,
+        customUser: null,
+        loading: false,
+        logout,
+        isAuthenticated: true,
+      }
+    : {
+        user,
+        firebaseUser,
+        customUser: customToken ? customUser : null,
+        loading,
+        logout,
+        isAuthenticated,
+      };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
