@@ -3,11 +3,13 @@ import LoginPage from "./auth/LoginPage";
 import ProtectedRoute from "./auth/ProtectedRoute";
 import Dashboard from "./components/dashboard/Dashboard";
 import OnboardingWizard from "./components/onboarding/OnboardingWizard";
+import VehicleApiTest from "./components/VehicleApiTest";
 
 export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+
       <Route
         path="/onboarding"
         element={
@@ -16,6 +18,7 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/dashboard"
         element={
@@ -24,6 +27,16 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+
+      <Route
+        path="/vehicle-test"
+        element={
+          <ProtectedRoute>
+            <VehicleApiTest />
+          </ProtectedRoute>
+        }
+      />
+
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
