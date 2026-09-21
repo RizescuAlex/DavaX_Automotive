@@ -1,8 +1,15 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api";
 import { MAP_CONFIG } from "../../config/constants";
 import MapSearch from "./MapSearch";
-import { apiFetch } from "../../config/api"; 
+import { apiFetch } from "../../config/api";
+import { useAppStore } from "../../store";
+
+/** Read a live design token, so map chrome follows the theme without a
+ *  second copy of the palette living in this file. */
+function token(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
 
 const mapContainerStyle = { width: "100%", height: "100%" };
 /* Dark map styling tuned to the "Stormy morning" palette, so the map reads as
@@ -28,18 +35,49 @@ const MAP_STYLE_DARK = [
   { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#6a89a7" }] },
 ];
 
-const mapOptions = {
+/* The daylight counterpart, keyed to the same slate-blue family so the map
+   still belongs to the cockpit rather than dropping to Google's stock look. */
+const MAP_STYLE_LIGHT = [
+  { elementType: "geometry", stylers: [{ color: "#eef2f7" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#516475" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#ffffff" }] },
+  { featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] },
+  { featureType: "administrative", elementType: "geometry", stylers: [{ color: "#c4d3e3" }] },
+  { featureType: "administrative.land_parcel", stylers: [{ visibility: "off" }] },
+  { featureType: "landscape.natural", elementType: "geometry", stylers: [{ color: "#e4ebf3" }] },
+  { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#dcebe2" }] },
+  { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#17714a" }] },
+  { featureType: "road", elementType: "geometry", stylers: [{ color: "#ffffff" }] },
+  { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#dfe7f0" }] },
+  { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#33485a" }] },
+  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#fdf6e8" }] },
+  { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#e6d9b8" }] },
+  { featureType: "transit", elementType: "geometry", stylers: [{ color: "#e3e9f1" }] },
+  { featureType: "transit.station", elementType: "labels.text.fill", stylers: [{ color: "#516475" }] },
+  { featureType: "water", elementType: "geometry", stylers: [{ color: "#cfe0ef" }] },
+  { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#2c5f88" }] },
+];
+
+const BASE_MAP_OPTIONS = {
   disableDefaultUI: false,
   zoomControl: true,
   streetViewControl: false,
   mapTypeControl: false,
   fullscreenControl: false,
-  styles: MAP_STYLE_DARK,
 };
 
 const LIBRARIES = ["places", "geometry"];
 
 export default function MapPanel() {
+  const theme = useAppStore((s) => s.theme);
+  const mapOptions = useMemo(
+    () => ({
+      ...BASE_MAP_OPTIONS,
+      styles: theme === "light" ? MAP_STYLE_LIGHT : MAP_STYLE_DARK,
+    }),
+    [theme]
+  );
+
   const [center, setCenter] = useState(MAP_CONFIG.FALLBACK_CENTER);
   const [currentLocation, setCurrentLocation] = useState(null); 
   const [destLocation, setDestLocation] = useState(null);       
@@ -79,6 +117,12 @@ export default function MapPanel() {
 
     return () => navigator.geolocation.clearWatch(watchId);
   }, []);
+
+  // The route line is created imperatively and outlives re-renders, so it has
+  // to be repainted by hand when the theme changes.
+  useEffect(() => {
+    polylineRef.current?.setOptions({ strokeColor: token("--accent-primary") });
+  }, [theme]);
 
   const onLoad = useCallback((map) => {
     mapRef.current = map;
@@ -125,7 +169,7 @@ export default function MapPanel() {
       
       polylineRef.current = new window.google.maps.Polyline({
         path: fullPath,
-        strokeColor: "#88bdf2",
+        strokeColor: token("--accent-primary"),
         strokeOpacity: 0.9,
         strokeWeight: 6,
         map: mapRef.current
@@ -171,10 +215,10 @@ export default function MapPanel() {
             icon={{
               path: window.google.maps.SymbolPath.CIRCLE,
               scale: 8,
-              fillColor: "#88bdf2",
+              fillColor: token("--accent-primary"),
               fillOpacity: 1,
               strokeWeight: 2,
-              strokeColor: "#16212b",
+              strokeColor: token("--surface-primary"),
             }}
             zIndex={2}
           />

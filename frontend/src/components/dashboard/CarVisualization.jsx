@@ -17,7 +17,13 @@ export default function CarVisualization() {
   const headlightsOn = useAppStore((s) => s.headlightsOn);
   const leftSignal = useAppStore((s) => s.leftSignal);
   const rightSignal = useAppStore((s) => s.rightSignal);
+  const hazardsOn = useAppStore((s) => s.hazardsOn);
   const speed = useAppStore((s) => s.speed);
+
+  // Hazards drive both indicators, so each lamp blinks on its own signal or on
+  // hazards.
+  const leftBlinking = leftSignal || hazardsOn;
+  const rightBlinking = rightSignal || hazardsOn;
 
   return (
     <div className="car-viz">
@@ -34,7 +40,7 @@ export default function CarVisualization() {
 
       <div className="car-lamps">
         <span
-          className={`car-lamp ${leftSignal ? "blink" : ""}`}
+          className={`car-lamp ${leftBlinking ? "blink" : ""}`}
           title="Left signal"
         >
           <CornerUpLeft size={16} aria-hidden="true" />
@@ -46,7 +52,7 @@ export default function CarVisualization() {
           <Lightbulb size={16} aria-hidden="true" />
         </span>
         <span
-          className={`car-lamp ${rightSignal ? "blink" : ""}`}
+          className={`car-lamp ${rightBlinking ? "blink" : ""}`}
           title="Right signal"
         >
           <CornerUpRight size={16} aria-hidden="true" />

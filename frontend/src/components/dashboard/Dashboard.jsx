@@ -29,22 +29,20 @@ export default function Dashboard() {
       <TopBar user={user} onLogout={logout} />
 
       <div className="dashboard-body">
-        {/* Left rail — the vehicle and the media player */}
+        {/* Left rail — the vehicle and its live readings */}
         <aside className="dash-rail">
           <CarVisualization />
-          <div className="dash-rail-media">
-            <SpotifyControls />
-          </div>
+          <VehicleGauges />
         </aside>
 
-        {/* Middle column — live drivetrain readings, stacked */}
-        <section className="dash-gauges" aria-label="Vehicle readings">
-          <VehicleGauges />
-        </section>
-
-        {/* Right — the map, permanently open */}
+        {/* Right — the map, permanently open, with the player docked over it.
+            The player sits on the map rather than in the rail because at rail
+            width its track title had nowhere to go and clipped mid-word. */}
         <main className="dash-content">
           <MapPanel />
+          <div className="dash-media">
+            <SpotifyControls />
+          </div>
         </main>
       </div>
 

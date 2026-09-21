@@ -1,6 +1,32 @@
 import { useState, useEffect } from "react";
-import { LogOut, Sun, Cloud, CloudRain, User } from "lucide-react";
+import { LogOut, Sun, Cloud, CloudRain, User, Moon } from "lucide-react";
 import { APP_NAME } from "../../config/constants";
+import { useAppStore } from "../../store";
+
+/**
+ * Day/night switch.
+ *
+ * Labelled by the mode it switches TO, since that is the question the driver
+ * is actually asking — the icon shows the destination, not the current state.
+ */
+function ThemeToggle() {
+  const theme = useAppStore((s) => s.theme);
+  const toggleTheme = useAppStore((s) => s.toggleTheme);
+  const goingToDark = theme === "light";
+
+  return (
+    <button
+      type="button"
+      id="theme-toggle-btn"
+      className="theme-toggle"
+      onClick={toggleTheme}
+      aria-label={goingToDark ? "Switch to night mode" : "Switch to day mode"}
+      title={goingToDark ? "Night mode" : "Day mode"}
+    >
+      {goingToDark ? <Moon size={16} aria-hidden="true" /> : <Sun size={16} aria-hidden="true" />}
+    </button>
+  );
+}
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -68,6 +94,7 @@ export default function TopBar({ user, onLogout }) {
       </div>
       <div className="top-bar-right">
         <WeatherBadge />
+        <ThemeToggle />
         <div className="top-bar-user">
           <div className="avatar">
             {user?.photoURL ? (
