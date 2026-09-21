@@ -212,14 +212,21 @@ function EmailTab({ onSuccess }) {
 export default function LoginPage() {
   const [activeTab, setActiveTab] = useState("google");
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
-  const { setCustomAuth } = useAppStore();
-  // Redirect if already authenticated
+  const { isAuthenticated, user } = useAuth();
+  const { setCustomAuth, setBackendUser } = useAppStore();
+
+  // Redirect once authentication actually completes. This is the only place we
+  // navigate away from login: isAuthenticated only turns true after the backend
+  // profile has landed, so onboarding_completed is known by the time we read it.
   useEffect(() => {
     if (isAuthenticated) {
-      navigate(ROUTES.DASHBOARD, { replace: true });
+      if (user?.onboarding_completed === false) {
+        navigate(ROUTES.ONBOARDING, { replace: true });
+      } else {
+        navigate(ROUTES.DASHBOARD, { replace: true });
+      }
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, user]);
 
   if (isAuthenticated) return null;
 
@@ -232,12 +239,11 @@ export default function LoginPage() {
         display_name: data.display_name,
         onboarding_completed: data.onboarding_completed,
       });
-    }
-    
-    if (data.onboarding_completed === false) {
-      navigate(ROUTES.ONBOARDING, { replace: true });
     } else {
-      navigate(ROUTES.DASHBOARD, { replace: true });
+      // Google: POST /auth/login is what creates the row on first sign-in, so its
+      // response is the authoritative profile. Storing it flips isAuthenticated,
+      // and the effect above handles the redirect.
+      setBackendUser(data);
     }
   };
 
