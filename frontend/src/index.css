@@ -226,24 +226,6 @@ a:hover {
   box-shadow: var(--shadow-md);
 }
 
-/* ── Cards ── */
-.card {
-  background: var(--surface-primary);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
-  box-shadow: var(--shadow-md);
-}
-
-/* ── Utility ── */
-.text-muted {
-  color: var(--text-muted);
-}
-
-.text-center {
-  text-align: center;
-}
-
 /* ── Login Page ── */
 .login-page {
   display: flex;
@@ -284,31 +266,7 @@ a:hover {
   margin-bottom: var(--space-8);
 }
 
-.login-card .divider {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  margin: var(--space-6) 0;
-  color: var(--text-muted);
-  font-size: var(--font-size-sm);
-}
-
 .login-card .divider::before,
-.login-card .divider::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: var(--border-default);
-}
-
-.login-error {
-  background: var(--color-error-light);
-  color: var(--color-error);
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  margin-bottom: var(--space-4);
-}
 
 /* ── Dashboard Layout ── */
 .dashboard {
@@ -317,12 +275,6 @@ a:hover {
   height: 100vh;
   overflow: hidden;
   background: var(--surface-secondary);
-}
-
-.dashboard-content {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
 }
 
 /* ── Top Bar ── */
@@ -349,19 +301,6 @@ a:hover {
   font-weight: var(--font-weight-bold);
   color: var(--accent-primary);
   letter-spacing: -0.5px;
-}
-
-.top-bar-logo span {
-  color: var(--text-primary);
-}
-
-.top-bar-greeting {
-  font-size: var(--font-size-base);
-  color: var(--text-secondary);
-}
-
-.top-bar-greeting strong {
-  color: var(--text-primary);
 }
 
 .top-bar-right {
@@ -449,149 +388,7 @@ a:hover {
   transform: translateY(30px);
 }
 
-.car-viz-title {
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
-}
-
-.car-viz-container {
-  position: relative;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.car-svg {
-  width: 160px;
-  height: auto;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
-}
-
-.car-body {
-  fill: var(--accent-primary);
-  stroke: var(--accent-primary-hover);
-  stroke-width: 2;
-  transition: fill var(--transition-base);
-}
-
-.car-windshield {
-  fill: #c5e1f5;
-  stroke: #a3c9e8;
-  stroke-width: 1;
-  opacity: 0.8;
-}
-
-.car-wheel {
-  fill: #343a40;
-  stroke: #212529;
-  stroke-width: 1;
-}
-
-.car-headlight {
-  fill: #868e96;
-  transition: fill var(--transition-base);
-}
-
-.car-headlight.on {
-  fill: #ffd43b;
-  filter: drop-shadow(0 0 6px rgba(255, 212, 59, 0.6));
-}
-
-.car-headlight-beam {
-  fill: rgba(255, 212, 59, 0.15);
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-.car-taillight {
-  fill: #e03131;
-  opacity: 0.8;
-}
-
-.car-signal {
-  fill: #868e96;
-  opacity: 0.4;
-}
-
-.car-signal.blink {
-  fill: #ff922b;
-  animation: signal-blink 0.6s ease-in-out infinite;
-}
-
-.car-door-line {
-  stroke: var(--accent-primary-hover);
-  stroke-width: 1;
-  stroke-dasharray: 4 4;
-  opacity: 0.4;
-}
-
-.car-mirror {
-  fill: #495057;
-}
-
-.car-viz-speed {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  pointer-events: none;
-}
-
-.car-viz-speed-value {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
-  line-height: 1;
-}
-
-.car-viz-speed-unit {
-  font-size: var(--font-size-xs);
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-/* ── Car Controls ── */
-.car-controls {
-  display: flex;
-  gap: var(--space-2);
-  width: 100%;
-}
-
-.car-control-btn {
-  flex: 1;
-  padding: var(--space-2);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  font-family: var(--font-sans);
-  color: var(--text-muted);
-  background: var(--surface-secondary);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all var(--transition-base);
-}
-
-.car-control-btn:hover {
-  background: var(--surface-tertiary);
-  color: var(--text-secondary);
-}
-
-.car-control-btn.active {
-  background: var(--accent-primary-light);
-  color: var(--accent-primary);
-  border-color: var(--accent-primary);
-}
-
 /* ── Vehicle Gauges ── */
-.vehicle-gauges {
-  display: flex;
-  gap: var(--space-3);
-}
 
 .gauge-card {
   flex: 1;
@@ -606,18 +403,6 @@ a:hover {
   align-items: center;
   gap: var(--space-2);
   margin-bottom: var(--space-2);
-}
-
-.gauge-icon {
-  color: var(--text-muted);
-}
-
-.gauge-label {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .gauge-value {
@@ -726,10 +511,6 @@ a:hover {
   font-size: var(--font-size-base);
   color: var(--text-primary);
   background: transparent;
-}
-
-.map-search-input::placeholder {
-  color: var(--text-muted);
 }
 
 .map-search-clear {
@@ -975,7 +756,6 @@ a:hover {
   text-decoration: underline;
 }
 
-
 /* ── Auth Footnote ── */
 .auth-footnote {
   font-size: var(--font-size-xs);
@@ -1048,14 +828,6 @@ a:hover {
 }
 
 .spotify-details strong,
-.spotify-details > span:last-child {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.spotify-details strong { font-size: var(--font-size-xl); }
-.spotify-details > span:last-child { color: var(--text-muted); font-size: var(--font-size-md); }
 
 .spotify-actions { display: flex; gap: var(--space-2); }
 
@@ -1071,7 +843,6 @@ a:hover {
   cursor: pointer;
 }
 
-.spotify-actions button { width: 46px; height: 46px; }
 .spotify-actions button:hover,
 .spotify-connect-btn:hover { color: #1db954; border-color: #1db954; }
 .spotify-connect-btn { padding: 10px 16px; font-size: var(--font-size-sm); white-space: nowrap; }
@@ -1158,107 +929,15 @@ a:hover {
   justify-content: center;
 }
 
-.car-viz-container {
-  height: 100%;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.car-svg {
-  height: 100%;
-  max-height: 100%;
-  width: auto;
-  overflow: visible;
-}
-
 /* ── Car bodywork ── */
-.car-body {
-  fill: var(--accent-primary);
-  stroke: var(--accent-primary-active);
-  stroke-width: 1.5;
-}
-
-.car-body-sheen { pointer-events: none; }
 
 /* The roof is painted metal, not glass — keeping it body-coloured is what
    separates the windscreen and rear screen into two distinct dark panes
    instead of one slab running the length of the car. */
-.car-roof {
-  fill: var(--accent-primary-active);
-  stroke: var(--accent-primary-active);
-  stroke-width: 1;
-}
-
-.car-glass {
-  fill: #1c2730;
-  stroke: #16212b;
-  stroke-width: 1;
-}
-
-.car-seam {
-  stroke: var(--accent-primary-active);
-  stroke-width: 1.2;
-  stroke-linecap: round;
-  opacity: 0.55;
-  fill: none;
-}
-
-.car-wheel { fill: #1b242d; }
-
-.car-mirror { fill: var(--accent-primary-active); }
-
-.car-headlight {
-  fill: var(--surface-secondary);
-  stroke: var(--border-default);
-  stroke-width: 0.8;
-  transition: fill var(--transition-base);
-}
-
-.car-headlight.on {
-  fill: var(--accent-secondary);
-  filter: drop-shadow(0 0 7px var(--accent-primary-glow));
-}
-
-.car-taillight {
-  fill: #c9483f;
-  opacity: 0.9;
-}
-
-.car-signal rect {
-  fill: var(--surface-secondary);
-  stroke: var(--border-default);
-  stroke-width: 0.8;
-}
-
-.car-signal.blinking rect {
-  fill: var(--color-warning);
-  stroke: var(--color-warning);
-  animation: signal-blink 700ms steps(1, end) infinite;
-}
 
 @keyframes signal-blink {
   0%, 49% { opacity: 1; }
   50%, 100% { opacity: 0.15; }
-}
-
-.car-beams { pointer-events: none; }
-
-.car-speed-value {
-  fill: var(--on-accent);
-  font-family: var(--font-mono);
-  font-size: 34px;
-  font-weight: var(--font-weight-bold);
-}
-
-.car-speed-unit {
-  fill: var(--on-accent);
-  opacity: 0.7;
-  font-family: var(--font-sans);
-  font-size: 11px;
-  font-weight: var(--font-weight-medium);
-  letter-spacing: 0.14em;
 }
 
 /* ── Gauge column ──
@@ -1278,29 +957,6 @@ a:hover {
   min-width: 0;
   min-height: 0;
   background: var(--surface-base);
-}
-
-.panel {
-  position: relative;
-  z-index: 1;
-  height: 100%;
-  overflow-y: auto;
-  padding: var(--space-6);
-  background: var(--surface-base);
-}
-
-.panel-header { margin-bottom: var(--space-5); }
-
-.panel-title {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
-}
-
-.panel-subtitle {
-  margin-top: var(--space-1);
-  font-size: var(--font-size-sm);
-  color: var(--text-muted);
 }
 
 /* ── Gauges ── */
@@ -1438,7 +1094,6 @@ a:hover {
   font-weight: var(--font-weight-semibold);
 }
 
-/* ── Map, in the dark shell ── */
 /* Centred over the map, matching the geolocation notice at the foot. */
 .map-search {
   top: var(--space-3);
@@ -1447,9 +1102,6 @@ a:hover {
   transform: translateX(-50%);
   max-width: 300px;
 }
-
-.car-speed-value { font-size: 26px; }
-.car-speed-unit { font-size: 9px; }
 
 .map-panel {
   width: 100%;
