@@ -10,7 +10,7 @@ export function AuthProvider({ children }) {
   const [firebaseUser, setFirebaseUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const { customUser, customToken, clearCustomAuth, setBackendUser, clearBackendUser } = useAppStore();
+  const { customUser, customToken, clearCustomAuth, backendUser, setBackendUser, clearBackendUser } = useAppStore();
 
   useEffect(() => {
     // Design preview: skip Firebase entirely and seed a mock profile.
@@ -59,8 +59,11 @@ export function AuthProvider({ children }) {
     clearBackendUser();
   };
 
-  // The active user is either from Firebase or from our custom JWT
-  const user = firebaseUser ?? (customToken ? customUser : null);
+  // The active user is the backend profile (Google users) or our custom JWT user
+  // (email/password). A Firebase session alone is NOT enough: the backend profile
+  // is what carries onboarding_completed, so we stay unauthenticated until
+  // /auth/me or POST /auth/login has given us one.
+  const user = (firebaseUser && backendUser) ? backendUser : (customToken ? customUser : null);
   const isAuthenticated = !!user;
 
   const value = DESIGN_PREVIEW
