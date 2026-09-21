@@ -1,39 +1,37 @@
 import { useState } from "react";
 import { apiFetch } from "../config/api";
 
-const inputStyle = {
-  width: "100%",
-  padding: "0.6rem 0.7rem",
-  border: "1px solid #555",
-  borderRadius: "6px",
-  background: "transparent",
-  color: "inherit",
-  boxSizing: "border-box",
+const initialVehicle = {
+  model_year: "2020",
+  make: "Toyota",
+  model: "Camry",
 };
 
 export default function VehicleApiTest() {
-  const [year, setYear] = useState("2020");
-  const [make, setMake] = useState("Toyota");
-  const [model, setModel] = useState("Camry");
+  const [vehicle, setVehicle] = useState(initialVehicle);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleSubmit = async (event) => {
+  const fetchSpecs = async (selectedVehicle) => {
+    const params = new URLSearchParams({
+      year: String(selectedVehicle.model_year),
+      make: selectedVehicle.make,
+      model: selectedVehicle.model,
+    });
+
+    const data = await apiFetch(`/vehicle-specs?${params.toString()}`);
+    setResult(data);
+  };
+
+  const handleManualSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
     setError(null);
     setResult(null);
 
     try {
-      const params = new URLSearchParams({
-        year,
-        make,
-        model,
-      });
-
-      const data = await apiFetch(`/vehicle-specs?${params.toString()}`);
-      setResult(data);
+      await fetchSpecs(vehicle);
     } catch (err) {
       setError(err.message || "Failed to fetch vehicle data.");
     } finally {
@@ -41,21 +39,44 @@ export default function VehicleApiTest() {
     }
   };
 
+  const handleSavedVehicleLookup = async () => {
+    setLoading(true);
+    setError(null);
+    setResult(null);
+
+    try {
+      const savedVehicle = await apiFetch("/vehicles/me");
+      setVehicle({
+        model_year: String(savedVehicle.model_year),
+        make: savedVehicle.make,
+        model: savedVehicle.model,
+      });
+      await fetchSpecs(savedVehicle);
+    } catch (err) {
+      setError(err.message || "Failed to load your saved vehicle.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateVehicle = (field, value) => {
+    setVehicle((current) => ({ ...current, [field]: value }));
+  };
+
   return (
     <main style={{ maxWidth: "760px", margin: "2rem auto", padding: "1rem" }}>
       <h1>Vehicle API Test</h1>
       <p>Look up fuel capacity and consumption data from CarAPI.</p>
 
-      <form onSubmit={handleSubmit} style={{ display: "grid", gap: "1rem" }}>
+      <form onSubmit={handleManualSubmit} style={{ display: "grid", gap: "1rem" }}>
         <label>
           Model year
           <input
             type="number"
             min="2015"
             max="2020"
-            value={year}
-            onChange={(event) => setYear(event.target.value)}
-            style={inputStyle}
+            value={vehicle.model_year}
+            onChange={(event) => updateVehicle("model_year", event.target.value)}
             required
           />
         </label>
@@ -64,10 +85,8 @@ export default function VehicleApiTest() {
           Make
           <input
             type="text"
-            value={make}
-            onChange={(event) => setMake(event.target.value)}
-            style={inputStyle}
-            placeholder="Toyota"
+            value={vehicle.make}
+            onChange={(event) => updateVehicle("make", event.target.value)}
             required
           />
         </label>
@@ -76,35 +95,30 @@ export default function VehicleApiTest() {
           Model
           <input
             type="text"
-            value={model}
-            onChange={(event) => setModel(event.target.value)}
-            style={inputStyle}
-            placeholder="Camry"
+            value={vehicle.model}
+            onChange={(event) => updateVehicle("model", event.target.value)}
             required
           />
         </label>
 
         <button type="submit" disabled={loading}>
-          {loading ? "Loading..." : "Fetch vehicle data"}
+          {loading ? "Loading..." : "Fetch selected vehicle"}
         </button>
       </form>
 
-      {error && (
-        <p role="alert" style={{ color: "#d9534f", marginTop: "1rem" }}>
-          {error}
-        </p>
-      )}
+      <button
+        type="button"
+        onClick={handleSavedVehicleLookup}
+        disabled={loading}
+        style={{ marginTop: "1rem" }}
+      >
+        {loading ? "Loading..." : "Load my saved car and fetch specs"}
+      </button>
+
+      {error && <p role="alert">{error}</p>}
 
       {result && (
-        <pre
-          style={{
-            marginTop: "1.5rem",
-            padding: "1rem",
-            overflowX: "auto",
-            borderRadius: "6px",
-            background: "rgba(0, 0, 0, 0.25)",
-          }}
-        >
+        <pre style={{ marginTop: "1.5rem", overflowX: "auto" }}>
           {JSON.stringify(result, null, 2)}
         </pre>
       )}

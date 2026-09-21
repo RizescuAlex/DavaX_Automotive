@@ -16,19 +16,10 @@ async def get_vehicle_specs(
         async with httpx.AsyncClient(timeout=10) as client:
             response = await client.get(
                 CAR_API_URL,
-                params={
-                    "year": year,
-                    "make": make,
-                    "model": model,
-                },
+                params={"year": year, "make": make, "model": model},
                 headers={"Accept": "application/json"},
             )
-
-        response.raise_for_status()
-        return response.json()
-
+            response.raise_for_status()
+            return response.json()
     except httpx.HTTPError as exc:
-        raise HTTPException(
-            status_code=502,
-            detail=f"CarAPI request failed: {exc}",
-        )
+        raise HTTPException(status_code=502, detail=f"CarAPI request failed: {exc}") from exc
