@@ -6,21 +6,23 @@ from app.core.dependencies import get_db
 from app.core.security import get_current_token
 from app.api.v1.auth import _get_user_from_token
 from app.models.onboarding_profile import OnboardingProfile
+from app.models.vehicle import Vehicle
 from app.schemas.onboarding import OnboardingProfileCreate, OnboardingProfileOut
 
 router = APIRouter()
 
+
 @router.post("", response_model=OnboardingProfileOut, status_code=status.HTTP_201_CREATED)
 async def create_onboarding_profile(
-    profile_in: OnboardingProfileCreate,
-    db: AsyncSession = Depends(get_db),
-    token: dict = Depends(get_current_token),
+        profile_in: OnboardingProfileCreate,
+        db: AsyncSession = Depends(get_db),
+        token: dict = Depends(get_current_token),
 ):
     current_user = await _get_user_from_token(token, db)
-    
+
     if current_user.onboarding_completed:
         raise HTTPException(status_code=400, detail="Onboarding already completed")
-    
+
     # Create the profile
     profile = OnboardingProfile(
         user_id=current_user.id,
@@ -32,11 +34,19 @@ async def create_onboarding_profile(
         avoid_highways=profile_in.avoid_highways,
         preferred_fuel_type=profile_in.preferred_fuel_type,
     )
-    
+
     db.add(profile)
+    db.add(
+        Vehicle(
+            user_id=current_user.id,
+            model_year=profile_in.vehicle.model_year,
+            make=profile_in.vehicle.make,
+            model=profile_in.vehicle.model,
+        )
+    )
     current_user.onboarding_completed = True
-    
+
     await db.commit()
     await db.refresh(profile)
-    
+
     return profile

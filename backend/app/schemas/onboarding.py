@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from app.schemas.vehicle import VehicleInput
 
 class OnboardingProfileCreate(BaseModel):
     fastest_arrival: int = Field(default=5, ge=0, le=10)
@@ -8,7 +9,10 @@ class OnboardingProfileCreate(BaseModel):
     avoid_tolls: bool = False
     avoid_highways: bool = False
     preferred_fuel_type: str | None = None
+    vehicle: VehicleInput
 
 class OnboardingProfileOut(OnboardingProfileCreate):
+    vehicle: VehicleInput | None = None
+
     class Config:
         from_attributes = True

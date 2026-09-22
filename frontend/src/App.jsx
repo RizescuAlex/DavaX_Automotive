@@ -3,6 +3,7 @@ import LoginPage from "./auth/LoginPage";
 import ProtectedRoute from "./auth/ProtectedRoute";
 import Dashboard from "./components/dashboard/Dashboard";
 import OnboardingWizard from "./components/onboarding/OnboardingWizard";
+import VehicleApiTest from "./components/VehicleApiTest";
 
 export default function App() {
   return (
@@ -21,6 +22,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/vehicle-test"
+        element={
+          <ProtectedRoute>
+            <VehicleApiTest />
           </ProtectedRoute>
         }
       />
