@@ -30,6 +30,11 @@ export default function OnboardingWizard() {
     avoid_tolls: false,
     avoid_highways: false,
     preferred_fuel_type: "gasoline",
+    vehicle: {
+      model_year: "2020",
+      make: "Toyota",
+      model: "Camry",
+    },
   });
 
   const handleChange = (key, value) => {
@@ -38,7 +43,7 @@ export default function OnboardingWizard() {
 
   const handleNext = () => {
     setError(null);
-    if (step < 3) setStep(step + 1);
+    if (step < 4) setStep(step + 1);
   };
 
   const handleBack = () => {
@@ -81,7 +86,7 @@ export default function OnboardingWizard() {
           <div className="progress-bar">
             <div
               className="progress-fill"
-              style={{ width: `${(step / 3) * 100}%` }}
+              style={{ width: `${(step / 4) * 100}%` }}
             />
           </div>
         </div>
@@ -209,6 +214,67 @@ export default function OnboardingWizard() {
               </div>
             </div>
           )}
+
+          {step === 4 && (
+            <div className="step-panel animate-fade-in">
+              <h3>Your Car</h3>
+              <p className="step-desc">
+                Enter a demo vehicle so DavaX can retrieve its fuel specifications.
+              </p>
+
+              <div className="vehicle-input-group">
+                <label htmlFor="vehicle-year">Model year</label>
+                <input
+                  id="vehicle-year"
+                  type="number"
+                  min="2015"
+                  max="2020"
+                  value={preferences.vehicle.model_year}
+                  onChange={(e) =>
+                    handleChange("vehicle", {
+                      ...preferences.vehicle,
+                      model_year: e.target.value,
+                    })
+                  }
+                  required
+                />
+              </div>
+
+              <div className="vehicle-input-group">
+                <label htmlFor="vehicle-make">Make</label>
+                <input
+                  id="vehicle-make"
+                  type="text"
+                  value={preferences.vehicle.make}
+                  onChange={(e) =>
+                    handleChange("vehicle", {
+                      ...preferences.vehicle,
+                      make: e.target.value,
+                    })
+                  }
+                  placeholder="Toyota"
+                  required
+                />
+              </div>
+
+              <div className="vehicle-input-group">
+                <label htmlFor="vehicle-model">Model</label>
+                <input
+                  id="vehicle-model"
+                  type="text"
+                  value={preferences.vehicle.model}
+                  onChange={(e) =>
+                    handleChange("vehicle", {
+                      ...preferences.vehicle,
+                      model: e.target.value,
+                    })
+                  }
+                  placeholder="Camry"
+                  required
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="onboarding-footer">
@@ -220,7 +286,7 @@ export default function OnboardingWizard() {
             <div></div> // Spacer
           )}
 
-          {step < 3 ? (
+          {step < 4 ? (
             <button className="btn btn-primary" onClick={handleNext}>
               Next Step
             </button>
