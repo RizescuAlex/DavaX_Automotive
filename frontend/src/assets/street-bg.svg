@@ -1,0 +1,62 @@
+<svg width="1600" height="1200" viewBox="0 0 1600 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+<!--
+  Street scene behind the vehicle illustration.
+
+  Derived from the supplied Figma export, with three changes:
+
+  1.  The original carried a 1600x1200 grain bitmap, embedded twice as a
+      soft-light overlay, which accounted for 3.6MB of a 3.6MB file. The
+      overlays are replaced by the `grain` filter below, so the asset is
+      vector-only and the whole scene ships in a couple of kilobytes.
+  2.  The light-grey/orange palette was remapped onto the cockpit's slate
+      tokens, keeping the original luminance order so the planes still read
+      as separate surfaces: asphalt darkest, lane marking brightest.
+  3.  The scene is lifted 200 units and the asphalt extended past the frame,
+      so the middle of the road lands on the middle of the viewBox. The car
+      is centred on the stage, so anything else parks it against the far
+      kerb with dead tarmac below.
+-->
+<g clip-path="url(#street-clip)">
+  <g transform="translate(0, -200)">
+    <!-- Ground planes, light to dark, matching #F0F0F0 / #D6D6D6 / #CFCFCF -->
+    <rect x="-100" y="-600" width="1800" height="2200" fill="#41556a"/>
+    <path d="M853.135 1216C587.801 1058.67 3.39063 697.4 -12.6094 691L-12.6094 1500L853.135 1500Z" fill="#3a4c5e"/>
+    <path d="M-68.6094 18L-81 -546L1658.55 -175L1735.39 766L-68.6094 18Z" fill="#35465a"/>
+
+    <!-- Asphalt. The inner shadow is what lifts the road off the verge. The
+         near edge runs on past y=1200 so the lift leaves no gap at the foot. -->
+    <g filter="url(#road-inner-shadow)">
+      <path d="M1602.5 780.5L-10 47L-10 698.5L1339.8 1500L1602.5 1500L1602.5 780.5Z" fill="#1d262f"/>
+    </g>
+    <!-- Lane marking along the far edge — was #F18042, now the UI accent -->
+    <path d="M-10.6094 54L-24.8652 -24L1669.13 666L1689.39 832L-10.6094 54Z" fill="#88bdf2" opacity="0.78"/>
+
+    <!-- Distance haze toward the top of the frame -->
+    <rect x="-100" y="-600" width="1800" height="2200" fill="url(#haze)"/>
+    <!-- Replaces the two stripped bitmap overlays -->
+    <rect x="-100" y="-600" width="1800" height="2200" filter="url(#grain)" opacity="0.14" style="mix-blend-mode:overlay"/>
+  </g>
+</g>
+<defs>
+  <filter id="road-inner-shadow" x="-200" y="-100" width="2000" height="1800" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+    <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+    <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+    <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+    <feOffset dy="71"/>
+    <feGaussianBlur stdDeviation="111"/>
+    <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+    <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.47 0"/>
+    <feBlend mode="normal" in2="shape" result="effect1_innerShadow"/>
+  </filter>
+  <filter id="grain" x="-100" y="-600" width="1800" height="2200" filterUnits="userSpaceOnUse">
+    <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/>
+    <feColorMatrix type="saturate" values="0"/>
+  </filter>
+  <linearGradient id="haze" x1="800" y1="200" x2="800" y2="1400" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#222c36" stop-opacity="0.55"/>
+    <stop offset="0.45" stop-color="#222c36" stop-opacity="0"/>
+    <stop offset="1" stop-color="#16202a" stop-opacity="0.35"/>
+  </linearGradient>
+  <clipPath id="street-clip"><rect width="1600" height="1200" fill="white"/></clipPath>
+</defs>
+</svg>

@@ -4,44 +4,77 @@
    ═══════════════════════════════════════════════════════════ */
 
 /* ── Design Tokens ── */
+/*
+   Palette: "Stormy morning"
+     #384959  deep slate   — app chrome and panels
+     #6A89A7  muted slate  — borders and dividers
+     #88BDF2  sky blue     — accent / active state
+     #BDDDFC  pale ice     — primary text
+
+   Text colours are derived from the palette rather than taken from it
+   directly, so every text/background pair clears WCAG AA (4.5:1). Measured
+   against --surface-primary #384959: pale ice 6.5:1, muted ice 4.9:1,
+   sky blue 4.6:1. #6A89A7 sits at 2.7:1, so it is used only for borders
+   and never for text.
+*/
 :root {
-  /* Surfaces */
-  --surface-primary: #ffffff;
-  --surface-secondary: #f8f9fa;
-  --surface-tertiary: #f1f3f5;
-  --surface-elevated: #ffffff;
+  /* Surfaces — darkest at the back, lifting toward the viewer */
+  --surface-base: #2b3744;
+  --surface-primary: #384959;
+  --surface-secondary: #3f5264;
+  --surface-tertiary: #42566b;
+  --surface-elevated: #42566b;
+  --surface-hover: #4e6480;
+  --surface-sunken: #222c36;
 
   /* Borders */
-  --border-default: #e9ecef;
-  --border-subtle: #f1f3f5;
-  --border-strong: #dee2e6;
+  --border-subtle: #44596d;
+  --border-default: #526c85;
+  --border-strong: #6a89a7;
 
   /* Accent */
-  --accent-primary: #228be6;
-  --accent-primary-hover: #1c7ed6;
-  --accent-primary-light: #e7f5ff;
-  --accent-secondary: #15aabf;
-  --accent-secondary-hover: #1098ad;
+  --accent-primary: #88bdf2;
+  --accent-primary-hover: #a5cdf6;
+  --accent-primary-active: #6fa9e4;
+  --accent-primary-light: rgba(136, 189, 242, 0.16);
+  --accent-primary-glow: rgba(136, 189, 242, 0.34);
+  --accent-secondary: #bdddfc;
+  --accent-secondary-hover: #d6ebfe;
+  /* Text that sits on top of an accent fill */
+  --on-accent: #16212b;
 
   /* Text */
-  --text-primary: #212529;
-  --text-secondary: #495057;
-  --text-muted: #adb5bd;
-  --text-inverse: #ffffff;
+  --text-primary: #e8f2fc;
+  --text-secondary: #bdddfc;
+  --text-muted: #a8c0d6;
+  --text-inverse: #16212b;
 
   /* Semantic */
-  --color-success: #40c057;
-  --color-success-light: #ebfbee;
-  --color-warning: #fcc419;
-  --color-warning-light: #fff9db;
-  --color-error: #fa5252;
-  --color-error-light: #fff5f5;
+  --color-success: #6fd3a3;
+  --color-success-light: rgba(111, 211, 163, 0.16);
+  --color-warning: #f2c57c;
+  --color-warning-light: rgba(242, 197, 124, 0.16);
+  --color-error: #f28b82;
+  --color-error-light: rgba(242, 139, 130, 0.16);
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-xl: 0 8px 24px rgba(0, 0, 0, 0.1);
+  /* Shadows — deeper than the light theme, since dark UI needs more
+     separation to read as layered rather than flat */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.36);
+  --shadow-lg: 0 6px 18px rgba(0, 0, 0, 0.44);
+  --shadow-xl: 0 12px 34px rgba(0, 0, 0, 0.52);
+
+  /* Vehicle stage — the shading that sits the car on the road. Tokenised
+     because a shadow tuned for night asphalt reads as dirt in daylight. */
+  /* Seat heating. Warm rather than the accent blue, because "hot" reading as
+     cold is the one mistake this control cannot afford. Not --color-warning:
+     heat is a setting, not a fault. */
+  --color-heat: #f2a15c;
+
+  --stage-vignette: rgba(22, 32, 42, 0.62);
+  --stage-inset: rgba(0, 0, 0, 0.45);
+  --stage-contact: rgba(10, 15, 20, 0.7);
+  --stage-drop: rgba(9, 14, 19, 0.55);
 
   /* Typography */
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -79,10 +112,90 @@
   --radius-xl: 16px;
   --radius-full: 9999px;
 
+  /* Layout — rail, map, dock */
+  --rail-width: 300px;
+  --dock-height: 60px;
+  --topbar-height: 44px;
+
   /* Transitions */
   --transition-fast: 120ms ease;
   --transition-base: 200ms ease;
   --transition-slow: 300ms ease;
+}
+
+/*
+   Day theme: "Stormy morning" in daylight.
+
+   Same family as the night palette — cool slate-blues over a white-first
+   ground — rather than a second unrelated look. The accent darkens from
+   #88bdf2 to #1f6fb2 because the night accent sits at 1.9:1 on white and
+   would fail as text or as a button fill.
+
+   Measured, worst case across all four surfaces (white, secondary #f4f7fb,
+   base #e8eef5, sunken #dce5ef):
+     text-primary   12.8:1    text-muted     4.8:1
+     text-secondary  7.4:1    accent-primary 4.9:1
+     white on accent 5.3:1    success/warning/error all above 5.9:1
+   --border-strong is 2.2:1 and, as in the night theme, is only ever a
+   border — never text.
+
+   Night stays the default in :root, so the cockpit is dark unless the
+   driver asks otherwise.
+*/
+:root[data-theme="light"] {
+  /* Surfaces — lightest at the front, settling back toward the ground */
+  --surface-base: #e8eef5;
+  --surface-primary: #ffffff;
+  --surface-secondary: #f4f7fb;
+  --surface-tertiary: #eaf0f7;
+  --surface-elevated: #ffffff;
+  --surface-hover: #e1eaf4;
+  --surface-sunken: #dce5ef;
+
+  /* Borders */
+  --border-subtle: #dfe7f0;
+  --border-default: #c4d3e3;
+  --border-strong: #9cb2c8;
+
+  /* Accent */
+  --accent-primary: #1f6fb2;
+  --accent-primary-hover: #195c95;
+  --accent-primary-active: #14496f;
+  --accent-primary-light: rgba(31, 111, 178, 0.12);
+  --accent-primary-glow: rgba(31, 111, 178, 0.25);
+  --accent-secondary: #2c5f88;
+  --accent-secondary-hover: #244e6f;
+  --on-accent: #ffffff;
+
+  /* Text */
+  --text-primary: #16212b;
+  --text-secondary: #33485a;
+  --text-muted: #516475;
+  --text-inverse: #ffffff;
+
+  /* Semantic */
+  --color-success: #17714a;
+  --color-success-light: rgba(23, 113, 74, 0.12);
+  --color-warning: #8a5a00;
+  --color-warning-light: rgba(138, 90, 0, 0.14);
+  --color-error: #b3261e;
+  --color-error-light: rgba(179, 38, 30, 0.1);
+
+  /* Shadows — far lighter than the night theme; on a pale ground a heavy
+     shadow reads as dirt rather than elevation */
+  --shadow-sm: 0 1px 2px rgba(22, 33, 43, 0.06);
+  --shadow-md: 0 2px 6px rgba(22, 33, 43, 0.08);
+  --shadow-lg: 0 6px 18px rgba(22, 33, 43, 0.1);
+  --shadow-xl: 0 12px 34px rgba(22, 33, 43, 0.14);
+
+  /* Stage shading, lightened: enough to seat the car on the road, not so
+     much that the pale asphalt looks soiled. */
+  --color-heat: #b35a12;
+
+  --stage-vignette: rgba(120, 140, 160, 0.26);
+  --stage-inset: rgba(90, 110, 130, 0.16);
+  --stage-contact: rgba(60, 80, 100, 0.34);
+  --stage-drop: rgba(60, 80, 100, 0.28);
 }
 
 /* ── Reset & Base ── */
@@ -199,24 +312,6 @@ a:hover {
   box-shadow: var(--shadow-md);
 }
 
-/* ── Cards ── */
-.card {
-  background: var(--surface-primary);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
-  box-shadow: var(--shadow-md);
-}
-
-/* ── Utility ── */
-.text-muted {
-  color: var(--text-muted);
-}
-
-.text-center {
-  text-align: center;
-}
-
 /* ── Login Page ── */
 .login-page {
   display: flex;
@@ -257,31 +352,6 @@ a:hover {
   margin-bottom: var(--space-8);
 }
 
-.login-card .divider {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  margin: var(--space-6) 0;
-  color: var(--text-muted);
-  font-size: var(--font-size-sm);
-}
-
-.login-card .divider::before,
-.login-card .divider::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: var(--border-default);
-}
-
-.login-error {
-  background: var(--color-error-light);
-  color: var(--color-error);
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  margin-bottom: var(--space-4);
-}
 
 /* ── Dashboard Layout ── */
 .dashboard {
@@ -290,12 +360,6 @@ a:hover {
   height: 100vh;
   overflow: hidden;
   background: var(--surface-secondary);
-}
-
-.dashboard-content {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
 }
 
 /* ── Top Bar ── */
@@ -322,19 +386,6 @@ a:hover {
   font-weight: var(--font-weight-bold);
   color: var(--accent-primary);
   letter-spacing: -0.5px;
-}
-
-.top-bar-logo span {
-  color: var(--text-primary);
-}
-
-.top-bar-greeting {
-  font-size: var(--font-size-base);
-  color: var(--text-secondary);
-}
-
-.top-bar-greeting strong {
-  color: var(--text-primary);
 }
 
 .top-bar-right {
@@ -422,149 +473,7 @@ a:hover {
   transform: translateY(30px);
 }
 
-.car-viz-title {
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
-}
-
-.car-viz-container {
-  position: relative;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.car-svg {
-  width: 160px;
-  height: auto;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
-}
-
-.car-body {
-  fill: var(--accent-primary);
-  stroke: var(--accent-primary-hover);
-  stroke-width: 2;
-  transition: fill var(--transition-base);
-}
-
-.car-windshield {
-  fill: #c5e1f5;
-  stroke: #a3c9e8;
-  stroke-width: 1;
-  opacity: 0.8;
-}
-
-.car-wheel {
-  fill: #343a40;
-  stroke: #212529;
-  stroke-width: 1;
-}
-
-.car-headlight {
-  fill: #868e96;
-  transition: fill var(--transition-base);
-}
-
-.car-headlight.on {
-  fill: #ffd43b;
-  filter: drop-shadow(0 0 6px rgba(255, 212, 59, 0.6));
-}
-
-.car-headlight-beam {
-  fill: rgba(255, 212, 59, 0.15);
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-.car-taillight {
-  fill: #e03131;
-  opacity: 0.8;
-}
-
-.car-signal {
-  fill: #868e96;
-  opacity: 0.4;
-}
-
-.car-signal.blink {
-  fill: #ff922b;
-  animation: signal-blink 0.6s ease-in-out infinite;
-}
-
-.car-door-line {
-  stroke: var(--accent-primary-hover);
-  stroke-width: 1;
-  stroke-dasharray: 4 4;
-  opacity: 0.4;
-}
-
-.car-mirror {
-  fill: #495057;
-}
-
-.car-viz-speed {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  pointer-events: none;
-}
-
-.car-viz-speed-value {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
-  line-height: 1;
-}
-
-.car-viz-speed-unit {
-  font-size: var(--font-size-xs);
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-/* ── Car Controls ── */
-.car-controls {
-  display: flex;
-  gap: var(--space-2);
-  width: 100%;
-}
-
-.car-control-btn {
-  flex: 1;
-  padding: var(--space-2);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  font-family: var(--font-sans);
-  color: var(--text-muted);
-  background: var(--surface-secondary);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all var(--transition-base);
-}
-
-.car-control-btn:hover {
-  background: var(--surface-tertiary);
-  color: var(--text-secondary);
-}
-
-.car-control-btn.active {
-  background: var(--accent-primary-light);
-  color: var(--accent-primary);
-  border-color: var(--accent-primary);
-}
-
 /* ── Vehicle Gauges ── */
-.vehicle-gauges {
-  display: flex;
-  gap: var(--space-3);
-}
 
 .gauge-card {
   flex: 1;
@@ -579,18 +488,6 @@ a:hover {
   align-items: center;
   gap: var(--space-2);
   margin-bottom: var(--space-2);
-}
-
-.gauge-icon {
-  color: var(--text-muted);
-}
-
-.gauge-label {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .gauge-value {
@@ -699,10 +596,6 @@ a:hover {
   font-size: var(--font-size-base);
   color: var(--text-primary);
   background: transparent;
-}
-
-.map-search-input::placeholder {
-  color: var(--text-muted);
 }
 
 .map-search-clear {
@@ -948,7 +841,6 @@ a:hover {
   text-decoration: underline;
 }
 
-
 /* ── Auth Footnote ── */
 .auth-footnote {
   font-size: var(--font-size-xs);
@@ -1020,15 +912,6 @@ a:hover {
   font-weight: var(--font-weight-semibold);
 }
 
-.spotify-details strong,
-.spotify-details > span:last-child {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.spotify-details strong { font-size: var(--font-size-xl); }
-.spotify-details > span:last-child { color: var(--text-muted); font-size: var(--font-size-md); }
 
 .spotify-actions { display: flex; gap: var(--space-2); }
 
@@ -1044,8 +927,997 @@ a:hover {
   cursor: pointer;
 }
 
-.spotify-actions button { width: 46px; height: 46px; }
 .spotify-actions button:hover,
 .spotify-connect-btn:hover { color: #1db954; border-color: #1db954; }
 .spotify-connect-btn { padding: 10px 16px; font-size: var(--font-size-sm); white-space: nowrap; }
 .spotify-error { position: absolute; top: 100%; left: 0; right: 0; padding-top: 4px; color: var(--color-error); font-size: var(--font-size-xs); }
+
+/* ═══════════════════════════════════════════════════════════
+   Cockpit shell — rail · nav · content · dock
+   Appended after the original rules so it overrides them; the
+   light-theme selectors above that are no longer referenced by
+   any component simply go unused.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Shell grid ── */
+.dashboard {
+  height: 100vh;
+  display: grid;
+  grid-template-rows: var(--topbar-height) 1fr var(--dock-height);
+  background: var(--surface-base);
+  overflow: hidden;
+}
+
+.dashboard-body {
+  display: grid;
+  grid-template-columns: var(--rail-width) 1fr;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── Top strip ── */
+.top-bar {
+  height: var(--topbar-height);
+  padding: 0 var(--space-4);
+  background: var(--surface-sunken);
+  border-bottom: 1px solid var(--border-subtle);
+  box-shadow: none;
+}
+
+.top-bar-logo {
+  font-size: var(--font-size-md);
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.top-bar-logo span { color: var(--accent-primary); }
+
+.top-bar-greeting {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.top-bar-greeting strong { color: var(--text-secondary); }
+
+.top-bar-user .avatar {
+  background: var(--surface-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+.weather-badge {
+  background: var(--surface-tertiary);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+/* ── Left rail ── */
+.dash-rail {
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  min-height: 0;
+  padding: var(--space-4);
+  gap: var(--space-3);
+  background: var(--surface-primary);
+  border-right: 1px solid var(--border-subtle);
+}
+
+/* The player now floats over the map; see .dash-media below. */
+
+.car-viz {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Car bodywork ── */
+
+/* The roof is painted metal, not glass — keeping it body-coloured is what
+   separates the windscreen and rear screen into two distinct dark panes
+   instead of one slab running the length of the car. */
+
+@keyframes signal-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.15; }
+}
+
+/* ── Gauge column ──
+   Sits where the section nav used to. The three readings stack rather than
+   flowing into a grid, because at this width a row would clip the numbers. */
+/* ── Content area ── */
+.dash-content {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  background: var(--surface-base);
+}
+
+/* Media player, docked over the bottom-left of the map. An overlay is the
+   right shape here — unlike the rail, the map has room to spare and nothing
+   underneath that the player hides. */
+.dash-media {
+  position: absolute;
+  z-index: 6;
+  left: var(--space-4);
+  bottom: var(--space-4);
+  width: min(420px, calc(100% - var(--space-8)));
+}
+
+/* ── Gauges ── */
+/* Two readings side by side at the foot of the rail. minmax(0, ...) rather
+   than a bare 1fr: a plain 1fr track refuses to shrink below its content's
+   min-content width and pushes a scrollbar into the rail instead. */
+.vehicle-gauges {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.gauge-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--surface-elevated);
+}
+
+.gauge-label {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.gauge-icon { color: var(--accent-primary); }
+
+.gauge-number {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.gauge-unit { color: var(--text-muted); }
+
+.gauge-bar-track {
+  background: var(--surface-sunken);
+  border-radius: var(--radius-full);
+}
+
+/* ── Dock ── */
+.dock {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: 0 var(--space-4);
+  background: var(--surface-sunken);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.dock-section {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1;
+}
+
+.dock-center { justify-content: center; }
+.dock-right { justify-content: flex-end; }
+
+.dock-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+}
+
+.dock-badge small {
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-regular);
+}
+
+.dock-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-success);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.dock-btn {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.dock-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.dock-btn:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.dock-btn.on {
+  background: var(--accent-primary);
+  color: var(--on-accent);
+}
+
+.dock-date {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.dock-time {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Centred over the map, matching the geolocation notice at the foot. */
+.map-search {
+  top: var(--space-3);
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  max-width: 300px;
+}
+
+.map-panel {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  border: none;
+  background: var(--surface-base);
+}
+
+.map-search {
+  background: var(--surface-primary);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-lg);
+}
+
+.map-search input,
+.map-search-input {
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.map-search input::placeholder,
+.map-search-input::placeholder { color: var(--text-muted); }
+
+.map-loading,
+.map-error {
+  color: var(--text-muted);
+  background: var(--surface-base);
+}
+
+.map-geo-notice {
+  background: var(--color-warning-light);
+  border: 1px solid var(--color-warning);
+  color: var(--color-warning);
+}
+
+/* ── Media card in the rail ──
+   The original widget floated over the car panel (position: absolute, white
+   fill). In the rail it is a normal block at the foot of the column. */
+/* Floats over the map, so unlike the rail version it needs elevation and an
+   opaque ground — map detail showing through would make the title unreadable. */
+.spotify-widget {
+  position: static;
+  z-index: auto;
+  min-height: 0;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--surface-primary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  color: var(--text-secondary);
+}
+
+.spotify-art {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+}
+
+.spotify-details { min-width: 0; }
+
+.spotify-details strong,
+.spotify-details > span:last-child {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spotify-details strong {
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+}
+
+.spotify-details > span:last-child {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.spotify-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.spotify-actions button,
+.spotify-connect-btn {
+  background: var(--surface-tertiary);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.spotify-actions button { width: 34px; height: 34px; }
+
+.spotify-error { position: static; padding-top: var(--space-1); }
+
+/* ── Narrow screens ── */
+@media (max-width: 1100px) {
+  :root { --rail-width: 248px; }
+  /* The controls matter more than the furniture: shed the date, then the
+     connection status, before the strip starts crowding itself. */
+  .dock-date { display: none; }
+}
+
+@media (max-width: 1000px) {
+  .dock-status { display: none; }
+  .dock-group { padding-right: var(--space-2); }
+  .dock-center { gap: var(--space-2); }
+}
+
+@media (max-width: 860px) {
+  .dashboard { grid-template-rows: var(--topbar-height) 1fr auto var(--dock-height); }
+  .dashboard-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(220px, 34vh) 1fr;
+    overflow-y: auto;
+  }
+  .dash-rail {
+    flex-direction: row;
+    align-items: stretch;
+    border-right: none;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .vehicle-gauges {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    width: 160px;
+    flex-shrink: 0;
+  }
+  /* Full width at the foot of the map rather than a floating card, which at
+     this width would cover most of it. */
+  .dash-media {
+    left: var(--space-3);
+    right: var(--space-3);
+    bottom: var(--space-3);
+    width: auto;
+  }
+  .dock-left .dock-status { display: none; }
+}
+
+/* ── Vehicle illustration (imported 3/4 view) ── */
+.car-viz {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-2);
+  overflow: hidden;
+  /* The original rule nudged this block down 30px to sit over the old car
+     panel. In the rail that offset pushes the indicator lamps onto the media
+     card, so it is cleared here. */
+  transform: none;
+  max-width: none;
+}
+
+/* The car stands on the street scene rather than on flat panel fill. The
+   artwork is 4:3 and the rail is not, so it is cropped around the centre,
+   biased downward to hold the asphalt — not the verge — under the wheels. */
+.car-viz-stage {
+  position: relative;
+  flex: 1;
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background-color: var(--surface-sunken);
+  background-image: url("./assets/street-bg.svg");
+  background-size: cover;
+  background-position: center 62%;
+  background-repeat: no-repeat;
+  box-shadow: inset 0 0 40px var(--stage-inset);
+}
+
+:root[data-theme="light"] .car-viz-stage {
+  background-image: url("./assets/street-bg-light.svg");
+}
+
+/* Darkens the crop toward the frame so the scene fades into the card edge
+   instead of ending on a hard rectangle. */
+.car-viz-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 58%,
+    transparent 38%,
+    var(--stage-vignette) 100%
+  );
+}
+
+.car-photo {
+  position: relative;
+  z-index: 2;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 14px var(--stage-drop));
+}
+
+/* Contact shadow — without it the car reads as pasted over the asphalt */
+.car-shadow {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 74%;
+  width: 72%;
+  height: 16%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    var(--stage-contact) 0%,
+    transparent 70%
+  );
+}
+
+/* Pool of light under the nose when the headlights are on */
+.car-glow {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 52%;
+  width: 78%;
+  height: 46%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    var(--accent-primary-glow) 0%,
+    transparent 68%
+  );
+  opacity: 0;
+  transition: opacity var(--transition-slow);
+}
+
+.car-glow.on { opacity: 1; }
+
+.car-readout {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.car-speed-num {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.car-speed-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.car-lamps {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.car-lamp {
+  width: 38px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.car-lamp.on {
+  background: var(--accent-primary-light);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.car-lamp.blink {
+  background: var(--color-warning-light);
+  border-color: var(--color-warning);
+  color: var(--color-warning);
+  animation: signal-blink 700ms steps(1, end) infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Climate card
+   A control rather than a readout, so it carries more height
+   than the fuel and engine tiles above it. Every hit target
+   is 44px, which is also why the +/- pairs are buttons rather
+   than a slider — a 4px-wide thumb is not a driving control.
+   ═══════════════════════════════════════════════════════════ */
+.climate-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--surface-elevated);
+}
+
+.climate-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.climate-head-icon { color: var(--accent-primary); flex-shrink: 0; }
+
+.climate-head-title {
+  flex: 1;
+  margin: 0;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.climate-auto {
+  padding: var(--space-1) var(--space-2);
+  min-height: 26px;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.climate-auto:hover { color: var(--text-secondary); border-color: var(--border-strong); }
+
+.climate-auto.on {
+  color: var(--on-accent);
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+/* ── Target temperature ── */
+.climate-target {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.climate-step {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+  background: var(--surface-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.climate-step:hover {
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+  background: var(--surface-hover);
+}
+
+.climate-step:active { background: var(--accent-primary-light); }
+
+.climate-step-sm { width: 40px; height: 40px; }
+
+.climate-reading {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.climate-reading-value {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.climate-reading-unit {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.climate-cabin {
+  margin: calc(var(--space-2) * -1) 0 0;
+  text-align: center;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.climate-cabin strong {
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Fan ── */
+.climate-fan {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-1);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.climate-fan-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.climate-fan-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.climate-fan-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  flex: 1;
+  height: 24px;
+  min-width: 0;
+}
+
+/* Bars step up in height as well as colour, so fan level survives being read
+   by someone who cannot separate the two blues. */
+.climate-fan-bar {
+  flex: 1;
+  min-width: 0;
+  border-radius: 2px;
+  background: var(--border-default);
+  transition: background-color var(--transition-base);
+}
+
+.climate-fan-bar:nth-child(1) { height: 40%; }
+.climate-fan-bar:nth-child(2) { height: 55%; }
+.climate-fan-bar:nth-child(3) { height: 70%; }
+.climate-fan-bar:nth-child(4) { height: 85%; }
+.climate-fan-bar:nth-child(5) { height: 100%; }
+
+.climate-fan-bar.on { background: var(--accent-primary); }
+
+/* ── A/C ── */
+.climate-ac {
+  min-height: 44px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  background: var(--surface-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.climate-ac:hover { color: var(--text-primary); border-color: var(--border-strong); }
+
+.climate-ac.on {
+  color: var(--accent-primary);
+  background: var(--accent-primary-light);
+  border-color: var(--accent-primary);
+}
+
+/* ── Day/night toggle ── */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.theme-toggle:hover {
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+  background: var(--accent-primary-light);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Dock controls
+   Grouped rather than an undifferentiated row of icons: lights
+   and signals, then comfort, then temperature. The separators
+   are what let a driver find a control by position instead of
+   reading every glyph.
+   ═══════════════════════════════════════════════════════════ */
+.dock-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding-right: var(--space-3);
+  border-right: 1px solid var(--border-subtle);
+}
+
+.dock-center { gap: var(--space-3); }
+
+.dock-btn.on {
+  background: var(--accent-primary-light);
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+/* Hazards get the warning colour rather than the accent: it is the one
+   control here that means "something is wrong". */
+.dock-btn.alert {
+  background: var(--color-warning-light);
+  color: var(--color-warning);
+  border-color: var(--color-warning);
+  animation: signal-blink 700ms steps(1, end) infinite;
+}
+
+/* Seat heat is a level, not a toggle, so the button carries its own count */
+.dock-btn.seat { position: relative; }
+
+.dock-level {
+  position: absolute;
+  right: 5px;
+  bottom: 3px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  color: var(--accent-primary);
+}
+
+/* ── Temperature ── */
+.dock-climate {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.dock-temp {
+  min-width: 68px;
+  height: 44px;
+  padding: 0 var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.dock-temp span { color: var(--text-muted); }
+
+.dock-temp:hover { background: var(--surface-hover); }
+
+.dock-temp.open {
+  background: var(--accent-primary-light);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.dock-temp:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* ── Climate panel ── */
+.climate-panel {
+  position: absolute;
+  z-index: 20;
+  bottom: calc(100% + var(--space-3));
+  left: 50%;
+  transform: translateX(-50%);
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  animation: fadeInUp 160ms ease forwards;
+}
+
+.climate-panel .climate-cabin { margin: 0; text-align: center; }
+
+/* ── Seat heating ── */
+.dock-seat {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 52px;
+  height: 44px;
+  padding: 0;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.dock-seat:hover { background: var(--surface-hover); color: var(--text-primary); }
+
+.dock-seat:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.dock-seat.on {
+  color: var(--color-heat);
+  background: var(--color-warning-light);
+  border-color: var(--color-heat);
+}
+
+.dock-seat-flames {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  height: 10px;
+}
+
+/* Unlit flames stay visible so the control always shows it has three steps,
+   rather than appearing to be a plain toggle until you press it. */
+.dock-seat-flames svg {
+  opacity: 0.28;
+  transition: opacity var(--transition-fast), color var(--transition-fast);
+}
+
+.dock-seat-flames svg.lit {
+  opacity: 1;
+  color: var(--color-heat);
+}
+
+/* ── A/C intensity ── */
+.dock-btn.ac {
+  position: relative;
+  width: 48px;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.dock-ac-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 8px;
+}
+
+.dock-ac-bars span {
+  width: 5px;
+  border-radius: 1px;
+  background: currentColor;
+  opacity: 0.25;
+  transition: opacity var(--transition-fast);
+}
+
+.dock-ac-bars span:nth-child(1) { height: 4px; }
+.dock-ac-bars span:nth-child(2) { height: 6px; }
+.dock-ac-bars span:nth-child(3) { height: 8px; }
+.dock-ac-bars span.lit { opacity: 1; }
+
+/* Wipers sweep while they are running — a static highlight would not say
+   whether they are on or merely selected. */
+.wiper-arm {
+  transform-origin: 6.5px 18px;
+  transform-box: fill-box;
+}
+
+.dock-btn.on .wiper-arm {
+  animation: wiper-sweep 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dock-btn.on .wiper-arm { animation: none; }
+}
+
+@keyframes wiper-sweep {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(38deg); }
+}
