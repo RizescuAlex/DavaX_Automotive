@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import {
   Wifi, Lightbulb, CornerUpLeft, CornerUpRight, Car,
-  TriangleAlert, Minus, Plus, Snowflake,
+  Minus, Plus, Snowflake,
 } from "lucide-react";
 import { useAppStore, CLIMATE_LIMITS } from "../../store";
 import ClimatePanel from "./ClimatePanel";
 import SeatHeatButton from "./SeatHeatButton";
-import { FrontDefogIcon, RearDefogIcon, WiperIcon } from "./CarIcons";
+import { FrontDefogIcon, HazardIcon, RearDefogIcon, WiperIcon } from "./CarIcons";
 
 /**
  * Persistent control strip, in four groups: lights and signals, visibility,
@@ -94,7 +94,7 @@ export default function BottomDock() {
             title="Hazard lights"
             onClick={toggleHazards}
           >
-            <TriangleAlert size={18} />
+            <HazardIcon size={18} />
           </button>
           <button
             type="button"

@@ -114,6 +114,16 @@ export const useAppStore = create((set, get) => ({
 
   toggleTheme: () => get().setTheme(get().theme === "dark" ? "light" : "dark"),
 
+  // ── Assistant ─────────────────────────────────────────────────────────────
+  // Open state lives here because the button that opens the panel is in the
+  // top bar while the panel itself is over the map — two siblings that would
+  // otherwise have to thread a prop through Dashboard to reach each other.
+  assistantOpen: false,
+
+  setAssistantOpen: (open) => set({ assistantOpen: open }),
+
+  toggleAssistant: () => set((s) => ({ assistantOpen: !s.assistantOpen })),
+
   // ── Climate ───────────────────────────────────────────────────────────────
   // Target/fan/A-C are the driver's settings and persist to the backend.
   // cabinTemp is simulated: it drifts toward the target, faster with the fan up.
@@ -182,6 +192,67 @@ export const useAppStore = create((set, get) => ({
     set({ _climateSaveTimer: timer });
   },
 
+  /**
+   * Apply absolute climate values, clamped.
+   *
+   * The adjust and cycle actions below clamp their own deltas, but
+   * _commitClimate does not — it trusts its caller. The assistant sends
+   * absolutes ("set it to 23"), and a model asking for 40 degrees must not be
+   * able to write 40, so the clamping lives here rather than in the
+   * dispatcher: one place, whether the value came from a button or a sentence.
+   *
+   * Keys are the store's own (targetTemp, not target_temperature). Undefined
+   * fields are left untouched, so a request that mentions only temperature
+   * does not reset the fan.
+   */
+  setClimate: (patch) => {
+    const next = {};
+
+    if (patch.targetTemp !== undefined) {
+      next.targetTemp = clamp(
+        Math.round(patch.targetTemp * 2) / 2,
+        CLIMATE_LIMITS.TEMP_MIN,
+        CLIMATE_LIMITS.TEMP_MAX
+      );
+    }
+    if (patch.fanSpeed !== undefined) {
+      next.fanSpeed = clamp(
+        Math.round(patch.fanSpeed),
+        CLIMATE_LIMITS.FAN_MIN,
+        CLIMATE_LIMITS.FAN_MAX
+      );
+    }
+    if (patch.acLevel !== undefined) {
+      next.acLevel = clamp(Math.round(patch.acLevel), 0, CLIMATE_LIMITS.AC_MAX);
+    }
+    if (patch.seatHeatLeft !== undefined) {
+      next.seatHeatLeft = clamp(
+        Math.round(patch.seatHeatLeft),
+        0,
+        CLIMATE_LIMITS.SEAT_HEAT_MAX
+      );
+    }
+    if (patch.seatHeatRight !== undefined) {
+      next.seatHeatRight = clamp(
+        Math.round(patch.seatHeatRight),
+        0,
+        CLIMATE_LIMITS.SEAT_HEAT_MAX
+      );
+    }
+    if (patch.autoMode !== undefined) next.autoMode = Boolean(patch.autoMode);
+    if (patch.frontDefrost !== undefined) next.frontDefrost = Boolean(patch.frontDefrost);
+    if (patch.rearDefrost !== undefined) next.rearDefrost = Boolean(patch.rearDefrost);
+
+    // Setting the fan by hand, or cutting the compressor, drops out of auto —
+    // the same rule adjustFanSpeed and cycleAcLevel follow. An explicit
+    // auto_mode in the same breath wins over the implication.
+    if (patch.autoMode === undefined && (next.fanSpeed !== undefined || next.acLevel === 0)) {
+      next.autoMode = false;
+    }
+
+    if (Object.keys(next).length > 0) get()._commitClimate(next);
+  },
+
   adjustTargetTemp: (delta) =>
     get()._commitClimate({
       targetTemp: clamp(
@@ -234,23 +305,42 @@ export const useAppStore = create((set, get) => ({
   wipersOn: false,
   _simInterval: null,
 
-  toggleHeadlights: () => set((s) => ({ headlightsOn: !s.headlightsOn })),
-  toggleWipers: () => set((s) => ({ wipersOn: !s.wipersOn })),
-  toggleLeftSignal: () =>
-    set((s) => ({ leftSignal: !s.leftSignal, rightSignal: false, hazardsOn: false })),
-  toggleRightSignal: () =>
-    set((s) => ({ rightSignal: !s.rightSignal, leftSignal: false, hazardsOn: false })),
+  // Absolute setters, not just toggles: the assistant has to be able to say
+  // "on" and mean on. Asking a toggle to turn on something already on turns it
+  // off instead — and headlightsOn starts true, so that is the first thing a
+  // driver would hit.
+  setHeadlights: (on) => set({ headlightsOn: on }),
+  setWipers: (on) => set({ wipersOn: on }),
 
-  // Hazards drive both indicators at once, so they cancel a single signal and
-  // are cancelled by one. Deliberately NOT persisted: a car that remembered
-  // its hazards were on would turn them on again next trip.
-  toggleHazards: () =>
-    set((s) => {
-      const hazardsOn = !s.hazardsOn;
-      return hazardsOn
-        ? { hazardsOn, leftSignal: false, rightSignal: false }
-        : { hazardsOn };
-    }),
+  // Left, right and hazards are one mutually exclusive group. Hazards drive
+  // both indicators at once, so they cancel a single signal and are cancelled
+  // by one. Switching a member ON clears the other two; switching it OFF
+  // clears only itself, so "cancel the left signal" cannot silently kill
+  // hazards the driver turned on afterwards.
+  setLeftSignal: (on) =>
+    set(on
+      ? { leftSignal: true, rightSignal: false, hazardsOn: false }
+      : { leftSignal: false }),
+
+  setRightSignal: (on) =>
+    set(on
+      ? { rightSignal: true, leftSignal: false, hazardsOn: false }
+      : { rightSignal: false }),
+
+  // Deliberately NOT persisted: a car that remembered its hazards were on
+  // would turn them on again next trip.
+  setHazards: (on) =>
+    set(on
+      ? { hazardsOn: true, leftSignal: false, rightSignal: false }
+      : { hazardsOn: false }),
+
+  // The dock's buttons still toggle. They delegate so the exclusion rules
+  // above live in exactly one place, whether the driver taps or asks.
+  toggleHeadlights: () => get().setHeadlights(!get().headlightsOn),
+  toggleWipers: () => get().setWipers(!get().wipersOn),
+  toggleLeftSignal: () => get().setLeftSignal(!get().leftSignal),
+  toggleRightSignal: () => get().setRightSignal(!get().rightSignal),
+  toggleHazards: () => get().setHazards(!get().hazardsOn),
 
   startSimulation: () => {
     // Prevent duplicate intervals

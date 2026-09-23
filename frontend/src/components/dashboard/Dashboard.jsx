@@ -7,6 +7,7 @@ import SpotifyControls from "./SpotifyControls";
 import MapPanel from "./MapPanel";
 import VehicleGauges from "./VehicleGauges";
 import BottomDock from "./BottomDock";
+import AssistantPanel from "./AssistantPanel";
 
 /**
  * Fixed three-column cockpit. There is no section switching any more: every
@@ -43,6 +44,7 @@ export default function Dashboard() {
           <div className="dash-media">
             <SpotifyControls />
           </div>
+          <AssistantPanel />
         </main>
       </div>
 
