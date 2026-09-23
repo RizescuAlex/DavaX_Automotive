@@ -44,7 +44,11 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    # Migrate before serving: a fresh clone has an empty database, and every
+    # auth call 500s on a missing relation until `alembic upgrade head` has run.
+    # Postgres is already healthy here via depends_on, and the upgrade is a
+    # no-op once the schema is current, so this is safe on every restart.
+    command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
 
   frontend:
     build:
