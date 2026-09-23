@@ -1,31 +1,22 @@
+/*
+   The page's own names, pointed at the cockpit's design tokens (index.css),
+   so it follows the day/night toggle instead of carrying a second palette.
+*/
 .vehicle-settings-shell {
-  --settings-page-bg: #eef0f3;
-  --settings-card-bg: #ffffff;
-  --settings-section-bg: #ffffff;
-  --settings-text: #1f2937;
-  --settings-heading: #1d2939;
-  --settings-muted: #667085;
-  --settings-border: #e1e5ea;
-  --settings-input-bg: #ffffff;
-  --settings-input-border: #d0d5dd;
-  --settings-button: #1683f7;
+  --settings-page-bg: var(--surface-base);
+  --settings-card-bg: var(--surface-primary);
+  --settings-section-bg: var(--surface-secondary);
+  --settings-text: var(--text-primary);
+  --settings-heading: var(--text-primary);
+  --settings-muted: var(--text-muted);
+  --settings-border: var(--border-subtle);
+  --settings-input-bg: var(--surface-sunken);
+  --settings-input-border: var(--border-default);
+  --settings-button: var(--accent-primary);
 
   min-height: 100vh;
   background: var(--settings-page-bg);
   color: var(--settings-text);
-}
-
-html[data-theme="dark"] .vehicle-settings-shell {
-  --settings-page-bg: #1f2e3b;
-  --settings-card-bg: #2e4355;
-  --settings-section-bg: #344b5f;
-  --settings-text: #edf4fb;
-  --settings-heading: #ffffff;
-  --settings-muted: #b7cce0;
-  --settings-border: #536d83;
-  --settings-input-bg: #2c4152;
-  --settings-input-border: #66829a;
-  --settings-button: #80baf2;
 }
 
 .vehicle-settings-page {
@@ -39,7 +30,7 @@ html[data-theme="dark"] .vehicle-settings-shell {
   background: var(--settings-card-bg);
   border: 1px solid var(--settings-border);
   border-radius: 20px;
-  box-shadow: 0 8px 24px rgba(31, 41, 55, 0.08);
+  box-shadow: var(--shadow-lg);
 }
 
 .vehicle-settings-header {
@@ -173,7 +164,8 @@ html[data-theme="dark"] .vehicle-settings-shell {
 .settings-save-button {
   width: fit-content;
   padding: 12px 22px;
-  color: #ffffff;
+  color: var(--on-accent);
+  font-weight: var(--font-weight-semibold);
   background: var(--settings-button);
   border: 0;
   border-radius: 8px;
@@ -194,134 +186,290 @@ html[data-theme="dark"] .vehicle-settings-shell {
 }
 
 .settings-error {
-  color: #b42318;
-  background: #fee4e2;
+  color: var(--color-error);
+  background: var(--color-error-light);
 }
 
 .settings-success {
-  color: #027a48;
-  background: #d1fadf;
+  color: var(--color-success);
+  background: var(--color-success-light);
 }
 
-/* Interior lighting */
-
-.lighting-layout {
-  display: flex;
-  align-items: flex-start;
-  gap: 32px;
-  width: 100%;
+.settings-checks {
+  display: grid;
+  align-content: start;
+  gap: var(--space-1);
 }
 
-.mini-car-preview {
+.settings-checks .settings-checkbox {
+  margin: 0;
+}
+
+/* Ambient lighting — styled as a cockpit surface, in the same tokens as the
+   dock and the climate panel */
+
+.ambient {
+  display: grid;
+  grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.ambient-stage {
   position: relative;
-  flex: 0 0 420px;
-  width: 420px;
-  height: 280px;
+  aspect-ratio: 200 / 320;
+  width: 100%;
   overflow: hidden;
-  background: #172534;
-  border: 1px solid var(--settings-border);
-  border-radius: 24px;
+  background: radial-gradient(ellipse at 50% 45%, var(--surface-tertiary), var(--surface-sunken) 72%);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  box-shadow: inset 0 0 28px var(--stage-inset);
 }
 
-.mini-car-image {
+.ambient-cabin {
   position: absolute;
   inset: 0;
-  z-index: 1;
-  display: block;
-  width: 100% !important;
-  height: 100% !important;
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  pointer-events: none;
+  width: 100%;
+  height: 100%;
 }
 
-.light-zone-map {
+.ambient-body {
+  fill: var(--surface-primary);
+  stroke: var(--border-strong);
+  stroke-width: 2;
+}
+
+.ambient-glass {
+  fill: var(--surface-sunken);
+  stroke: var(--border-default);
+  stroke-width: 1.5;
+}
+
+.ambient-seat {
+  fill: var(--surface-tertiary);
+  stroke: var(--border-default);
+  stroke-width: 1.5;
+}
+
+.ambient-trim {
+  fill: var(--surface-hover);
+}
+
+/* The light: a soft wash in the zone's colour, scaled by its brightness.
+   Screen blending lets overlapping zones mix the way real light does. */
+.ambient-glow {
   position: absolute;
-  top: 25%;
-  left: 17%;
-  z-index: 5;
-  width: 66%;
-  height: 48%;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  grid-template-areas:
-    "rear-overhead rear-overhead front-left-overhead front-right-overhead"
-    "rear-left-leg rear-right-leg driver-leg front-passenger-leg";
-  align-items: center;
-  justify-items: center;
-  padding: 8px;
-  border-radius: 28px;
-  background: rgba(23, 37, 52, 0.3);
-  pointer-events: auto;
+  width: 46%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--zone-color) 0%, transparent 65%);
+  opacity: calc(var(--zone-strength) * 0.75);
+  transform: translate(-50%, -50%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  transition: opacity var(--transition-slow), background var(--transition-slow);
 }
 
-.light-zone {
-  position: relative !important;
-  inset: auto !important;
-  z-index: 10;
-  width: 32px;
-  height: 32px;
+/* Screen blending vanishes on a pale ground; in daylight the wash sits on
+   top as a tint instead. */
+:root[data-theme="light"] .ambient-glow {
+  mix-blend-mode: multiply;
+  opacity: calc(var(--zone-strength) * 0.55);
+}
+
+.ambient-spot {
+  position: absolute;
+  width: 22px;
+  height: 22px;
   padding: 0;
-  background: #6b7280;
-  border: 2px solid rgba(255, 255, 255, 0.9);
+  transform: translate(-50%, -50%);
+  background: var(--surface-sunken);
+  border: 2px solid var(--border-strong);
   border-radius: 50%;
   cursor: pointer;
-  pointer-events: auto !important;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: transform var(--transition-fast), border-color var(--transition-fast),
+    box-shadow var(--transition-fast), background var(--transition-fast);
 }
 
-.light-zone:hover,
-.light-zone.selected {
-  transform: scale(1.2);
-  border-color: var(--settings-button);
-  box-shadow: 0 0 0 4px rgba(22, 131, 247, 0.25);
+.ambient-spot:hover {
+  transform: translate(-50%, -50%) scale(1.15);
+  border-color: var(--text-secondary);
 }
 
-.light-zone.enabled {
-  background: #ffd166;
-  box-shadow: 0 0 18px rgba(255, 209, 102, 0.9);
+.ambient-spot:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 3px;
 }
 
-.light-zone-rear_overhead {
-  grid-area: rear-overhead;
+.ambient-spot.on {
+  background: var(--zone-color);
+  border-color: var(--surface-primary);
+  box-shadow: 0 0 12px var(--zone-color);
 }
 
-.light-zone-front_left_overhead {
-  grid-area: front-left-overhead;
+.ambient-spot.selected {
+  transform: translate(-50%, -50%) scale(1.2);
+  box-shadow: 0 0 0 3px var(--accent-primary), 0 0 14px var(--accent-primary-glow);
 }
 
-.light-zone-front_right_overhead {
-  grid-area: front-right-overhead;
+.ambient-count {
+  position: absolute;
+  left: 50%;
+  bottom: var(--space-2);
+  transform: translateX(-50%);
+  padding: 2px var(--space-2);
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--text-muted);
+  background: var(--surface-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
 }
 
-.light-zone-rear_left_leg {
-  grid-area: rear-left-leg;
+/* Controls — the climate card's header pattern: icon, uppercase title, pill */
+.ambient-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-4);
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
 }
 
-.light-zone-rear_right_leg {
-  grid-area: rear-right-leg;
+.ambient-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
-.light-zone-driver_leg {
-  grid-area: driver-leg;
+.ambient-head-icon {
+  flex-shrink: 0;
+  color: var(--accent-primary);
 }
 
-.light-zone-front_passenger_leg {
-  grid-area: front-passenger-leg;
-}
-
-.light-controls {
-  display: grid;
+.ambient-head h3 {
   flex: 1;
-  min-width: 220px;
-  gap: 18px;
+  margin: 0;
+  font-size: var(--font-size-md);
+  color: var(--text-primary);
 }
 
-.light-controls h3,
+.ambient-toggle {
+  min-width: 52px;
+  min-height: 28px;
+  padding: var(--space-1) var(--space-3);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.ambient-toggle:hover {
+  color: var(--text-secondary);
+  border-color: var(--border-strong);
+}
+
+.ambient-toggle.on {
+  color: var(--on-accent);
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.ambient-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.ambient-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.ambient-value {
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+.ambient-field input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent-primary);
+  cursor: pointer;
+}
+
+.ambient-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.ambient-swatch {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  background: var(--swatch);
+  border: 2px solid var(--border-default);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.ambient-swatch:hover {
+  transform: scale(1.1);
+}
+
+.ambient-swatch:focus-visible,
+.ambient-swatch-custom:focus-within {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.ambient-swatch[aria-checked="true"],
+.ambient-swatch-custom.custom-active {
+  border-color: var(--surface-primary);
+  box-shadow: 0 0 0 2px var(--accent-primary);
+}
+
+/* The custom swatch is a colour wheel until a custom colour is chosen */
+.ambient-swatch-custom {
+  background: conic-gradient(#ff5f5f, #ffd166, #7fe08a, #5ee0d0, #88bdf2, #b58cff, #ff7ac6, #ff5f5f);
+}
+
+.ambient-swatch-custom.custom-active {
+  background: var(--swatch);
+}
+
+.ambient-swatch-custom input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.ambient-apply {
+  align-self: flex-start;
+}
+
 .mirror-card h3 {
   margin: 0;
   color: var(--settings-heading);
@@ -345,15 +493,12 @@ html[data-theme="dark"] .vehicle-settings-shell {
 /* Responsive layout */
 
 @media (max-width: 760px) {
-  .lighting-layout {
-    flex-direction: column;
+  .ambient {
+    grid-template-columns: 1fr;
   }
 
-  .mini-car-preview {
-    flex-basis: auto;
-    width: 100%;
-    max-width: 420px;
-    height: 260px;
+  .ambient-stage {
+    max-width: 240px;
     margin: 0 auto;
   }
 }
@@ -365,9 +510,5 @@ html[data-theme="dark"] .vehicle-settings-shell {
 
   .vehicle-settings-card {
     padding: 22px;
-  }
-
-  .mini-car-preview {
-    height: 230px;
   }
 }

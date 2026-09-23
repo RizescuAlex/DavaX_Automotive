@@ -142,19 +142,7 @@ export const useAppStore = create((set, get) => ({
     set({ _climateLoading: true });
     try {
       const settings = await getVehicleSettings();
-      const climate = settings?.climate_settings;
-      if (climate) {
-        set({
-          targetTemp: climate.target_temperature ?? 21.5,
-          fanSpeed: climate.fan_speed,
-          acLevel: climate.ac_level ?? 2,
-          autoMode: climate.auto_mode,
-          seatHeatLeft: climate.seat_heat_left ?? 0,
-          seatHeatRight: climate.seat_heat_right ?? 0,
-          frontDefrost: climate.front_defrost ?? false,
-          rearDefrost: climate.rear_defrost ?? false,
-        });
-      }
+      get().applyClimateSettings(settings?.climate_settings);
     } catch (error) {
       // A missing profile or an offline backend should not break the dashboard;
       // the defaults above are a perfectly usable starting point.
@@ -162,6 +150,28 @@ export const useAppStore = create((set, get) => ({
     } finally {
       set({ climateLoaded: true, _climateLoading: false });
     }
+  },
+
+  /**
+   * Take a climate_settings record the backend already holds.
+   *
+   * loadClimate runs once per session, so without this a save on the Vehicle
+   * Preferences page would leave the dock showing the old values until reload.
+   * Nothing is written back: the record came from the server.
+   */
+  applyClimateSettings: (climate) => {
+    if (!climate) return;
+    set({
+      targetTemp: climate.target_temperature ?? CLIMATE_DEFAULTS.targetTemp,
+      fanSpeed: climate.fan_speed ?? CLIMATE_DEFAULTS.fanSpeed,
+      acLevel: climate.ac_level ?? CLIMATE_DEFAULTS.acLevel,
+      autoMode: climate.auto_mode ?? CLIMATE_DEFAULTS.autoMode,
+      seatHeatLeft: climate.seat_heat_left ?? 0,
+      seatHeatRight: climate.seat_heat_right ?? 0,
+      frontDefrost: climate.front_defrost ?? false,
+      rearDefrost: climate.rear_defrost ?? false,
+      climateLoaded: true,
+    });
   },
 
   /** Apply a change locally, then persist it once the driver stops adjusting. */

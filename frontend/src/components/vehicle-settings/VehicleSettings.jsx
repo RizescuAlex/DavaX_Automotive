@@ -1,22 +1,12 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
-import { apiFetch } from "../../config/api";
 import { useAuth } from "../../auth/useAuth";
-import { DESIGN_PREVIEW } from "../../config/devPreview";
-import carIso from "../../assets/car-top-view.svg";
+import { getVehicleSettings, saveVehicleSettings } from "../../api/vehicle";
+import { useAppStore, CLIMATE_LIMITS } from "../../store";
 import TopBar from "../dashboard/TopBar";
+import AmbientLighting, { LIGHT_ZONES } from "./AmbientLighting";
 import "./VehicleSettings.css";
-
-const LIGHT_ZONES = [
-  ["front_left_overhead", "Front-left overhead"],
-  ["front_right_overhead", "Front-right overhead"],
-  ["driver_leg", "Driver leg"],
-  ["front_passenger_leg", "Front passenger leg"],
-  ["rear_left_leg", "Rear-left leg"],
-  ["rear_right_leg", "Rear-right leg"],
-  ["rear_overhead", "Rear overhead"],
-];
 
 const DEFAULT_LIGHT_ZONE = {
   enabled: false,
@@ -30,6 +20,8 @@ const DEFAULT_SETTINGS = {
   climate_settings: {
     target_temperature: 21.5,
     fan_speed: 2,
+    ac_level: 2,
+    auto_mode: true,
     seat_heat_left: 0,
     seat_heat_right: 0,
     front_defrost: false,
@@ -64,7 +56,7 @@ const DEFAULT_SETTINGS = {
 
   lighting_settings: {
     interior: Object.fromEntries(
-      LIGHT_ZONES.map(([id]) => [id, { ...DEFAULT_LIGHT_ZONE }])
+      LIGHT_ZONES.map(({ id }) => [id, { ...DEFAULT_LIGHT_ZONE }])
     ),
 
     exterior: {
@@ -97,7 +89,7 @@ function mergeLightingSettings(data) {
     ...savedLighting,
 
     interior: Object.fromEntries(
-      LIGHT_ZONES.map(([id]) => [
+      LIGHT_ZONES.map(({ id }) => [
         id,
         {
           ...DEFAULT_LIGHT_ZONE,
@@ -125,6 +117,7 @@ function mergeLightingSettings(data) {
 
 export default function VehicleSettings() {
   const { user, logout } = useAuth();
+  const applyClimateSettings = useAppStore((s) => s.applyClimateSettings);
 
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [selectedLight, setSelectedLight] = useState("driver_leg");
@@ -135,13 +128,8 @@ export default function VehicleSettings() {
 
   useEffect(() => {
     async function loadSettings() {
-      if (DESIGN_PREVIEW) {
-        setLoading(false);
-        return;
-      }
-
       try {
-        const data = await apiFetch("/vehicle-settings/me");
+        const data = await getVehicleSettings();
 
         if (data) {
           setSettings({
@@ -201,12 +189,12 @@ export default function VehicleSettings() {
     }));
   };
 
-  const updateMirror = (mirror, field, value) => {
+  const updateClimateFlag = (field, value) => {
     setSettings((previous) => ({
       ...previous,
-      [mirror]: {
-        ...previous[mirror],
-        [field]: Number(value),
+      climate_settings: {
+        ...previous.climate_settings,
+        [field]: value,
       },
     }));
   };
@@ -225,6 +213,24 @@ export default function VehicleSettings() {
         },
       },
     }));
+  };
+
+  const applyLightToAll = () => {
+    setSettings((previous) => {
+      const { color, brightness } = previous.lighting_settings.interior[selectedLight];
+      return {
+        ...previous,
+        lighting_settings: {
+          ...previous.lighting_settings,
+          interior: Object.fromEntries(
+            Object.entries(previous.lighting_settings.interior).map(([id, zone]) => [
+              id,
+              { ...zone, color, brightness },
+            ])
+          ),
+        },
+      };
+    });
   };
 
   const updateExteriorLight = (group, field, value) => {
@@ -251,12 +257,10 @@ export default function VehicleSettings() {
     setError("");
 
     try {
-      if (!DESIGN_PREVIEW) {
-        await apiFetch("/vehicle-settings/me", {
-          method: "PUT",
-          body: JSON.stringify(settings),
-        });
-      }
+      const saved = await saveVehicleSettings(settings);
+      // The dock holds its own copy of climate; hand it the saved one so it
+      // does not keep showing, and later re-save, what was there before.
+      applyClimateSettings(saved?.climate_settings ?? settings.climate_settings);
 
       setMessage("Vehicle preferences saved.");
     } catch (err) {
@@ -265,10 +269,6 @@ export default function VehicleSettings() {
       setSaving(false);
     }
   };
-
-  const selectedZone =
-    settings.lighting_settings.interior[selectedLight] ||
-    DEFAULT_LIGHT_ZONE;
 
   if (loading) {
     return (
@@ -314,9 +314,9 @@ export default function VehicleSettings() {
                 Target temperature
                 <input
                   type="number"
-                  min="15"
-                  max="30"
-                  step="0.5"
+                  min={CLIMATE_LIMITS.TEMP_MIN}
+                  max={CLIMATE_LIMITS.TEMP_MAX}
+                  step={CLIMATE_LIMITS.TEMP_STEP}
                   value={settings.climate_settings.target_temperature}
                   onChange={(event) =>
                     updateNestedSetting(
@@ -333,7 +333,7 @@ export default function VehicleSettings() {
                 <input
                   type="range"
                   min="0"
-                  max="5"
+                  max={CLIMATE_LIMITS.FAN_MAX}
                   value={settings.climate_settings.fan_speed}
                   onChange={(event) =>
                     updateNestedSetting(
@@ -343,7 +343,7 @@ export default function VehicleSettings() {
                     )
                   }
                 />
-                <span>{settings.climate_settings.fan_speed}/5</span>
+                <span>{settings.climate_settings.fan_speed}/{CLIMATE_LIMITS.FAN_MAX}</span>
               </label>
 
               <div className="settings-grid">
@@ -385,94 +385,60 @@ export default function VehicleSettings() {
                   </select>
                 </label>
               </div>
+
+              {/* The dock's own settings. They live in the same
+                  climate_settings record, so they belong here too. */}
+              <div className="settings-grid">
+                <label className="settings-field">
+                  Air conditioning
+                  <select
+                    value={settings.climate_settings.ac_level}
+                    onChange={(event) =>
+                      updateNestedSetting(
+                        "climate_settings",
+                        "ac_level",
+                        event.target.value
+                      )
+                    }
+                  >
+                    <option value="0">Off</option>
+                    <option value="1">Level 1</option>
+                    <option value="2">Level 2</option>
+                    <option value="3">Level 3</option>
+                  </select>
+                </label>
+
+                <div className="settings-checks">
+                  {[
+                    ["auto_mode", "Automatic climate"],
+                    ["front_defrost", "Front defogger"],
+                    ["rear_defrost", "Rear defogger"],
+                  ].map(([field, label]) => (
+                    <label key={field} className="settings-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(settings.climate_settings[field])}
+                        onChange={(event) =>
+                          updateClimateFlag(field, event.target.checked)
+                        }
+                      />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              </div>
             </section>
 
             <section className="settings-section">
-              <h2>Interior lighting</h2>
+              <h2>Ambient lighting</h2>
 
-              <div className="lighting-layout">
-                <div className="mini-car-preview">
-                  <img
-                    src={carIso}
-                    alt="Vehicle lighting preview"
-                    className="mini-car-image"
-                  />
-
-                  <div className="light-zone-map">
-                    {LIGHT_ZONES.map(([id, label]) => (
-                      <button
-                        key={id}
-                        type="button"
-                        className={`light-zone light-zone-${id} ${
-                          selectedLight === id ? "selected" : ""
-                        } ${
-                          settings.lighting_settings.interior[id].enabled
-                            ? "enabled"
-                            : ""
-                        }`}
-                        title={label}
-                        aria-label={label}
-                        aria-pressed={selectedLight === id}
-                        onClick={() => setSelectedLight(id)}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                <div className="light-controls">
-                  <h3>
-                    {LIGHT_ZONES.find(([id]) => id === selectedLight)?.[1]}
-                  </h3>
-
-                  <label className="settings-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={selectedZone.enabled}
-                      onChange={(event) =>
-                        updateLightZone(
-                          selectedLight,
-                          "enabled",
-                          event.target.checked
-                        )
-                      }
-                    />
-                    Light enabled
-                  </label>
-
-                  <label className="settings-field">
-                    Color
-                    <input
-                      type="color"
-                      value={selectedZone.color}
-                      onChange={(event) =>
-                        updateLightZone(
-                          selectedLight,
-                          "color",
-                          event.target.value
-                        )
-                      }
-                    />
-                  </label>
-
-                  <label className="settings-field">
-                    Brightness
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={selectedZone.brightness}
-                      onChange={(event) =>
-                        updateLightZone(
-                          selectedLight,
-                          "brightness",
-                          event.target.value
-                        )
-                      }
-                    />
-                    <span>{selectedZone.brightness}%</span>
-                  </label>
-                </div>
-              </div>
+              <AmbientLighting
+                interior={settings.lighting_settings.interior}
+                selected={selectedLight}
+                onSelect={setSelectedLight}
+                onChange={updateLightZone}
+                onApplyToAll={applyLightToAll}
+              />
             </section>
 
             <section className="settings-section">
@@ -652,7 +618,7 @@ export default function VehicleSettings() {
                         max="30"
                         value={settings[mirror].horizontal_angle}
                         onChange={(event) =>
-                          updateMirror(
+                          updateNestedSetting(
                             mirror,
                             "horizontal_angle",
                             event.target.value
@@ -670,7 +636,7 @@ export default function VehicleSettings() {
                         max="20"
                         value={settings[mirror].vertical_angle}
                         onChange={(event) =>
-                          updateMirror(
+                          updateNestedSetting(
                             mirror,
                             "vertical_angle",
                             event.target.value
