@@ -1410,7 +1410,8 @@ a:hover {
   );
 }
 
-/* Pool of light under the nose when the headlights are on */
+/* Pool of light under the nose. Its opacity is set inline from the
+   headlight brightness preference, or dimly for daytime running lights. */
 .car-glow {
   position: absolute;
   z-index: 1;
@@ -1429,7 +1430,6 @@ a:hover {
   transition: opacity var(--transition-slow);
 }
 
-.car-glow.on { opacity: 1; }
 
 .car-readout {
   display: flex;
@@ -1477,6 +1477,32 @@ a:hover {
   background: var(--accent-primary-light);
   border-color: var(--accent-primary);
   color: var(--accent-primary);
+}
+
+.car-lamp { position: relative; }
+
+.car-lamp-auto {
+  position: absolute;
+  right: 3px;
+  bottom: 1px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+
+/* Fog lamps are telltales that only appear while lit. Green for the front
+   and amber for the rear, the colours the real warning lights use. */
+.car-lamp.fog {
+  background: var(--color-success-light);
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.car-lamp.fog.rear {
+  background: var(--color-warning-light);
+  border-color: var(--color-warning);
+  color: var(--color-warning);
 }
 
 .car-lamp.blink {
@@ -1740,17 +1766,19 @@ a:hover {
   border-color: var(--accent-primary);
 }
 
-/* Hazards get the warning colour rather than the accent: it is the one
-   control here that means "something is wrong". */
+/* Hazards go red rather than the accent or the amber warning colour: it is
+   the one control here that means "something is wrong", and red is the colour
+   moulded into the button on a real dashboard. */
 .dock-btn.alert {
-  background: var(--color-warning-light);
-  color: var(--color-warning);
-  border-color: var(--color-warning);
+  background: var(--color-error-light);
+  color: var(--color-error);
+  border-color: var(--color-error);
   animation: signal-blink 700ms steps(1, end) infinite;
 }
 
-/* Seat heat is a level, not a toggle, so the button carries its own count */
-.dock-btn.seat { position: relative; }
+/* A small letter in the corner of a dock button — "A" while the headlights
+   are on automatic */
+.dock-btn.has-badge { position: relative; }
 
 .dock-level {
   position: absolute;
@@ -1920,4 +1948,168 @@ a:hover {
 @keyframes wiper-sweep {
   0%, 100% { transform: rotate(0deg); }
   50% { transform: rotate(38deg); }
+}
+
+/* ── Assistant ──
+   Hangs from the top-right of the map. It is opened from the top bar, not from
+   a floating button: as a round control in the bottom-right corner it sat on
+   top of Google's zoom buttons and ate the clicks meant for them.
+
+   The top offset clears the search bar — 44px tall at var(--space-3) — so the
+   two never collide, whatever the window width. Anchoring by the centred
+   search's horizontal position would only hold on a wide screen. */
+.assistant-panel {
+  position: absolute;
+  z-index: 6;
+  right: var(--space-4);
+  top: calc(var(--space-3) * 2 + 44px);
+  width: min(360px, calc(100% - var(--space-8)));
+  /* Capped rather than fixed: the log grows with the conversation but must
+     stop short of Google's attribution strip along the foot of the map. */
+  max-height: min(420px, calc(100% - var(--space-3) * 2 - 44px - var(--space-8)));
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--surface-primary);
+  overflow: hidden;
+}
+
+.assistant-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.assistant-head-icon { color: var(--accent-primary); flex-shrink: 0; }
+
+.assistant-head-title {
+  flex: 1;
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.assistant-close {
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.assistant-close:hover { color: var(--text-secondary); }
+
+.assistant-log {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.assistant-hint {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.assistant-line {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  line-height: 1.45;
+  max-width: 85%;
+}
+
+.assistant-line-user {
+  align-self: flex-end;
+  background: var(--accent-primary);
+  color: var(--surface-base);
+}
+
+.assistant-line-assistant {
+  align-self: flex-start;
+  background: var(--surface-tertiary);
+  color: var(--text-primary);
+}
+
+.assistant-line-busy {
+  align-self: flex-start;
+  color: var(--text-muted);
+}
+
+.assistant-input {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.assistant-input input {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+}
+
+.assistant-input input:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+}
+
+.assistant-input button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-tertiary);
+  color: var(--accent-primary);
+  cursor: pointer;
+}
+
+.assistant-input button:disabled { opacity: 0.45; cursor: default; }
+.assistant-input button:not(:disabled):hover { border-color: var(--border-strong); }
+
+/* Push-to-talk. Hidden entirely where the Web Speech API is missing, so the
+   row collapses to input + send rather than showing a dead control. */
+.assistant-mic {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  flex-shrink: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-tertiary);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.assistant-mic:disabled { opacity: 0.45; cursor: default; }
+.assistant-mic:not(:disabled):hover { border-color: var(--border-strong); }
+
+.assistant-mic.on {
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+  animation: assistant-listening 1.2s ease-in-out infinite;
+}
+
+@keyframes assistant-listening {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
 }

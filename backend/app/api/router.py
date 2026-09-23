@@ -1,6 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1 import auth, users, onboarding, navigation, spotify, vehicle_settings
-from app.api.v1 import auth, users, onboarding, navigation, spotify, vehicles, vehicle_specs, preferences
+from app.api.v1 import assistant, auth, users, onboarding, navigation, spotify, vehicle_settings, vehicles, vehicle_specs, preferences
 
 api_router = APIRouter()
 
@@ -10,6 +9,7 @@ api_router.include_router(onboarding.router, prefix="/onboarding", tags=["onboar
 api_router.include_router(navigation.router, prefix="/navigation", tags=["navigation"])
 api_router.include_router(spotify.router, prefix="/spotify", tags=["spotify"])
 api_router.include_router(vehicle_settings.router, prefix="/vehicle-settings", tags=["vehicle-settings"],)
+api_router.include_router(assistant.router, prefix="/assistant", tags=["assistant"])
 api_router.include_router(vehicles.router, prefix="/vehicles", tags=["vehicles"])
 api_router.include_router(vehicle_specs.router, prefix="/vehicle-specs", tags=["vehicle-specs"])
 api_router.include_router(preferences.router, prefix="/preferences", tags=["preferences"])

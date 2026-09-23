@@ -62,6 +62,32 @@ const CLIMATE_DEFAULTS = {
   rearDefrost: false,
 };
 
+/**
+ * Exterior lights as the Vehicle Preferences page stores them in
+ * lighting_settings.exterior. The page seeds its form from these too, so the
+ * two cannot drift apart on what "never set" means.
+ */
+export const EXTERIOR_LIGHT_DEFAULTS = {
+  headlights: {
+    brightness: 80,
+    automatic: true,
+    daytime_running: true,
+    follow_me_home: false,
+    fog_lights: false,
+  },
+  rear_lights: {
+    brightness: 80,
+    automatic: true,
+    rear_fog_lights: false,
+  },
+};
+
+/**
+ * Stand-in for the dusk sensor behind automatic headlights. There is no light
+ * sensor to read, so the clock decides: dark from 19:00 to 07:00.
+ */
+const isDark = (date = new Date()) => date.getHours() >= 19 || date.getHours() < 7;
+
 /** Writes are debounced so holding the +/- buttons does not spam the API. */
 const CLIMATE_SAVE_DELAY = 700;
 
@@ -114,44 +140,74 @@ export const useAppStore = create((set, get) => ({
 
   toggleTheme: () => get().setTheme(get().theme === "dark" ? "light" : "dark"),
 
+  // ── Assistant ─────────────────────────────────────────────────────────────
+  // Open state lives here because the button that opens the panel is in the
+  // top bar while the panel itself is over the map — two siblings that would
+  // otherwise have to thread a prop through Dashboard to reach each other.
+  assistantOpen: false,
+
+  setAssistantOpen: (open) => set({ assistantOpen: open }),
+
+  toggleAssistant: () => set((s) => ({ assistantOpen: !s.assistantOpen })),
+
   // ── Climate ───────────────────────────────────────────────────────────────
   // Target/fan/A-C are the driver's settings and persist to the backend.
   // cabinTemp is simulated: it drifts toward the target, faster with the fan up.
   ...CLIMATE_DEFAULTS,
   cabinTemp: 19.5,
-  climateLoaded: false,
-  _climateLoading: false,
+  settingsLoaded: false,
+  _settingsLoading: false,
   _climateSaveTimer: null,
 
-  /** Seed climate from the backend once per session. Falls back to defaults. */
-  loadClimate: async () => {
+  /**
+   * Seed climate and exterior lighting from the backend once per session.
+   * Falls back to defaults.
+   */
+  loadVehicleSettings: async () => {
     // Set synchronously, before the first await: StrictMode mounts effects
     // twice in dev, and a flag set in the finally block would let both
     // invocations past the guard and fire two identical requests.
-    if (get().climateLoaded || get()._climateLoading) return;
-    set({ _climateLoading: true });
+    if (get().settingsLoaded || get()._settingsLoading) return;
+    set({ _settingsLoading: true });
     try {
       const settings = await getVehicleSettings();
-      const climate = settings?.climate_settings;
-      if (climate) {
-        set({
-          targetTemp: climate.target_temperature ?? 21.5,
-          fanSpeed: climate.fan_speed,
-          acLevel: climate.ac_level ?? 2,
-          autoMode: climate.auto_mode,
-          seatHeatLeft: climate.seat_heat_left ?? 0,
-          seatHeatRight: climate.seat_heat_right ?? 0,
-          frontDefrost: climate.front_defrost ?? false,
-          rearDefrost: climate.rear_defrost ?? false,
-        });
-      }
+      get().applyVehicleSettings(settings);
     } catch (error) {
       // A missing profile or an offline backend should not break the dashboard;
       // the defaults above are a perfectly usable starting point.
-      console.error("Could not load climate settings", error);
+      console.error("Could not load vehicle settings", error);
     } finally {
-      set({ climateLoaded: true, _climateLoading: false });
+      set({ settingsLoaded: true, _settingsLoading: false });
     }
+  },
+
+  /**
+   * Take a settings record the backend already holds.
+   *
+   * loadVehicleSettings runs once per session, so the Vehicle Preferences page
+   * calls this after it saves; otherwise the cockpit would keep showing the old
+   * values until a reload. Nothing is written back: the record came from the
+   * server.
+   */
+  applyVehicleSettings: (settings) => {
+    if (!settings) return;
+    get().applyClimateSettings(settings.climate_settings);
+    get().applyLightingSettings(settings.lighting_settings);
+    set({ settingsLoaded: true });
+  },
+
+  applyClimateSettings: (climate) => {
+    if (!climate) return;
+    set({
+      targetTemp: climate.target_temperature ?? CLIMATE_DEFAULTS.targetTemp,
+      fanSpeed: climate.fan_speed ?? CLIMATE_DEFAULTS.fanSpeed,
+      acLevel: climate.ac_level ?? CLIMATE_DEFAULTS.acLevel,
+      autoMode: climate.auto_mode ?? CLIMATE_DEFAULTS.autoMode,
+      seatHeatLeft: climate.seat_heat_left ?? 0,
+      seatHeatRight: climate.seat_heat_right ?? 0,
+      frontDefrost: climate.front_defrost ?? false,
+      rearDefrost: climate.rear_defrost ?? false,
+    });
   },
 
   /** Apply a change locally, then persist it once the driver stops adjusting. */
@@ -180,6 +236,67 @@ export const useAppStore = create((set, get) => ({
     }, CLIMATE_SAVE_DELAY);
 
     set({ _climateSaveTimer: timer });
+  },
+
+  /**
+   * Apply absolute climate values, clamped.
+   *
+   * The adjust and cycle actions below clamp their own deltas, but
+   * _commitClimate does not — it trusts its caller. The assistant sends
+   * absolutes ("set it to 23"), and a model asking for 40 degrees must not be
+   * able to write 40, so the clamping lives here rather than in the
+   * dispatcher: one place, whether the value came from a button or a sentence.
+   *
+   * Keys are the store's own (targetTemp, not target_temperature). Undefined
+   * fields are left untouched, so a request that mentions only temperature
+   * does not reset the fan.
+   */
+  setClimate: (patch) => {
+    const next = {};
+
+    if (patch.targetTemp !== undefined) {
+      next.targetTemp = clamp(
+        Math.round(patch.targetTemp * 2) / 2,
+        CLIMATE_LIMITS.TEMP_MIN,
+        CLIMATE_LIMITS.TEMP_MAX
+      );
+    }
+    if (patch.fanSpeed !== undefined) {
+      next.fanSpeed = clamp(
+        Math.round(patch.fanSpeed),
+        CLIMATE_LIMITS.FAN_MIN,
+        CLIMATE_LIMITS.FAN_MAX
+      );
+    }
+    if (patch.acLevel !== undefined) {
+      next.acLevel = clamp(Math.round(patch.acLevel), 0, CLIMATE_LIMITS.AC_MAX);
+    }
+    if (patch.seatHeatLeft !== undefined) {
+      next.seatHeatLeft = clamp(
+        Math.round(patch.seatHeatLeft),
+        0,
+        CLIMATE_LIMITS.SEAT_HEAT_MAX
+      );
+    }
+    if (patch.seatHeatRight !== undefined) {
+      next.seatHeatRight = clamp(
+        Math.round(patch.seatHeatRight),
+        0,
+        CLIMATE_LIMITS.SEAT_HEAT_MAX
+      );
+    }
+    if (patch.autoMode !== undefined) next.autoMode = Boolean(patch.autoMode);
+    if (patch.frontDefrost !== undefined) next.frontDefrost = Boolean(patch.frontDefrost);
+    if (patch.rearDefrost !== undefined) next.rearDefrost = Boolean(patch.rearDefrost);
+
+    // Setting the fan by hand, or cutting the compressor, drops out of auto —
+    // the same rule adjustFanSpeed and cycleAcLevel follow. An explicit
+    // auto_mode in the same breath wins over the implication.
+    if (patch.autoMode === undefined && (next.fanSpeed !== undefined || next.acLevel === 0)) {
+      next.autoMode = false;
+    }
+
+    if (Object.keys(next).length > 0) get()._commitClimate(next);
   },
 
   adjustTargetTemp: (delta) =>
@@ -223,34 +340,107 @@ export const useAppStore = create((set, get) => ({
     get()._commitClimate(autoMode ? { autoMode, acLevel: 2, fanSpeed: 3 } : { autoMode });
   },
 
+  // ── Exterior lighting ─────────────────────────────────────────────────────
+  // The preferences are set on the Vehicle Preferences page and only read
+  // here; the cockpit never writes them back.
+  exteriorLights: EXTERIOR_LIGHT_DEFAULTS,
+
+  // With automatic headlights, a tap in the dock overrides the sensor for the
+  // rest of the session, and a second tap hands control back — the AUTO
+  // position on a real light stalk. null means "following the sensor".
+  headlightsOverride: null,
+
+  applyLightingSettings: (lighting) => {
+    const exterior = lighting?.exterior ?? {};
+    set({
+      exteriorLights: {
+        headlights: {
+          ...EXTERIOR_LIGHT_DEFAULTS.headlights,
+          ...(exterior.headlights ?? {}),
+        },
+        rear_lights: {
+          ...EXTERIOR_LIGHT_DEFAULTS.rear_lights,
+          ...(exterior.rear_lights ?? {}),
+        },
+      },
+      // A new preference is a fresh instruction; an old override should not
+      // outlive it.
+      headlightsOverride: null,
+    });
+    get()._syncHeadlights();
+  },
+
+  /** In automatic mode, put the headlights where the sensor (or override) says. */
+  _syncHeadlights: () => {
+    const { exteriorLights, headlightsOverride, headlightsOn } = get();
+    if (!exteriorLights.headlights.automatic) return;
+    const on = headlightsOverride ?? isDark();
+    if (on !== headlightsOn) set({ headlightsOn: on });
+  },
+
   // ── Vehicle Simulation ────────────────────────────────────────────────────
   speed: 0,
   fuelLevel: 78,
   engineTemp: 88,
-  headlightsOn: true,
+  // Automatic headlights are the default preference, so start where the
+  // sensor would put them rather than always on.
+  headlightsOn: isDark(),
   leftSignal: false,
   rightSignal: false,
   hazardsOn: false,
   wipersOn: false,
   _simInterval: null,
 
-  toggleHeadlights: () => set((s) => ({ headlightsOn: !s.headlightsOn })),
-  toggleWipers: () => set((s) => ({ wipersOn: !s.wipersOn })),
-  toggleLeftSignal: () =>
-    set((s) => ({ leftSignal: !s.leftSignal, rightSignal: false, hazardsOn: false })),
-  toggleRightSignal: () =>
-    set((s) => ({ rightSignal: !s.rightSignal, leftSignal: false, hazardsOn: false })),
+  // Absolute setters, not just toggles: the assistant has to be able to say
+  // "on" and mean on. Asking a toggle to turn on something already on turns it
+  // off instead — and headlightsOn starts true, so that is the first thing a
+  // driver would hit.
+  // Under automatic headlights an explicit on/off — a tap or the assistant —
+  // is an override of the sensor, not a new preference.
+  setHeadlights: (on) =>
+    set(get().exteriorLights.headlights.automatic
+      ? { headlightsOn: on, headlightsOverride: on }
+      : { headlightsOn: on }),
+  setWipers: (on) => set({ wipersOn: on }),
 
-  // Hazards drive both indicators at once, so they cancel a single signal and
-  // are cancelled by one. Deliberately NOT persisted: a car that remembered
-  // its hazards were on would turn them on again next trip.
-  toggleHazards: () =>
-    set((s) => {
-      const hazardsOn = !s.hazardsOn;
-      return hazardsOn
-        ? { hazardsOn, leftSignal: false, rightSignal: false }
-        : { hazardsOn };
-    }),
+  // Left, right and hazards are one mutually exclusive group. Hazards drive
+  // both indicators at once, so they cancel a single signal and are cancelled
+  // by one. Switching a member ON clears the other two; switching it OFF
+  // clears only itself, so "cancel the left signal" cannot silently kill
+  // hazards the driver turned on afterwards.
+  setLeftSignal: (on) =>
+    set(on
+      ? { leftSignal: true, rightSignal: false, hazardsOn: false }
+      : { leftSignal: false }),
+
+  setRightSignal: (on) =>
+    set(on
+      ? { rightSignal: true, leftSignal: false, hazardsOn: false }
+      : { rightSignal: false }),
+
+  // Deliberately NOT persisted: a car that remembered its hazards were on
+  // would turn them on again next trip.
+  setHazards: (on) =>
+    set(on
+      ? { hazardsOn: true, leftSignal: false, rightSignal: false }
+      : { hazardsOn: false }),
+
+  // The dock's buttons still toggle. They delegate so the exclusion rules
+  // above live in exactly one place, whether the driver taps or asks.
+  toggleHeadlights: () => {
+    const { exteriorLights, headlightsOverride, headlightsOn } = get();
+    // Overriding the sensor already? The next tap goes back to auto.
+    if (exteriorLights.headlights.automatic && headlightsOverride !== null) {
+      set({ headlightsOverride: null });
+      get()._syncHeadlights();
+      return;
+    }
+    get().setHeadlights(!headlightsOn);
+  },
+  toggleWipers: () => get().setWipers(!get().wipersOn),
+  toggleLeftSignal: () => get().setLeftSignal(!get().leftSignal),
+  toggleRightSignal: () => get().setRightSignal(!get().rightSignal),
+  toggleHazards: () => get().setHazards(!get().hazardsOn),
 
   startSimulation: () => {
     // Prevent duplicate intervals
@@ -259,6 +449,8 @@ export const useAppStore = create((set, get) => ({
     let tick = 0;
     const interval = setInterval(() => {
       tick += 1;
+      // Dusk arrives while driving; the sensor has to notice.
+      get()._syncHeadlights();
       set((s) => {
         // Speed: gentle sine wave oscillation 30–80 km/h
         const newSpeed = 55 + 25 * Math.sin(tick * 0.04) + (Math.random() - 0.5) * 4;

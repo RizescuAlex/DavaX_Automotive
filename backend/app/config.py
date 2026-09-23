@@ -22,6 +22,11 @@ class Settings(BaseSettings):
     MAPBOX_ACCESS_TOKEN: str = ""
     OPENWEATHERMAP_API_KEY: str = ""
 
+    # Gemini (in-car assistant). Deliberately not VITE_-prefixed: the key must
+    # stay backend-side, which is the reason the assistant route exists at all.
+    GEMINI_API_KEY: str = ""
+    GEMINI_MODEL: str = "gemini-3.1-flash-lite"
+
     # Spotify
     SPOTIFY_CLIENT_ID: str = ""
     SPOTIFY_CLIENT_SECRET: str = ""
