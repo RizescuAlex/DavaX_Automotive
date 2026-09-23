@@ -198,6 +198,28 @@
   color: var(--accent-primary);
 }
 
+.vehicle-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.vehicle-input-group label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.vehicle-input-group input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-tertiary);
+  color: var(--text-primary);
+}
+
 .onboarding-footer {
   display: flex;
   justify-content: space-between;

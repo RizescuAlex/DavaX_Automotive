@@ -1,7 +1,31 @@
 .vehicle-settings-shell {
+  --settings-page-bg: #eef0f3;
+  --settings-card-bg: #ffffff;
+  --settings-section-bg: #ffffff;
+  --settings-text: #1f2937;
+  --settings-heading: #1d2939;
+  --settings-muted: #667085;
+  --settings-border: #e1e5ea;
+  --settings-input-bg: #ffffff;
+  --settings-input-border: #d0d5dd;
+  --settings-button: #1683f7;
+
   min-height: 100vh;
-  background: #eef0f3;
-  color: #1f2937;
+  background: var(--settings-page-bg);
+  color: var(--settings-text);
+}
+
+html[data-theme="dark"] .vehicle-settings-shell {
+  --settings-page-bg: #1f2e3b;
+  --settings-card-bg: #2e4355;
+  --settings-section-bg: #344b5f;
+  --settings-text: #edf4fb;
+  --settings-heading: #ffffff;
+  --settings-muted: #b7cce0;
+  --settings-border: #536d83;
+  --settings-input-bg: #2c4152;
+  --settings-input-border: #66829a;
+  --settings-button: #80baf2;
 }
 
 .vehicle-settings-page {
@@ -11,28 +35,42 @@
 }
 
 .vehicle-settings-card {
-  background: #ffffff;
-  border: 1px solid #e1e5ea;
-  border-radius: 20px;
   padding: 34px;
+  background: var(--settings-card-bg);
+  border: 1px solid var(--settings-border);
+  border-radius: 20px;
   box-shadow: 0 8px 24px rgba(31, 41, 55, 0.08);
 }
 
 .vehicle-settings-header {
   margin-bottom: 28px;
   padding-bottom: 20px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--settings-border);
 }
 
 .vehicle-settings-header h1 {
   margin: 0 0 8px;
-  color: #1d2939;
+  color: var(--settings-heading);
   font-size: 2rem;
 }
 
 .vehicle-settings-header p {
   margin: 0;
-  color: #667085;
+  color: var(--settings-muted);
+}
+
+.settings-back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 22px;
+  color: var(--settings-muted);
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+
+.settings-back-button:hover {
+  color: var(--settings-button);
 }
 
 .vehicle-settings-form {
@@ -42,14 +80,25 @@
 
 .settings-section {
   padding: 22px;
-  border: 1px solid #e5e7eb;
+  background: var(--settings-section-bg);
+  border: 1px solid var(--settings-border);
   border-radius: 14px;
 }
 
 .settings-section h2 {
-  margin: 0 0 18px;
-  color: #344054;
+  margin: 0 0 22px;
+  color: var(--settings-heading);
   font-size: 1.15rem;
+}
+
+.settings-section > h3 {
+  margin: 30px 0 16px;
+  color: var(--settings-heading);
+  font-size: 1.05rem;
+}
+
+.settings-section > h3:first-of-type {
+  margin-top: 0;
 }
 
 .settings-grid {
@@ -61,30 +110,264 @@
 .settings-field {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  color: #475467;
+  gap: 10px;
+  margin-bottom: 16px;
+  color: var(--settings-muted);
+  line-height: 1.4;
 }
 
-.settings-field input {
+.settings-field input,
+.settings-field select {
   box-sizing: border-box;
   width: 100%;
   padding: 11px 12px;
-  color: #1d2939;
-  background: #ffffff;
-  border: 1px solid #d0d5dd;
+  color: var(--settings-text);
+  background: var(--settings-input-bg);
+  border: 1px solid var(--settings-input-border);
   border-radius: 8px;
+  font: inherit;
+}
+
+.settings-field input[type="range"] {
+  width: 100%;
+  padding: 0;
+  accent-color: var(--settings-button);
+  cursor: pointer;
+}
+
+.settings-field input[type="color"] {
+  width: 70px;
+  height: 42px;
+  padding: 3px;
+  cursor: pointer;
+}
+
+.settings-field > span {
+  display: block;
+  margin-top: 2px;
+  color: var(--settings-muted);
+  font-size: 0.9rem;
+}
+
+.settings-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 28px;
+  margin: 12px 0;
+  color: var(--settings-text);
+  line-height: 1.4;
+}
+
+.settings-checkbox + .settings-checkbox {
+  margin-top: 14px;
+}
+
+.settings-checkbox input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--settings-button);
+  cursor: pointer;
 }
 
 .settings-save-button {
   width: fit-content;
   padding: 12px 22px;
-  color: white;
-  background: #1683f7;
+  color: #ffffff;
+  background: var(--settings-button);
   border: 0;
   border-radius: 8px;
   cursor: pointer;
+  font-size: 1rem;
 }
 
 .settings-save-button:disabled {
   opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.settings-error,
+.settings-success {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border-radius: 8px;
+}
+
+.settings-error {
+  color: #b42318;
+  background: #fee4e2;
+}
+
+.settings-success {
+  color: #027a48;
+  background: #d1fadf;
+}
+
+/* Interior lighting */
+
+.lighting-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+  width: 100%;
+}
+
+.mini-car-preview {
+  position: relative;
+  flex: 0 0 420px;
+  width: 420px;
+  height: 280px;
+  overflow: hidden;
+  background: #172534;
+  border: 1px solid var(--settings-border);
+  border-radius: 24px;
+}
+
+.mini-car-image {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.light-zone-map {
+  position: absolute;
+  top: 25%;
+  left: 17%;
+  z-index: 5;
+  width: 66%;
+  height: 48%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  grid-template-areas:
+    "rear-overhead rear-overhead front-left-overhead front-right-overhead"
+    "rear-left-leg rear-right-leg driver-leg front-passenger-leg";
+  align-items: center;
+  justify-items: center;
+  padding: 8px;
+  border-radius: 28px;
+  background: rgba(23, 37, 52, 0.3);
+  pointer-events: auto;
+}
+
+.light-zone {
+  position: relative !important;
+  inset: auto !important;
+  z-index: 10;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: #6b7280;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  cursor: pointer;
+  pointer-events: auto !important;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.light-zone:hover,
+.light-zone.selected {
+  transform: scale(1.2);
+  border-color: var(--settings-button);
+  box-shadow: 0 0 0 4px rgba(22, 131, 247, 0.25);
+}
+
+.light-zone.enabled {
+  background: #ffd166;
+  box-shadow: 0 0 18px rgba(255, 209, 102, 0.9);
+}
+
+.light-zone-rear_overhead {
+  grid-area: rear-overhead;
+}
+
+.light-zone-front_left_overhead {
+  grid-area: front-left-overhead;
+}
+
+.light-zone-front_right_overhead {
+  grid-area: front-right-overhead;
+}
+
+.light-zone-rear_left_leg {
+  grid-area: rear-left-leg;
+}
+
+.light-zone-rear_right_leg {
+  grid-area: rear-right-leg;
+}
+
+.light-zone-driver_leg {
+  grid-area: driver-leg;
+}
+
+.light-zone-front_passenger_leg {
+  grid-area: front-passenger-leg;
+}
+
+.light-controls {
+  display: grid;
+  flex: 1;
+  min-width: 220px;
+  gap: 18px;
+}
+
+.light-controls h3,
+.mirror-card h3 {
+  margin: 0;
+  color: var(--settings-heading);
+}
+
+/* Mirrors */
+
+.mirror-card {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  background: var(--settings-section-bg);
+  border: 1px solid var(--settings-border);
+  border-radius: 12px;
+}
+
+.mirror-card .settings-field {
+  margin-bottom: 0;
+}
+
+/* Responsive layout */
+
+@media (max-width: 760px) {
+  .lighting-layout {
+    flex-direction: column;
+  }
+
+  .mini-car-preview {
+    flex-basis: auto;
+    width: 100%;
+    max-width: 420px;
+    height: 260px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .vehicle-settings-page {
+    padding: 24px 16px 40px;
+  }
+
+  .vehicle-settings-card {
+    padding: 22px;
+  }
+
+  .mini-car-preview {
+    height: 230px;
+  }
 }

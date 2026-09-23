@@ -32,3 +32,4 @@ class User(Base):
     preferences = relationship("UserPreference", back_populates="user")
     vehicle_settings = relationship("VehicleSettings", back_populates="user")
     frequented_locations = relationship("FrequentedLocation", back_populates="user")
+    vehicle = relationship("Vehicle", back_populates="user", uselist=False)
