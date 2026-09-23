@@ -40,6 +40,7 @@ export async function saveClimateSettings(climate) {
       seat_position: lastSettings?.seat_position ?? null,
       mirror_left: lastSettings?.mirror_left ?? null,
       mirror_right: lastSettings?.mirror_right ?? null,
+      mirror_rear: lastSettings?.mirror_rear ?? null,
       steering_position: lastSettings?.steering_position ?? null,
       lighting_settings: lastSettings?.lighting_settings ?? null,
       is_active: lastSettings?.is_active ?? true,

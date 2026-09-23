@@ -8,6 +8,7 @@ class VehicleSettingsBase(BaseModel):
     seat_position: dict[str, Any] | None = None
     mirror_left: dict[str, Any] | None = None
     mirror_right: dict[str, Any] | None = None
+    mirror_rear: dict[str, Any] | None = None
     steering_position: dict[str, Any] | None = None
     climate_settings: dict[str, Any] | None = None
     lighting_settings: dict[str, Any] | None = None
