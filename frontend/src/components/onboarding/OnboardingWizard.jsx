@@ -60,6 +60,20 @@ export default function OnboardingWizard() {
         body: JSON.stringify(preferences),
       });
 
+      // CarAPI returns trim-level rows. Persist them after the vehicle and
+      // onboarding profile have been created; onboarding should still finish
+      // if the external catalog is temporarily unavailable.
+      try {
+        const params = new URLSearchParams({
+          year: String(preferences.vehicle.model_year),
+          make: preferences.vehicle.make,
+          model: preferences.vehicle.model,
+        });
+        await apiFetch(`/vehicle-specs?${params.toString()}`);
+      } catch (specError) {
+        console.warn("Vehicle created, but fuel specifications were not saved:", specError);
+      }
+
       // Update local state to reflect completion
       if (backendUser) {
         setBackendUser({ ...backendUser, onboarding_completed: true });

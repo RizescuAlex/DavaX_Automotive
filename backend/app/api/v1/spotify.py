@@ -33,7 +33,8 @@ def spotify_runtime_error(error: RuntimeError) -> HTTPException:
     if "active Spotify device" in str(error):
         return HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error))
     return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error))
-
+class VolumeRequest(BaseModel):
+    volume_percent: int = Field(ge=0, le=100)
 
 @router.get("/login")
 def spotify_login() -> RedirectResponse:
@@ -102,7 +103,6 @@ def play_music() -> dict[str, bool]:
     except SpotifyException as error:
         raise spotify_error(error) from error
 
-
 @router.post("/pause")
 def pause_music() -> dict[str, bool]:
     try:
@@ -113,6 +113,16 @@ def pause_music() -> dict[str, bool]:
     except SpotifyException as error:
         raise spotify_error(error) from error
 
+@router.post("/volume")
+def set_volume(request: VolumeRequest) -> dict[str, int]:
+    try:
+        spotify = _client_with_device()
+        spotify.volume(request.volume_percent)
+        return {"volume_percent": request.volume_percent}
+    except RuntimeError as error:
+        raise spotify_runtime_error(error) from error
+    except SpotifyException as error:
+        raise spotify_error(error) from error
 
 @router.post("/next")
 def skip_to_next_track() -> dict[str, str]:
@@ -162,6 +172,31 @@ def transfer_playback(request: TransferRequest) -> dict:
         return {"device_id": request.device_id, "playing": True}
     except RuntimeError as error:
         raise spotify_runtime_error(error) from error
+    except SpotifyException as error:
+        raise spotify_error(error) from error
+
+@router.post("/play-pause")
+def toggle_play_pause() -> dict[str, bool]:
+    try:
+        client = _client_with_device()
+
+        playback = client.current_playback()
+
+        is_playing = bool(
+            playback
+            and playback.get("is_playing")
+        )
+
+        if is_playing:
+            client.pause_playback()
+            return {"playing": False}
+
+        client.start_playback()
+        return {"playing": True}
+
+    except RuntimeError as error:
+        raise spotify_runtime_error(error) from error
+
     except SpotifyException as error:
         raise spotify_error(error) from error
 

@@ -12,6 +12,7 @@ export default function VehicleApiTest() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [specs, setSpecs] = useState([]);
 
   const fetchSpecs = async (selectedVehicle) => {
     const params = new URLSearchParams({
@@ -22,6 +23,7 @@ export default function VehicleApiTest() {
 
     const data = await apiFetch(`/vehicle-specs?${params.toString()}`);
     setResult(data);
+    setSpecs(Array.isArray(data) ? data : data?.specs || []);
   };
 
   const handleManualSubmit = async (event) => {
@@ -61,6 +63,16 @@ export default function VehicleApiTest() {
 
   const updateVehicle = (field, value) => {
     setVehicle((current) => ({ ...current, [field]: value }));
+  };
+
+  const selectTrim = async (trimId) => {
+    try {
+      await apiFetch(`/vehicles/me/selected-trim?trim_id=${encodeURIComponent(trimId)}`, {
+        method: "PUT",
+      });
+    } catch (err) {
+      setError(err.message || "Failed to select vehicle trim.");
+    }
   };
 
   return (
@@ -121,6 +133,22 @@ export default function VehicleApiTest() {
         <pre style={{ marginTop: "1.5rem", overflowX: "auto" }}>
           {JSON.stringify(result, null, 2)}
         </pre>
+      )}
+
+      {specs.length > 0 && (
+        <div style={{ marginTop: "1.5rem" }}>
+          <h2>Saved trims</h2>
+          {specs.map((spec) => (
+            <div key={spec.trim_id} style={{ display: "flex", gap: "1rem", margin: "0.5rem 0" }}>
+              <span>
+                {spec.trim || spec.submodel || "Unnamed trim"} — {spec.fuel_tank_capacity_gal ?? "—"} gal, {spec.combined_mpg ?? "—"} combined MPG
+              </span>
+              <button type="button" onClick={() => selectTrim(spec.trim_id)}>
+                Use this trim
+              </button>
+            </div>
+          ))}
+        </div>
       )}
     </main>
   );
