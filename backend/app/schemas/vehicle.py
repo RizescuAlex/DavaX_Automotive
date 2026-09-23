@@ -11,5 +11,8 @@ class VehicleInput(BaseModel):
 
 class VehicleOut(VehicleInput):
     id: uuid.UUID
+    selected_trim_id: int | None = None
+    selected_trim_name: str | None = None
+    fuel_type: str | None = None
 
     model_config = {"from_attributes": True}
