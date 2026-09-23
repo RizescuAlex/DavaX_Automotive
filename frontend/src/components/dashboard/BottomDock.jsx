@@ -28,6 +28,9 @@ export default function BottomDock() {
 
   const speed = useAppStore((s) => s.speed);
   const headlightsOn = useAppStore((s) => s.headlightsOn);
+  const headlightsAuto = useAppStore(
+    (s) => s.exteriorLights.headlights.automatic && s.headlightsOverride === null
+  );
   const leftSignal = useAppStore((s) => s.leftSignal);
   const rightSignal = useAppStore((s) => s.rightSignal);
   const hazardsOn = useAppStore((s) => s.hazardsOn);
@@ -46,11 +49,11 @@ export default function BottomDock() {
   const cycleAcLevel = useAppStore((s) => s.cycleAcLevel);
   const toggleFrontDefrost = useAppStore((s) => s.toggleFrontDefrost);
   const toggleRearDefrost = useAppStore((s) => s.toggleRearDefrost);
-  const loadClimate = useAppStore((s) => s.loadClimate);
+  const loadVehicleSettings = useAppStore((s) => s.loadVehicleSettings);
 
   useEffect(() => {
-    loadClimate();
-  }, [loadClimate]);
+    loadVehicleSettings();
+  }, [loadVehicleSettings]);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 1000);
@@ -78,13 +81,14 @@ export default function BottomDock() {
         <div className="dock-group" role="group" aria-label="Lights and signals">
           <button
             type="button"
-            className={`dock-btn ${headlightsOn ? "on" : ""}`}
+            className={`dock-btn has-badge ${headlightsOn ? "on" : ""}`}
             aria-pressed={headlightsOn}
-            aria-label="Headlights"
-            title="Headlights"
+            aria-label={`Headlights${headlightsAuto ? ", automatic" : ""}`}
+            title={headlightsAuto ? "Headlights (automatic)" : "Headlights"}
             onClick={toggleHeadlights}
           >
             <Lightbulb size={18} />
+            {headlightsAuto && <span className="dock-level" aria-hidden="true">A</span>}
           </button>
           <button
             type="button"

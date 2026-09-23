@@ -1410,7 +1410,8 @@ a:hover {
   );
 }
 
-/* Pool of light under the nose when the headlights are on */
+/* Pool of light under the nose. Its opacity is set inline from the
+   headlight brightness preference, or dimly for daytime running lights. */
 .car-glow {
   position: absolute;
   z-index: 1;
@@ -1429,7 +1430,6 @@ a:hover {
   transition: opacity var(--transition-slow);
 }
 
-.car-glow.on { opacity: 1; }
 
 .car-readout {
   display: flex;
@@ -1477,6 +1477,32 @@ a:hover {
   background: var(--accent-primary-light);
   border-color: var(--accent-primary);
   color: var(--accent-primary);
+}
+
+.car-lamp { position: relative; }
+
+.car-lamp-auto {
+  position: absolute;
+  right: 3px;
+  bottom: 1px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+
+/* Fog lamps are telltales that only appear while lit. Green for the front
+   and amber for the rear, the colours the real warning lights use. */
+.car-lamp.fog {
+  background: var(--color-success-light);
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.car-lamp.fog.rear {
+  background: var(--color-warning-light);
+  border-color: var(--color-warning);
+  color: var(--color-warning);
 }
 
 .car-lamp.blink {
@@ -1750,8 +1776,9 @@ a:hover {
   animation: signal-blink 700ms steps(1, end) infinite;
 }
 
-/* Seat heat is a level, not a toggle, so the button carries its own count */
-.dock-btn.seat { position: relative; }
+/* A small letter in the corner of a dock button — "A" while the headlights
+   are on automatic */
+.dock-btn.has-badge { position: relative; }
 
 .dock-level {
   position: absolute;

@@ -67,6 +67,35 @@ export function RearDefogIcon({ size = 18 }) {
   );
 }
 
+/**
+ * Front fog lamp: a lamp facing left, beams dipping toward the road, cut by
+ * the wavy line that stands for fog. The warning-light shape, not a bulb.
+ */
+export function FrontFogIcon({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
+      <path d="M14.5 6 C 20.5 6, 20.5 18, 14.5 18 Z" />
+      <path d="M11.5 7.5 L 3.5 9.5" />
+      <path d="M11.5 12 L 3.5 14" />
+      <path d="M11.5 16.5 L 3.5 18.5" />
+      <path d="M8 5 q -1.4 2.3 0 4.7 q 1.4 2.3 0 4.6 q -1.4 2.3 0 4.7" />
+    </svg>
+  );
+}
+
+/** Rear fog lamp: the lamp faces right and its beams run level. */
+export function RearFogIcon({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
+      <path d="M9.5 6 C 3.5 6, 3.5 18, 9.5 18 Z" />
+      <path d="M12.5 8 H 20.5" />
+      <path d="M12.5 12 H 20.5" />
+      <path d="M12.5 16 H 20.5" />
+      <path d="M16.5 5 q -1.4 2.3 0 4.7 q 1.4 2.3 0 4.6 q -1.4 2.3 0 4.7" />
+    </svg>
+  );
+}
+
 /** A wiper arm sweeping a windscreen, with the spray it clears. */
 export function WiperIcon({ size = 18 }) {
   return (

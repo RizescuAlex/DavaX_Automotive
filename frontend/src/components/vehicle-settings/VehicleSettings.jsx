@@ -3,7 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../auth/useAuth";
 import { getVehicleSettings, saveVehicleSettings } from "../../api/vehicle";
-import { useAppStore, CLIMATE_LIMITS } from "../../store";
+import { useAppStore, CLIMATE_LIMITS, EXTERIOR_LIGHT_DEFAULTS } from "../../store";
 import TopBar from "../dashboard/TopBar";
 import AmbientLighting, { LIGHT_ZONES } from "./AmbientLighting";
 import "./VehicleSettings.css";
@@ -59,21 +59,7 @@ const DEFAULT_SETTINGS = {
       LIGHT_ZONES.map(({ id }) => [id, { ...DEFAULT_LIGHT_ZONE }])
     ),
 
-    exterior: {
-      headlights: {
-        brightness: 80,
-        automatic: true,
-        daytime_running: true,
-        follow_me_home: false,
-        fog_lights: false,
-      },
-
-      rear_lights: {
-        brightness: 80,
-        automatic: true,
-        rear_fog_lights: false,
-      },
-    },
+    exterior: EXTERIOR_LIGHT_DEFAULTS,
   },
 
   is_active: true,
@@ -117,7 +103,7 @@ function mergeLightingSettings(data) {
 
 export default function VehicleSettings() {
   const { user, logout } = useAuth();
-  const applyClimateSettings = useAppStore((s) => s.applyClimateSettings);
+  const applyVehicleSettings = useAppStore((s) => s.applyVehicleSettings);
 
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [selectedLight, setSelectedLight] = useState("driver_leg");
@@ -258,9 +244,10 @@ export default function VehicleSettings() {
 
     try {
       const saved = await saveVehicleSettings(settings);
-      // The dock holds its own copy of climate; hand it the saved one so it
-      // does not keep showing, and later re-save, what was there before.
-      applyClimateSettings(saved?.climate_settings ?? settings.climate_settings);
+      // The cockpit holds its own copy of climate and exterior lighting; hand
+      // it the saved record so it does not keep showing, and later re-save,
+      // what was there before.
+      applyVehicleSettings(saved ?? settings);
 
       setMessage("Vehicle preferences saved.");
     } catch (err) {
