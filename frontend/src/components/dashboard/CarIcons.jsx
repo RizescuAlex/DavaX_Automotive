@@ -16,6 +16,33 @@ const base = {
   "aria-hidden": "true",
 };
 
+/**
+ * The hazard symbol: one triangle nested inside another.
+ *
+ * Not lucide's TriangleAlert, which puts an exclamation mark inside a single
+ * triangle — that is a generic warning sign. The moulded button in a car is
+ * two bare outlined triangles, and that is the shape a driver's eye is looking
+ * for.
+ *
+ * The inner triangle is the outer one scaled to 0.42 about their shared
+ * centroid, which keeps the gap equal on all three sides — picking the
+ * coordinates by eye left the two bases closer together than the stroke was
+ * wide, so they merged into one thick line. That leaves 3.2 units between the
+ * centrelines, about 1.3px of daylight once both strokes are drawn at 18px.
+ *
+ * Stroke is 1.5 rather than the shared 1.75: two nested outlines in an 18px
+ * box need the extra room, and at this size the difference is invisible
+ * beside the other glyphs.
+ */
+export function HazardIcon({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base} strokeWidth={1.5}>
+      <path d="M12 3.4 21.6 19.9 H2.4 Z" />
+      <path d="M12 9.78 16.03 16.71 H7.97 Z" />
+    </svg>
+  );
+}
+
 /** Three wavy arrows rising inside a raked windscreen. */
 export function FrontDefogIcon({ size = 18 }) {
   return (
@@ -36,6 +63,35 @@ export function RearDefogIcon({ size = 18 }) {
       <path d="M8.5 15 c 0 -1.1 1.2 -1.3 1.2 -2.5 s -1.2 -1.4 -1.2 -2.5" />
       <path d="M12 15 c 0 -1.1 1.2 -1.3 1.2 -2.5 s -1.2 -1.4 -1.2 -2.5" />
       <path d="M15.5 15 c 0 -1.1 1.2 -1.3 1.2 -2.5 s -1.2 -1.4 -1.2 -2.5" />
+    </svg>
+  );
+}
+
+/**
+ * Front fog lamp: a lamp facing left, beams dipping toward the road, cut by
+ * the wavy line that stands for fog. The warning-light shape, not a bulb.
+ */
+export function FrontFogIcon({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
+      <path d="M14.5 6 C 20.5 6, 20.5 18, 14.5 18 Z" />
+      <path d="M11.5 7.5 L 3.5 9.5" />
+      <path d="M11.5 12 L 3.5 14" />
+      <path d="M11.5 16.5 L 3.5 18.5" />
+      <path d="M8 5 q -1.4 2.3 0 4.7 q 1.4 2.3 0 4.6 q -1.4 2.3 0 4.7" />
+    </svg>
+  );
+}
+
+/** Rear fog lamp: the lamp faces right and its beams run level. */
+export function RearFogIcon({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
+      <path d="M9.5 6 C 3.5 6, 3.5 18, 9.5 18 Z" />
+      <path d="M12.5 8 H 20.5" />
+      <path d="M12.5 12 H 20.5" />
+      <path d="M12.5 16 H 20.5" />
+      <path d="M16.5 5 q -1.4 2.3 0 4.7 q 1.4 2.3 0 4.6 q -1.4 2.3 0 4.7" />
     </svg>
   );
 }

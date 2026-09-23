@@ -1,8 +1,33 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { LogOut, Sun, Cloud, CloudRain, User, Moon, Settings } from "lucide-react";
+import { Bot, LogOut, Sun, Cloud, CloudRain, User, Moon, Settings } from "lucide-react";
 import { APP_NAME } from "../../config/constants";
 import { useAppStore } from "../../store";
+
+/**
+ * Opens the assistant.
+ *
+ * It lives up here beside Vehicle Preferences rather than floating over the
+ * map, where as a round button in the bottom-right corner it sat on top of
+ * Google's zoom controls and swallowed the clicks meant for them.
+ */
+function AssistantButton() {
+  const open = useAppStore((s) => s.assistantOpen);
+  const toggleAssistant = useAppStore((s) => s.toggleAssistant);
+
+  return (
+    <button
+      type="button"
+      className={`btn btn-secondary btn-sm ${open ? "is-on" : ""}`}
+      onClick={toggleAssistant}
+      aria-pressed={open}
+      aria-label={open ? "Close the AI assistant" : "Open the AI assistant"}
+    >
+      <Bot size={14} />
+      AI Assistant
+    </button>
+  );
+}
 
 /**
  * Day/night switch.
@@ -94,6 +119,7 @@ export default function TopBar({ user, onLogout }) {
         </div>
       </div>
       <div className="top-bar-right">
+        <AssistantButton />
         <Link to="/vehicle-settings" className="btn btn-secondary btn-sm">
           <Settings size={14} />
            Vehicle Preferences

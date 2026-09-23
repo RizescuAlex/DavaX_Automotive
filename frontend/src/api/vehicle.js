@@ -30,6 +30,26 @@ export async function getVehicleSettings() {
   return settings;
 }
 
+/**
+ * Replace the whole record — the Vehicle Preferences page's save.
+ *
+ * It has to come through here rather than calling apiFetch directly: a write
+ * that skips lastSettings leaves the cockpit holding the old record, and the
+ * next climate tap sends that back, undoing every lighting and mirror change
+ * the driver just saved.
+ */
+export async function saveVehicleSettings(settings) {
+  if (DESIGN_PREVIEW) return null;
+
+  const saved = await apiFetch(PATH, {
+    method: "PUT",
+    body: JSON.stringify(settings),
+  });
+
+  lastSettings = saved;
+  return saved;
+}
+
 export async function saveClimateSettings(climate) {
   if (DESIGN_PREVIEW) return null;
 
@@ -40,6 +60,7 @@ export async function saveClimateSettings(climate) {
       seat_position: lastSettings?.seat_position ?? null,
       mirror_left: lastSettings?.mirror_left ?? null,
       mirror_right: lastSettings?.mirror_right ?? null,
+      mirror_rear: lastSettings?.mirror_rear ?? null,
       steering_position: lastSettings?.steering_position ?? null,
       lighting_settings: lastSettings?.lighting_settings ?? null,
       is_active: lastSettings?.is_active ?? true,

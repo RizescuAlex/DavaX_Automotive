@@ -1,7 +1,22 @@
+/*
+   The page's own names, pointed at the cockpit's design tokens (index.css),
+   so it follows the day/night toggle instead of carrying a second palette.
+*/
 .vehicle-settings-shell {
+  --settings-page-bg: var(--surface-base);
+  --settings-card-bg: var(--surface-primary);
+  --settings-section-bg: var(--surface-secondary);
+  --settings-text: var(--text-primary);
+  --settings-heading: var(--text-primary);
+  --settings-muted: var(--text-muted);
+  --settings-border: var(--border-subtle);
+  --settings-input-bg: var(--surface-sunken);
+  --settings-input-border: var(--border-default);
+  --settings-button: var(--accent-primary);
+
   min-height: 100vh;
-  background: #eef0f3;
-  color: #1f2937;
+  background: var(--settings-page-bg);
+  color: var(--settings-text);
 }
 
 .vehicle-settings-page {
@@ -11,28 +26,42 @@
 }
 
 .vehicle-settings-card {
-  background: #ffffff;
-  border: 1px solid #e1e5ea;
-  border-radius: 20px;
   padding: 34px;
-  box-shadow: 0 8px 24px rgba(31, 41, 55, 0.08);
+  background: var(--settings-card-bg);
+  border: 1px solid var(--settings-border);
+  border-radius: 20px;
+  box-shadow: var(--shadow-lg);
 }
 
 .vehicle-settings-header {
   margin-bottom: 28px;
   padding-bottom: 20px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--settings-border);
 }
 
 .vehicle-settings-header h1 {
   margin: 0 0 8px;
-  color: #1d2939;
+  color: var(--settings-heading);
   font-size: 2rem;
 }
 
 .vehicle-settings-header p {
   margin: 0;
-  color: #667085;
+  color: var(--settings-muted);
+}
+
+.settings-back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 22px;
+  color: var(--settings-muted);
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+
+.settings-back-button:hover {
+  color: var(--settings-button);
 }
 
 .vehicle-settings-form {
@@ -42,14 +71,25 @@
 
 .settings-section {
   padding: 22px;
-  border: 1px solid #e5e7eb;
+  background: var(--settings-section-bg);
+  border: 1px solid var(--settings-border);
   border-radius: 14px;
 }
 
 .settings-section h2 {
-  margin: 0 0 18px;
-  color: #344054;
+  margin: 0 0 22px;
+  color: var(--settings-heading);
   font-size: 1.15rem;
+}
+
+.settings-section > h3 {
+  margin: 30px 0 16px;
+  color: var(--settings-heading);
+  font-size: 1.05rem;
+}
+
+.settings-section > h3:first-of-type {
+  margin-top: 0;
 }
 
 .settings-grid {
@@ -61,30 +101,414 @@
 .settings-field {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  color: #475467;
+  gap: 10px;
+  margin-bottom: 16px;
+  color: var(--settings-muted);
+  line-height: 1.4;
 }
 
-.settings-field input {
+.settings-field input,
+.settings-field select {
   box-sizing: border-box;
   width: 100%;
   padding: 11px 12px;
-  color: #1d2939;
-  background: #ffffff;
-  border: 1px solid #d0d5dd;
+  color: var(--settings-text);
+  background: var(--settings-input-bg);
+  border: 1px solid var(--settings-input-border);
   border-radius: 8px;
+  font: inherit;
+}
+
+.settings-field input[type="range"] {
+  width: 100%;
+  padding: 0;
+  accent-color: var(--settings-button);
+  cursor: pointer;
+}
+
+.settings-field input[type="color"] {
+  width: 70px;
+  height: 42px;
+  padding: 3px;
+  cursor: pointer;
+}
+
+.settings-field > span {
+  display: block;
+  margin-top: 2px;
+  color: var(--settings-muted);
+  font-size: 0.9rem;
+}
+
+.settings-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 28px;
+  margin: 12px 0;
+  color: var(--settings-text);
+  line-height: 1.4;
+}
+
+.settings-checkbox + .settings-checkbox {
+  margin-top: 14px;
+}
+
+.settings-checkbox input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--settings-button);
+  cursor: pointer;
 }
 
 .settings-save-button {
   width: fit-content;
   padding: 12px 22px;
-  color: white;
-  background: #1683f7;
+  color: var(--on-accent);
+  font-weight: var(--font-weight-semibold);
+  background: var(--settings-button);
   border: 0;
   border-radius: 8px;
   cursor: pointer;
+  font-size: 1rem;
 }
 
 .settings-save-button:disabled {
   opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.settings-error,
+.settings-success {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border-radius: 8px;
+}
+
+.settings-error {
+  color: var(--color-error);
+  background: var(--color-error-light);
+}
+
+.settings-success {
+  color: var(--color-success);
+  background: var(--color-success-light);
+}
+
+.settings-checks {
+  display: grid;
+  align-content: start;
+  gap: var(--space-1);
+}
+
+.settings-checks .settings-checkbox {
+  margin: 0;
+}
+
+/* Ambient lighting — styled as a cockpit surface, in the same tokens as the
+   dock and the climate panel */
+
+.ambient {
+  display: grid;
+  grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.ambient-stage {
+  position: relative;
+  aspect-ratio: 200 / 320;
+  width: 100%;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 45%, var(--surface-tertiary), var(--surface-sunken) 72%);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  box-shadow: inset 0 0 28px var(--stage-inset);
+}
+
+.ambient-cabin {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ambient-body {
+  fill: var(--surface-primary);
+  stroke: var(--border-strong);
+  stroke-width: 2;
+}
+
+.ambient-glass {
+  fill: var(--surface-sunken);
+  stroke: var(--border-default);
+  stroke-width: 1.5;
+}
+
+.ambient-seat {
+  fill: var(--surface-tertiary);
+  stroke: var(--border-default);
+  stroke-width: 1.5;
+}
+
+.ambient-trim {
+  fill: var(--surface-hover);
+}
+
+/* The light: a soft wash in the zone's colour, scaled by its brightness.
+   Screen blending lets overlapping zones mix the way real light does. */
+.ambient-glow {
+  position: absolute;
+  width: 46%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--zone-color) 0%, transparent 65%);
+  opacity: calc(var(--zone-strength) * 0.75);
+  transform: translate(-50%, -50%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  transition: opacity var(--transition-slow), background var(--transition-slow);
+}
+
+/* Screen blending vanishes on a pale ground; in daylight the wash sits on
+   top as a tint instead. */
+:root[data-theme="light"] .ambient-glow {
+  mix-blend-mode: multiply;
+  opacity: calc(var(--zone-strength) * 0.55);
+}
+
+.ambient-spot {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  transform: translate(-50%, -50%);
+  background: var(--surface-sunken);
+  border: 2px solid var(--border-strong);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform var(--transition-fast), border-color var(--transition-fast),
+    box-shadow var(--transition-fast), background var(--transition-fast);
+}
+
+.ambient-spot:hover {
+  transform: translate(-50%, -50%) scale(1.15);
+  border-color: var(--text-secondary);
+}
+
+.ambient-spot:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 3px;
+}
+
+.ambient-spot.on {
+  background: var(--zone-color);
+  border-color: var(--surface-primary);
+  box-shadow: 0 0 12px var(--zone-color);
+}
+
+.ambient-spot.selected {
+  transform: translate(-50%, -50%) scale(1.2);
+  box-shadow: 0 0 0 3px var(--accent-primary), 0 0 14px var(--accent-primary-glow);
+}
+
+.ambient-count {
+  position: absolute;
+  left: 50%;
+  bottom: var(--space-2);
+  transform: translateX(-50%);
+  padding: 2px var(--space-2);
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--text-muted);
+  background: var(--surface-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+}
+
+/* Controls — the climate card's header pattern: icon, uppercase title, pill */
+.ambient-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-4);
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+.ambient-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.ambient-head-icon {
+  flex-shrink: 0;
+  color: var(--accent-primary);
+}
+
+.ambient-head h3 {
+  flex: 1;
+  margin: 0;
+  font-size: var(--font-size-md);
+  color: var(--text-primary);
+}
+
+.ambient-toggle {
+  min-width: 52px;
+  min-height: 28px;
+  padding: var(--space-1) var(--space-3);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.ambient-toggle:hover {
+  color: var(--text-secondary);
+  border-color: var(--border-strong);
+}
+
+.ambient-toggle.on {
+  color: var(--on-accent);
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.ambient-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.ambient-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.ambient-value {
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+.ambient-field input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent-primary);
+  cursor: pointer;
+}
+
+.ambient-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.ambient-swatch {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  background: var(--swatch);
+  border: 2px solid var(--border-default);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.ambient-swatch:hover {
+  transform: scale(1.1);
+}
+
+.ambient-swatch:focus-visible,
+.ambient-swatch-custom:focus-within {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.ambient-swatch[aria-checked="true"],
+.ambient-swatch-custom.custom-active {
+  border-color: var(--surface-primary);
+  box-shadow: 0 0 0 2px var(--accent-primary);
+}
+
+/* The custom swatch is a colour wheel until a custom colour is chosen */
+.ambient-swatch-custom {
+  background: conic-gradient(#ff5f5f, #ffd166, #7fe08a, #5ee0d0, #88bdf2, #b58cff, #ff7ac6, #ff5f5f);
+}
+
+.ambient-swatch-custom.custom-active {
+  background: var(--swatch);
+}
+
+.ambient-swatch-custom input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.ambient-apply {
+  align-self: flex-start;
+}
+
+.mirror-card h3 {
+  margin: 0;
+  color: var(--settings-heading);
+}
+
+/* Mirrors */
+
+.mirror-card {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  background: var(--settings-section-bg);
+  border: 1px solid var(--settings-border);
+  border-radius: 12px;
+}
+
+.mirror-card .settings-field {
+  margin-bottom: 0;
+}
+
+/* Responsive layout */
+
+@media (max-width: 760px) {
+  .ambient {
+    grid-template-columns: 1fr;
+  }
+
+  .ambient-stage {
+    max-width: 240px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .vehicle-settings-page {
+    padding: 24px 16px 40px;
+  }
+
+  .vehicle-settings-card {
+    padding: 22px;
+  }
 }
