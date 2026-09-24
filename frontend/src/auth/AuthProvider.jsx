@@ -27,7 +27,6 @@ export function AuthProvider({ children }) {
       if (fbUser || customToken) {
         // Fetch full profile from backend to get onboarding_completed status
         try {
-          // Dynamic import of apiFetch to avoid cyclic dependencies if any
           const { apiFetch } = await import("../config/api");
           const me = await apiFetch("/auth/me");
           setBackendUser(me);
@@ -54,7 +53,6 @@ export function AuthProvider({ children }) {
       console.error("Firebase signout failed", e);
     }
     setFirebaseUser(null);
-    // Clear custom JWT (for email/password users)
     clearCustomAuth();
     clearBackendUser();
   };
