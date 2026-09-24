@@ -28,8 +28,37 @@ class User(Base):
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     # Relationships
-    onboarding_profile = relationship("OnboardingProfile", back_populates="user", uselist=False)
-    preferences = relationship("UserPreference", back_populates="user")
-    vehicle_settings = relationship("VehicleSettings", back_populates="user")
-    frequented_locations = relationship("FrequentedLocation", back_populates="user")
-    vehicle = relationship("Vehicle", back_populates="user", uselist=False)
+    onboarding_profile = relationship(
+        "OnboardingProfile",
+        back_populates="user",
+        uselist=False,
+    )
+    preferences = relationship(
+        "UserPreference",
+        back_populates="user",
+    )
+    vehicle_settings = relationship(
+        "VehicleSettings",
+        back_populates="user",
+    )
+    frequented_locations = relationship(
+        "FrequentedLocation",
+        back_populates="user",
+    )
+    vehicle = relationship(
+        "Vehicle",
+        back_populates="user",
+        uselist=False,
+    )
+
+    # Call relationships
+    outgoing_calls = relationship(
+        "CallSession",
+        foreign_keys="CallSession.caller_id",
+        back_populates="caller",
+    )
+    incoming_calls = relationship(
+        "CallSession",
+        foreign_keys="CallSession.callee_id",
+        back_populates="callee",
+    )

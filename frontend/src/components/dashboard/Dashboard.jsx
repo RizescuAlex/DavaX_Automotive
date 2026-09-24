@@ -8,6 +8,7 @@ import MapPanel from "./MapPanel";
 import VehicleGauges from "./VehicleGauges";
 import BottomDock from "./BottomDock";
 import AssistantPanel from "./AssistantPanel";
+import CallSession from "../calls/CallSession";
 
 /**
  * Fixed three-column cockpit. There is no section switching any more: every
@@ -28,6 +29,7 @@ export default function Dashboard() {
   return (
     <div className="dashboard">
       <TopBar user={user} onLogout={logout} />
+      <CallSession />
 
       <div className="dashboard-body">
         {/* Left rail — the vehicle and its live readings */}
