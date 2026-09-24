@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Room } from "livekit-client";
+import { Room, RoomEvent, Track } from "livekit-client";
 import { useAppStore } from "../store";
 import {
   endCall,
@@ -21,15 +21,34 @@ export function useCallSession() {
     roomRef.current = null;
   }, []);
 
-  const joinRoom = useCallback(async (callToJoin) => {
-    if (roomRef.current || callToJoin.status !== "accepted") return;
+const joinRoom = useCallback(async (callToJoin) => {
+  if (roomRef.current || callToJoin.status !== "accepted") return;
 
-    const credentials = await getCallToken(callToJoin.id);
-    const room = new Room();
-    await room.connect(credentials.url, credentials.token);
-    await room.localParticipant.setMicrophoneEnabled(true);
-    roomRef.current = room;
-  }, []);
+  const credentials = await getCallToken(callToJoin.id);
+  const room = new Room();
+
+  room.on(RoomEvent.TrackSubscribed, (track) => {
+    if (track.kind === Track.Kind.Audio) {
+      const audioElement = track.attach();
+
+      audioElement.autoplay = true;
+      audioElement.setAttribute("playsinline", "true");
+      audioElement.volume = 1;
+
+      document.body.appendChild(audioElement);
+    }
+  });
+
+  room.on(RoomEvent.TrackUnsubscribed, (track) => {
+    track.detach().forEach((element) => element.remove());
+  });
+
+  await room.connect(credentials.url, credentials.token);
+
+  await room.localParticipant.setMicrophoneEnabled(true);
+
+  roomRef.current = room;
+}, []);
 
   useEffect(() => {
     let cancelled = false;
