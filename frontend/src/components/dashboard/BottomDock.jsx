@@ -4,6 +4,7 @@ import {
   Minus, Plus, Snowflake,
 } from "lucide-react";
 import { useAppStore, CLIMATE_LIMITS } from "../../store";
+import { DOCK_ICON } from "../../config/constants";
 import ClimatePanel from "./ClimatePanel";
 import SeatHeatButton from "./SeatHeatButton";
 import { FrontDefogIcon, HazardIcon, RearDefogIcon, WiperIcon } from "./CarIcons";
@@ -87,7 +88,7 @@ export default function BottomDock() {
             title={headlightsAuto ? "Headlights (automatic)" : "Headlights"}
             onClick={toggleHeadlights}
           >
-            <Lightbulb size={18} />
+            <Lightbulb size={DOCK_ICON} />
             {headlightsAuto && <span className="dock-level" aria-hidden="true">A</span>}
           </button>
           <button
@@ -98,7 +99,7 @@ export default function BottomDock() {
             title="Hazard lights"
             onClick={toggleHazards}
           >
-            <HazardIcon size={18} />
+            <HazardIcon size={DOCK_ICON} />
           </button>
           <button
             type="button"
@@ -108,7 +109,7 @@ export default function BottomDock() {
             title="Left signal"
             onClick={toggleLeftSignal}
           >
-            <CornerUpLeft size={18} />
+            <CornerUpLeft size={DOCK_ICON} />
           </button>
           <button
             type="button"
@@ -118,7 +119,7 @@ export default function BottomDock() {
             title="Right signal"
             onClick={toggleRightSignal}
           >
-            <CornerUpRight size={18} />
+            <CornerUpRight size={DOCK_ICON} />
           </button>
         </div>
 
@@ -132,7 +133,7 @@ export default function BottomDock() {
             title="Windscreen wipers"
             onClick={toggleWipers}
           >
-            <WiperIcon size={18} />
+            <WiperIcon size={DOCK_ICON} />
           </button>
           <button
             type="button"
@@ -142,7 +143,7 @@ export default function BottomDock() {
             title="Front defogger"
             onClick={toggleFrontDefrost}
           >
-            <FrontDefogIcon size={18} />
+            <FrontDefogIcon size={DOCK_ICON} />
           </button>
           <button
             type="button"
@@ -152,7 +153,7 @@ export default function BottomDock() {
             title="Rear defogger"
             onClick={toggleRearDefrost}
           >
-            <RearDefogIcon size={18} />
+            <RearDefogIcon size={DOCK_ICON} />
           </button>
         </div>
 
@@ -167,7 +168,7 @@ export default function BottomDock() {
             title="Air conditioning"
             onClick={cycleAcLevel}
           >
-            <Snowflake size={18} />
+            <Snowflake size={DOCK_ICON} />
             <span className="dock-ac-bars" aria-hidden="true">
               {[1, 2, 3].map((step) => (
                 <span key={step} className={step <= acLevel ? "lit" : ""} />
@@ -184,7 +185,7 @@ export default function BottomDock() {
             aria-label="Decrease target temperature"
             onClick={() => adjustTargetTemp(-CLIMATE_LIMITS.TEMP_STEP)}
           >
-            <Minus size={16} />
+            <Minus size={DOCK_ICON - 2} />
           </button>
           <button
             type="button"
@@ -202,7 +203,7 @@ export default function BottomDock() {
             aria-label="Increase target temperature"
             onClick={() => adjustTargetTemp(CLIMATE_LIMITS.TEMP_STEP)}
           >
-            <Plus size={16} />
+            <Plus size={DOCK_ICON - 2} />
           </button>
 
           {climateOpen && <ClimatePanel onClose={() => setClimateOpen(false)} />}

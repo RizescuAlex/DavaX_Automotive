@@ -1,6 +1,7 @@
 import { Flame } from "lucide-react";
 import { useAppStore, CLIMATE_LIMITS } from "../../store";
 import { SeatSideIcon } from "./CarIcons";
+import { DOCK_ICON } from "../../config/constants";
 
 const LEVELS = Array.from({ length: CLIMATE_LIMITS.SEAT_HEAT_MAX }, (_, i) => i + 1);
 
@@ -27,10 +28,10 @@ export default function SeatHeatButton({ side }) {
       title={`${seat} seat heating`}
       onClick={() => cycleSeatHeat(side)}
     >
-      <SeatSideIcon side={side} size={17} />
+      <SeatSideIcon side={side} size={DOCK_ICON - 2} />
       <span className="dock-seat-flames" aria-hidden="true">
         {LEVELS.map((step) => (
-          <Flame key={step} size={9} className={step <= level ? "lit" : ""} />
+          <Flame key={step} size={11} className={step <= level ? "lit" : ""} />
         ))}
       </span>
     </button>

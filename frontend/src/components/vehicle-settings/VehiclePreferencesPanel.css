@@ -1,10 +1,16 @@
 /*
-   The page's own names, pointed at the cockpit's design tokens (index.css),
-   so it follows the day/night toggle instead of carrying a second palette.
+   Vehicle Preferences, as a panel over the map.
+
+   Built like the assistant panel — header with icon, title and close; a body
+   that scrolls; the panel's own edge and shadow — but larger, because it
+   carries the whole form. It hangs at the same height as the assistant so the
+   centred search bar above stays usable, and stops short of Google's
+   attribution strip at the foot of the map.
+
+   The --settings-* names are the form's own, pointed at the cockpit's design
+   tokens (index.css), so it follows the day/night toggle.
 */
-.vehicle-settings-shell {
-  --settings-page-bg: var(--surface-base);
-  --settings-card-bg: var(--surface-primary);
+.prefs-panel {
   --settings-section-bg: var(--surface-secondary);
   --settings-text: var(--text-primary);
   --settings-heading: var(--text-primary);
@@ -14,59 +20,105 @@
   --settings-input-border: var(--border-default);
   --settings-button: var(--accent-primary);
 
-  min-height: 100vh;
-  background: var(--settings-page-bg);
+  position: absolute;
+  z-index: 7;
+  top: calc(var(--space-3) * 2 + 44px);
+  right: var(--space-4);
+  bottom: var(--space-8);
+  width: min(760px, calc(100% - var(--space-8)));
+  display: flex;
+  flex-direction: column;
   color: var(--settings-text);
+  background: var(--surface-primary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+  animation: fadeInUp 160ms ease forwards;
 }
 
-.vehicle-settings-page {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 42px 32px 64px;
-}
-
-.vehicle-settings-card {
-  padding: 34px;
-  background: var(--settings-card-bg);
-  border: 1px solid var(--settings-border);
-  border-radius: 20px;
-  box-shadow: var(--shadow-lg);
-}
-
-.vehicle-settings-header {
-  margin-bottom: 28px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--settings-border);
-}
-
-.vehicle-settings-header h1 {
-  margin: 0 0 8px;
-  color: var(--settings-heading);
-  font-size: 2rem;
-}
-
-.vehicle-settings-header p {
-  margin: 0;
-  color: var(--settings-muted);
-}
-
-.settings-back-button {
-  display: inline-flex;
+.prefs-head {
+  display: flex;
   align-items: center;
-  gap: 7px;
-  margin-bottom: 22px;
-  color: var(--settings-muted);
-  font-size: 0.95rem;
-  text-decoration: none;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
 }
 
-.settings-back-button:hover {
-  color: var(--settings-button);
+.prefs-head-icon {
+  flex-shrink: 0;
+  color: var(--accent-primary);
+}
+
+.prefs-head-title {
+  flex: 1;
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.prefs-close {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: var(--text-muted);
+  background: none;
+  border: 0;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.prefs-close:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover);
+}
+
+.prefs-close:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Only the form scrolls; the header and the save bar stay put. */
+.prefs-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-4);
+}
+
+.prefs-loading {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.prefs-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-secondary);
+  border-top: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.prefs-status {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-success);
+}
+
+.prefs-status.error {
+  color: var(--color-error);
 }
 
 .vehicle-settings-form {
   display: grid;
-  gap: 22px;
+  gap: var(--space-4);
 }
 
 .settings-section {
@@ -159,40 +211,6 @@
   height: 17px;
   accent-color: var(--settings-button);
   cursor: pointer;
-}
-
-.settings-save-button {
-  width: fit-content;
-  padding: 12px 22px;
-  color: var(--on-accent);
-  font-weight: var(--font-weight-semibold);
-  background: var(--settings-button);
-  border: 0;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-.settings-save-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.settings-error,
-.settings-success {
-  margin-bottom: 18px;
-  padding: 12px 14px;
-  border-radius: 8px;
-}
-
-.settings-error {
-  color: var(--color-error);
-  background: var(--color-error-light);
-}
-
-.settings-success {
-  color: var(--color-success);
-  background: var(--color-success-light);
 }
 
 .settings-checks {
@@ -500,15 +518,5 @@
   .ambient-stage {
     max-width: 240px;
     margin: 0 auto;
-  }
-}
-
-@media (max-width: 700px) {
-  .vehicle-settings-page {
-    padding: 24px 16px 40px;
-  }
-
-  .vehicle-settings-card {
-    padding: 22px;
   }
 }
