@@ -13,3 +13,6 @@ export const MAP_CONFIG = {
   // Fallback location if geolocation fails (Bucharest, Romania)
   FALLBACK_CENTER: { lat: 44.4268, lng: 26.1025 },
 };
+
+/** Glyph size inside a dock button — large enough to read at a glance. */
+export const DOCK_ICON = 22;
