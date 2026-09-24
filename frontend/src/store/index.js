@@ -146,9 +146,22 @@ export const useAppStore = create((set, get) => ({
   // otherwise have to thread a prop through Dashboard to reach each other.
   assistantOpen: false,
 
-  setAssistantOpen: (open) => set({ assistantOpen: open }),
+  // Both panels hang over the same corner of the map, so opening one closes
+  // the other rather than stacking them.
+  setAssistantOpen: (open) =>
+    set(open ? { assistantOpen: true, preferencesOpen: false } : { assistantOpen: false }),
 
-  toggleAssistant: () => set((s) => ({ assistantOpen: !s.assistantOpen })),
+  toggleAssistant: () => get().setAssistantOpen(!get().assistantOpen),
+
+  // ── Vehicle Preferences ───────────────────────────────────────────────────
+  // A panel over the map rather than a page, so the cockpit stays live behind
+  // it and changes land in the dock the moment they are saved.
+  preferencesOpen: false,
+
+  setPreferencesOpen: (open) =>
+    set(open ? { preferencesOpen: true, assistantOpen: false } : { preferencesOpen: false }),
+
+  togglePreferences: () => get().setPreferencesOpen(!get().preferencesOpen),
 
   // ── Climate ───────────────────────────────────────────────────────────────
   // Target/fan/A-C are the driver's settings and persist to the backend.
@@ -184,7 +197,7 @@ export const useAppStore = create((set, get) => ({
   /**
    * Take a settings record the backend already holds.
    *
-   * loadVehicleSettings runs once per session, so the Vehicle Preferences page
+   * loadVehicleSettings runs once per session, so the Vehicle Preferences panel
    * calls this after it saves; otherwise the cockpit would keep showing the old
    * values until a reload. Nothing is written back: the record came from the
    * server.

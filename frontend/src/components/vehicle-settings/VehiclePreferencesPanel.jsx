@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useAuth } from "../../auth/useAuth";
+import { Settings, X } from "lucide-react";
 import { getVehicleSettings, saveVehicleSettings } from "../../api/vehicle";
 import { useAppStore, CLIMATE_LIMITS, EXTERIOR_LIGHT_DEFAULTS } from "../../store";
-import TopBar from "../dashboard/TopBar";
 import AmbientLighting, { LIGHT_ZONES } from "./AmbientLighting";
-import "./VehicleSettings.css";
+import "./VehiclePreferencesPanel.css";
 
 const DEFAULT_LIGHT_ZONE = {
   enabled: false,
@@ -101,8 +98,25 @@ function mergeLightingSettings(data) {
   };
 }
 
-export default function VehicleSettings() {
-  const { user, logout } = useAuth();
+/**
+ * Vehicle Preferences, as a panel over the map rather than a page of its own.
+ *
+ * Same family as the assistant panel — header, icon, close — but larger, with
+ * the form scrolling inside it and Save pinned to the foot, so the button and
+ * its result stay in view however far down the driver has scrolled.
+ *
+ * It mounts on open and loads fresh each time, so it never shows a record the
+ * dock has since changed. Closing without saving discards the edits.
+ */
+export default function VehiclePreferencesPanel() {
+  const open = useAppStore((s) => s.preferencesOpen);
+  const setPreferencesOpen = useAppStore((s) => s.setPreferencesOpen);
+
+  if (!open) return null;
+  return <PreferencesContent onClose={() => setPreferencesOpen(false)} />;
+}
+
+function PreferencesContent({ onClose }) {
   const applyVehicleSettings = useAppStore((s) => s.applyVehicleSettings);
 
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
@@ -235,6 +249,15 @@ export default function VehicleSettings() {
     }));
   };
 
+  // Escape closes, as it does the climate popover.
+  useEffect(() => {
+    const onKey = (event) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   const handleSave = async (event) => {
     event.preventDefault();
 
@@ -257,43 +280,30 @@ export default function VehicleSettings() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="vehicle-settings-shell">
-        <TopBar user={user} onLogout={logout} />
-
-        <main className="vehicle-settings-page">
-          <div className="vehicle-settings-card">
-            <p>Loading vehicle preferences...</p>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
   return (
-    <div className="vehicle-settings-shell">
-      <TopBar user={user} onLogout={logout} />
+    <section className="prefs-panel" aria-label="Vehicle Preferences">
+      <header className="prefs-head">
+        <Settings size={16} className="prefs-head-icon" aria-hidden="true" />
+        <h2 className="prefs-head-title">Vehicle Preferences</h2>
+        <button
+          type="button"
+          className="prefs-close"
+          onClick={onClose}
+          aria-label="Close vehicle preferences"
+        >
+          <X size={18} />
+        </button>
+      </header>
 
-      <main className="vehicle-settings-page">
-        <div className="vehicle-settings-card">
-          <Link to="/dashboard" className="settings-back-button">
-            <ArrowLeft size={17} />
-            Back to dashboard
-          </Link>
-
-          <div className="vehicle-settings-header">
-            <h1>Vehicle Preferences</h1>
-            <p>
-              Personalize your comfort, lighting, mirrors, and driving
-              position.
-            </p>
-          </div>
-
-          {error && <div className="settings-error">{error}</div>}
-          {message && <div className="settings-success">{message}</div>}
-
-          <form className="vehicle-settings-form" onSubmit={handleSave}>
+      <div className="prefs-body">
+        {loading ? (
+          <p className="prefs-loading">Loading vehicle preferences…</p>
+        ) : (
+          <form
+            id="vehicle-preferences-form"
+            className="vehicle-settings-form"
+            onSubmit={handleSave}
+          >
             <section className="settings-section">
               <h2>Climate</h2>
 
@@ -682,17 +692,26 @@ export default function VehicleSettings() {
                 ))}
               </div>
             </section>
-
-            <button
-              className="settings-save-button"
-              type="submit"
-              disabled={saving}
-            >
-              {saving ? "Saving..." : "Save preferences"}
-            </button>
           </form>
-        </div>
-      </main>
-    </div>
+        )}
+      </div>
+
+      <footer className="prefs-foot">
+        <span
+          className={`prefs-status ${error ? "error" : ""}`}
+          role="status"
+        >
+          {error || message}
+        </span>
+        <button
+          className="btn btn-primary prefs-save"
+          type="submit"
+          form="vehicle-preferences-form"
+          disabled={saving || loading}
+        >
+          {saving ? "Saving…" : "Save preferences"}
+        </button>
+      </footer>
+    </section>
   );
 }
