@@ -78,7 +78,12 @@ export function buildContext(state) {
     left_signal: state.leftSignal,
     right_signal: state.rightSignal,
     wipers: state.wipersOn,
+    headlights_auto:
+      state.exteriorLights.headlights.automatic && state.headlightsOverride === null,
+    fog_lights: state.exteriorLights.headlights.fog_lights,
+    rear_fog_lights: state.exteriorLights.rear_lights.rear_fog_lights,
 
     theme: state.theme,
+    preferences_open: state.preferencesOpen,
   };
 }

@@ -37,9 +37,14 @@ class VehicleContext(BaseModel):
     left_signal: bool | None = None
     right_signal: bool | None = None
     wipers: bool | None = None
+    # True while the dusk sensor, not the driver, decides the headlights.
+    headlights_auto: bool | None = None
+    fog_lights: bool | None = None
+    rear_fog_lights: bool | None = None
 
-    # Appearance — writable via set_theme.
+    # The screen — writable via set_display.
     theme: Literal["dark", "light"] | None = None
+    preferences_open: bool | None = None
 
 
 class AssistantMessageIn(BaseModel):

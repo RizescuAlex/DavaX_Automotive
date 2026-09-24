@@ -46,9 +46,21 @@ function applyClimate(args) {
 function applyVehicleControls(args) {
   const state = useAppStore.getState();
 
-  // Independent of everything else, so order does not matter.
+  // Auto before an explicit on/off: the tool description forbids sending
+  // both, but if the model does, the explicit command is what the driver said
+  // last and wins as an override.
+  if (typeof args.headlights_auto === "boolean") state.setHeadlightsAuto(args.headlights_auto);
   if (typeof args.headlights === "boolean") state.setHeadlights(args.headlights);
   if (typeof args.wipers === "boolean") state.setWipers(args.wipers);
+
+  // Fog lights are saved preferences, not live switches, so they go through
+  // setExteriorLight, which persists them.
+  if (typeof args.fog_lights === "boolean") {
+    state.setExteriorLight("headlights", "fog_lights", args.fog_lights);
+  }
+  if (typeof args.rear_fog_lights === "boolean") {
+    state.setExteriorLight("rear_lights", "rear_fog_lights", args.rear_fog_lights);
+  }
 
   // Left, right and hazards are mutually exclusive, and each setter clears the
   // other two. Order therefore decides the winner when the model sends a
@@ -61,10 +73,13 @@ function applyVehicleControls(args) {
   if (typeof args.hazards === "boolean") state.setHazards(args.hazards);
 }
 
-function applyTheme(args) {
-  if (args.mode === "dark" || args.mode === "light") {
-    useAppStore.getState().setTheme(args.mode);
-  }
+function applyDisplay(args) {
+  const state = useAppStore.getState();
+  if (args.mode === "dark" || args.mode === "light") state.setTheme(args.mode);
+  // Opening preferences closes the assistant panel; the reply is still read
+  // aloud when the driver spoke, so nothing is lost.
+  if (args.preferences_panel === "open") state.setPreferencesOpen(true);
+  if (args.preferences_panel === "closed") state.setPreferencesOpen(false);
 }
 
 const MUSIC_ACTIONS = {
@@ -91,7 +106,7 @@ function applyMusic(args) {
 const HANDLERS = {
   set_climate: applyClimate,
   set_vehicle_controls: applyVehicleControls,
-  set_theme: applyTheme,
+  set_display: applyDisplay,
   control_music: applyMusic,
 };
 

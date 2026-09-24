@@ -127,9 +127,17 @@ def _describe(context: VehicleContext) -> str:
         add(f"- Right signal: {on_off(context.right_signal)}")
     if context.wipers is not None:
         add(f"- Wipers: {on_off(context.wipers)}")
+    if context.headlights_auto is not None:
+        add(f"- Automatic headlights: {on_off(context.headlights_auto)}")
+    if context.fog_lights is not None:
+        add(f"- Front fog lights: {on_off(context.fog_lights)}")
+    if context.rear_fog_lights is not None:
+        add(f"- Rear fog light: {on_off(context.rear_fog_lights)}")
 
     if context.theme is not None:
         add(f"- Dashboard appearance: {context.theme}")
+    if context.preferences_open is not None:
+        add(f"- Vehicle Preferences panel: {'open' if context.preferences_open else 'closed'}")
 
     if not lines:
         return "\nThe dashboard did not report its current state."

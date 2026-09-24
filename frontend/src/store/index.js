@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { getVehicleSettings, saveClimateSettings } from "../api/vehicle";
+import { getVehicleSettings, saveClimateSettings, saveExteriorLights } from "../api/vehicle";
 
 const CUSTOM_TOKEN_KEY = "davax_token";
 const CUSTOM_USER_KEY = "davax_user";
@@ -354,8 +354,8 @@ export const useAppStore = create((set, get) => ({
   },
 
   // ── Exterior lighting ─────────────────────────────────────────────────────
-  // The preferences are set on the Vehicle Preferences page and only read
-  // here; the cockpit never writes them back.
+  // Set on the Vehicle Preferences panel, and by the assistant through
+  // setExteriorLight below.
   exteriorLights: EXTERIOR_LIGHT_DEFAULTS,
 
   // With automatic headlights, a tap in the dock overrides the sensor for the
@@ -381,6 +381,44 @@ export const useAppStore = create((set, get) => ({
       headlightsOverride: null,
     });
     get()._syncHeadlights();
+  },
+
+  /**
+   * Change one exterior-light preference and save it.
+   *
+   * Applied locally first so the cockpit answers at once; a failed save is
+   * logged rather than rolled back, the same trade the climate writes make.
+   */
+  setExteriorLight: (group, field, value) => {
+    const current = get().exteriorLights;
+    const exteriorLights = {
+      ...current,
+      [group]: { ...current[group], [field]: value },
+    };
+    set({ exteriorLights });
+    get()._syncHeadlights();
+    saveExteriorLights(exteriorLights).catch((error) =>
+      console.error("Could not save exterior lights", error)
+    );
+  },
+
+  /**
+   * Hand the headlights to the dusk sensor, or take them back.
+   *
+   * On: drop any override, and switch the automatic preference on if the
+   * driver had turned it off. Off: switch the preference off, leaving the
+   * headlights exactly as they are now rather than snapping them to a default.
+   */
+  setHeadlightsAuto: (on) => {
+    const { exteriorLights } = get();
+    if (on) {
+      set({ headlightsOverride: null });
+      if (exteriorLights.headlights.automatic) get()._syncHeadlights();
+      else get().setExteriorLight("headlights", "automatic", true);
+    } else if (exteriorLights.headlights.automatic) {
+      set({ headlightsOverride: null });
+      get().setExteriorLight("headlights", "automatic", false);
+    }
   },
 
   /** In automatic mode, put the headlights where the sensor (or override) says. */
