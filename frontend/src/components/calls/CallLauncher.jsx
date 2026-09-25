@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { createCall } from "../../services/calls";
+import { startCallRingtone } from "../../services/callSounds";
 import { useAppStore } from "../../store";
 
 export default function CallLauncher() {
@@ -15,6 +16,7 @@ export default function CallLauncher() {
     try {
       const call = await createCall(email);
       setCall(call);
+      startCallRingtone("ongoing");
       setMessage("Calling...");
       setEmail("");
     } catch (error) {

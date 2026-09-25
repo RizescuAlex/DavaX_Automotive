@@ -7,6 +7,7 @@ export default function IncomingCallModal({ call, isIncoming, loading, onRespond
     ? call.caller_name || "DavaX user"
     : call.callee_name || "DavaX user";
   const incomingAndRinging = isIncoming && call.status === "ringing";
+  const callIsAccepted = call.status === "accepted";
 
   return (
     <div className="call-modal-backdrop" role="dialog" aria-modal="true" aria-label="Call dialog">
@@ -21,7 +22,11 @@ export default function IncomingCallModal({ call, isIncoming, loading, onRespond
             </span>
             <strong>{contactName}</strong>
             <span className="call-modal-status">
-              {incomingAndRinging ? "DavaX voice call" : "Waiting for answer..."}
+              {incomingAndRinging
+                ? "DavaX voice call"
+                : callIsAccepted
+                  ? "Call connected"
+                  : "Waiting for answer..."}
             </span>
           </div>
         </div>
