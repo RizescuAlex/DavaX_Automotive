@@ -1,53 +1,48 @@
+import { Phone, PhoneOff } from "lucide-react";
+
 export default function IncomingCallModal({ call, isIncoming, loading, onRespond, onEnd }) {
   if (!call) return null;
 
-  const caller = call.caller_name || "DavaX user";
+  const contactName = isIncoming
+    ? call.caller_name || "DavaX user"
+    : call.callee_name || "DavaX user";
+  const incomingAndRinging = isIncoming && call.status === "ringing";
 
   return (
-    <div style={styles.backdrop} role="dialog" aria-modal="true" aria-label="Call dialog">
-      <div style={styles.card}>
-        <div style={styles.icon}>☎</div>
-        <h2>{isIncoming ? "Incoming call" : "Calling..."}</h2>
-        <p>{isIncoming ? caller : call.callee_name || "DavaX user"}</p>
+    <div className="call-modal-backdrop" role="dialog" aria-modal="true" aria-label="Call dialog">
+      <div className="call-modal-card">
+        <div className="call-modal-info">
+          <div className="call-modal-icon" aria-hidden="true">
+            <Phone size={22} strokeWidth={2.5} />
+          </div>
+          <div className="call-modal-copy">
+            <span className="call-modal-label">
+              {incomingAndRinging ? "Incoming call" : "Calling"}
+            </span>
+            <strong>{contactName}</strong>
+            <span className="call-modal-status">
+              {incomingAndRinging ? "DavaX voice call" : "Waiting for answer..."}
+            </span>
+          </div>
+        </div>
 
-        {isIncoming && call.status === "ringing" ? (
-          <div style={styles.actions}>
-            <button type="button" disabled={loading} onClick={() => onRespond("accept")}>
-              Accept
+        {incomingAndRinging ? (
+          <div className="call-modal-actions">
+            <button className="call-action-button call-action-decline" type="button" disabled={loading} onClick={() => onRespond("decline")} aria-label="Decline call" title="Decline">
+              <PhoneOff size={21} />
             </button>
-            <button type="button" disabled={loading} onClick={() => onRespond("decline")}>
-              Decline
+            <button className="call-action-button call-action-accept" type="button" disabled={loading} onClick={() => onRespond("accept")} aria-label="Accept call" title="Accept">
+              <Phone size={21} />
             </button>
           </div>
         ) : (
-          <button type="button" disabled={loading} onClick={onEnd}>
-            End call
+          <button className="call-action-button call-action-decline" type="button" disabled={loading} onClick={onEnd} aria-label="End call" title="End call">
+            <PhoneOff size={21} />
           </button>
         )}
 
-        <small>Thumbs up accepts; thumbs down declines.</small>
+        {incomingAndRinging && <span className="call-modal-hint">Thumbs up to accept · thumbs down to decline</span>}
       </div>
     </div>
   );
 }
-
-const styles = {
-  backdrop: {
-    position: "fixed",
-    inset: 0,
-    zIndex: 1000,
-    display: "grid",
-    placeItems: "center",
-    background: "rgba(0, 0, 0, 0.65)",
-  },
-  card: {
-    minWidth: 280,
-    padding: "2rem",
-    textAlign: "center",
-    borderRadius: 16,
-    background: "var(--surface-primary, #1b1f2a)",
-    color: "var(--text-primary, white)",
-  },
-  icon: { fontSize: "2.5rem" },
-  actions: { display: "flex", justifyContent: "center", gap: "1rem", margin: "1.5rem 0" },
-};

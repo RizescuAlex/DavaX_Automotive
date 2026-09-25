@@ -12,7 +12,6 @@ export default function CallLauncher() {
     event.preventDefault();
     setLoading(true);
     setMessage(null);
-
     try {
       const call = await createCall(email);
       setCall(call);
@@ -35,20 +34,10 @@ export default function CallLauncher() {
         placeholder="Connected user's email"
         required
       />
-
-      <button
-        className="call-launcher-button"
-        type="submit"
-        disabled={loading}
-      >
+      <button className="call-launcher-button" type="submit" disabled={loading}>
         {loading ? "Calling..." : "Call user"}
       </button>
-
-      {message && (
-        <small className="call-launcher-message">
-          {message}
-        </small>
-      )}
+      {message && <small className="call-launcher-message">{message}</small>}
     </form>
   );
 }

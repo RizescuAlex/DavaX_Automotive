@@ -2109,15 +2109,8 @@ a:hover {
   animation: assistant-listening 1.2s ease-in-out infinite;
 }
 
-/* ── User-to-user call launcher ── */
-/*
-   The launcher floats below the top bar so it does not become a full-height
-   grid row or push the cockpit content down. The incoming-call modal remains
-   responsible for the full-screen call prompt when a call arrives.
-*/
-.dashboard {
-  position: relative;
-}
+/* ── Compact in-car call UI ── */
+.dashboard { position: relative; }
 
 .call-session {
   position: absolute;
@@ -2134,7 +2127,7 @@ a:hover {
   width: max-content;
   max-width: calc(100vw - 2 * var(--space-4));
   padding: var(--space-2);
-  background: color-mix(in srgb, var(--surface-sunken) 94%, transparent);
+  background: var(--surface-sunken);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
@@ -2152,15 +2145,10 @@ a:hover {
   font: inherit;
 }
 
-.call-launcher-input:focus {
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px var(--accent-primary-light);
-}
-
 .call-launcher-button {
   height: 34px;
   padding: 0 var(--space-3);
-  border: 1px solid var(--accent-primary);
+  border: 0;
   border-radius: var(--radius-md);
   color: var(--on-accent);
   background: var(--accent-primary);
@@ -2170,14 +2158,8 @@ a:hover {
   white-space: nowrap;
 }
 
-.call-launcher-button:hover:not(:disabled) {
-  background: var(--accent-primary-hover);
-}
-
-.call-launcher-button:disabled {
-  cursor: wait;
-  opacity: 0.7;
-}
+.call-launcher-button:hover:not(:disabled) { background: var(--accent-primary-hover); }
+.call-launcher-button:disabled { cursor: wait; opacity: 0.7; }
 
 .call-launcher-message {
   position: absolute;
@@ -2193,22 +2175,56 @@ a:hover {
   white-space: nowrap;
 }
 
+.call-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: var(--space-4);
+  pointer-events: none;
+}
+
+.call-modal-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  width: min(540px, calc(100vw - 2 * var(--space-6)));
+  min-height: 88px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  color: var(--text-primary);
+  background: rgba(20, 30, 40, 0.96);
+  box-shadow: var(--shadow-xl), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  pointer-events: auto;
+  animation: call-card-in 180ms ease-out;
+}
+
+.call-modal-info { display: flex; align-items: center; gap: var(--space-3); min-width: 0; flex: 1; }
+.call-modal-icon { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; border: 1px solid rgba(136, 189, 242, 0.35); border-radius: var(--radius-full); color: var(--accent-primary); background: rgba(136, 189, 242, 0.14); }
+.call-modal-copy { display: flex; min-width: 0; flex-direction: column; gap: 2px; }
+.call-modal-label { color: var(--accent-primary); font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); letter-spacing: 0.04em; text-transform: uppercase; }
+.call-modal-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--font-size-lg); }
+.call-modal-status, .call-modal-hint { color: var(--text-muted); font-size: var(--font-size-xs); }
+.call-modal-actions { display: flex; align-items: center; gap: var(--space-3); flex-shrink: 0; }
+.call-action-button { display: grid; place-items: center; width: 48px; height: 48px; border: 0; border-radius: var(--radius-full); color: #fff; cursor: pointer; transition: transform var(--transition-fast), filter var(--transition-fast); }
+.call-action-button:hover:not(:disabled) { filter: brightness(1.12); transform: scale(1.06); }
+.call-action-button:disabled { cursor: wait; opacity: 0.55; }
+.call-action-accept { background: #35b86b; }
+.call-action-decline { background: #e55353; }
+.call-modal-hint { position: absolute; top: calc(100% + var(--space-1)); left: 50%; transform: translateX(-50%); white-space: nowrap; }
+
+@keyframes call-card-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
 @media (max-width: 560px) {
-  .call-session {
-    left: var(--space-3);
-    right: var(--space-3);
-  }
-
-  .call-launcher {
-    width: 100%;
-    max-width: none;
-  }
-
-  .call-launcher-input {
-    min-width: 0;
-    width: auto;
-    flex: 1;
-  }
+  .call-session { left: var(--space-3); right: var(--space-3); }
+  .call-launcher { width: 100%; max-width: none; }
+  .call-launcher-input { min-width: 0; width: auto; flex: 1; }
+  .call-modal-card { gap: var(--space-3); padding: var(--space-3); }
+  .call-action-button { width: 42px; height: 42px; }
 }
 
 @keyframes assistant-listening {
