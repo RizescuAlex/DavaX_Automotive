@@ -114,7 +114,9 @@
 
   /* Layout — rail, map, dock */
   --rail-width: 300px;
-  --dock-height: 60px;
+  --dock-height: 76px;
+  /* Dock controls: sized for a hand on a moving car, not a mouse */
+  --dock-btn-size: 52px;
   --topbar-height: 44px;
 
   /* Transitions */
@@ -293,6 +295,13 @@ a:hover {
 .btn-secondary:hover {
   background: var(--surface-secondary);
   border-color: var(--border-strong);
+}
+
+/* A top-bar button whose panel is open */
+.btn-secondary.is-on {
+  color: var(--accent-primary);
+  background: var(--accent-primary-light);
+  border-color: var(--accent-primary);
 }
 
 .btn-google {
@@ -1118,7 +1127,7 @@ a:hover {
   gap: var(--space-2);
   color: var(--text-primary);
   font-family: var(--font-mono);
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -1138,16 +1147,18 @@ a:hover {
   font-weight: var(--font-weight-medium);
 }
 
+/* Idle buttons carry a filled face and the brighter secondary text colour,
+   so an off control still reads as a control rather than a loose glyph. */
 .dock-btn {
-  width: 44px;
-  height: 44px;
+  width: var(--dock-btn-size);
+  height: var(--dock-btn-size);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
-  background: transparent;
-  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--surface-primary);
+  color: var(--text-secondary);
   cursor: pointer;
   transition: background var(--transition-fast), color var(--transition-fast);
 }
@@ -1175,7 +1186,7 @@ a:hover {
 .dock-time {
   color: var(--text-primary);
   font-family: var(--font-mono);
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -1293,8 +1304,11 @@ a:hover {
 }
 
 @media (max-width: 1000px) {
+  /* The enlarged controls no longer fit at full size; give back some width
+     rather than letting the strip overflow. */
+  :root { --dock-btn-size: 46px; }
   .dock-status { display: none; }
-  .dock-group { padding-right: var(--space-2); }
+  .dock-group { padding-right: var(--space-2); gap: var(--space-1); }
   .dock-center { gap: var(--space-2); }
 }
 
@@ -1753,7 +1767,7 @@ a:hover {
 .dock-group {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--space-2);
   padding-right: var(--space-3);
   border-right: 1px solid var(--border-subtle);
 }
@@ -1782,10 +1796,10 @@ a:hover {
 
 .dock-level {
   position: absolute;
-  right: 5px;
-  bottom: 3px;
+  right: 6px;
+  bottom: 4px;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: var(--font-weight-bold);
   line-height: 1;
   color: var(--accent-primary);
@@ -1800,11 +1814,11 @@ a:hover {
 }
 
 .dock-temp {
-  min-width: 68px;
-  height: 44px;
+  min-width: 84px;
+  height: var(--dock-btn-size);
   padding: 0 var(--space-2);
   font-family: var(--font-mono);
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
   font-variant-numeric: tabular-nums;
   color: var(--text-primary);
@@ -1857,14 +1871,14 @@ a:hover {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  width: 52px;
-  height: 44px;
+  gap: 4px;
+  width: 60px;
+  height: var(--dock-btn-size);
   padding: 0;
-  color: var(--text-muted);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  background: var(--surface-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
   cursor: pointer;
   transition: background var(--transition-fast), color var(--transition-fast),
     border-color var(--transition-fast);
@@ -1886,8 +1900,8 @@ a:hover {
 .dock-seat-flames {
   display: flex;
   align-items: center;
-  gap: 1px;
-  height: 10px;
+  gap: 2px;
+  height: 12px;
 }
 
 /* Unlit flames stay visible so the control always shows it has three steps,
@@ -1905,29 +1919,29 @@ a:hover {
 /* ── A/C intensity ── */
 .dock-btn.ac {
   position: relative;
-  width: 48px;
+  width: 56px;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 }
 
 .dock-ac-bars {
   display: flex;
   align-items: flex-end;
   gap: 2px;
-  height: 8px;
+  height: 10px;
 }
 
 .dock-ac-bars span {
-  width: 5px;
+  width: 6px;
   border-radius: 1px;
   background: currentColor;
   opacity: 0.25;
   transition: opacity var(--transition-fast);
 }
 
-.dock-ac-bars span:nth-child(1) { height: 4px; }
-.dock-ac-bars span:nth-child(2) { height: 6px; }
-.dock-ac-bars span:nth-child(3) { height: 8px; }
+.dock-ac-bars span:nth-child(1) { height: 5px; }
+.dock-ac-bars span:nth-child(2) { height: 7px; }
+.dock-ac-bars span:nth-child(3) { height: 10px; }
 .dock-ac-bars span.lit { opacity: 1; }
 
 /* Wipers sweep while they are running — a static highlight would not say

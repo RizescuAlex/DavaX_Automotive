@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { Bot, LogOut, Sun, Cloud, CloudRain, User, Moon, Settings } from "lucide-react";
 import { APP_NAME } from "../../config/constants";
 import { useAppStore } from "../../store";
@@ -25,6 +24,25 @@ function AssistantButton() {
     >
       <Bot size={14} />
       AI Assistant
+    </button>
+  );
+}
+
+/** Opens Vehicle Preferences over the map, the way the assistant opens. */
+function PreferencesButton() {
+  const open = useAppStore((s) => s.preferencesOpen);
+  const togglePreferences = useAppStore((s) => s.togglePreferences);
+
+  return (
+    <button
+      type="button"
+      className={`btn btn-secondary btn-sm ${open ? "is-on" : ""}`}
+      onClick={togglePreferences}
+      aria-pressed={open}
+      aria-label={open ? "Close vehicle preferences" : "Open vehicle preferences"}
+    >
+      <Settings size={14} />
+      Vehicle Preferences
     </button>
   );
 }
@@ -120,10 +138,7 @@ export default function TopBar({ user, onLogout }) {
       </div>
       <div className="top-bar-right">
         <AssistantButton />
-        <Link to="/vehicle-settings" className="btn btn-secondary btn-sm">
-          <Settings size={14} />
-           Vehicle Preferences
-        </Link>
+        <PreferencesButton />
         <WeatherBadge />
         <ThemeToggle />
         <div className="top-bar-user">

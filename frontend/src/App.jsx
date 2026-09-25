@@ -1,10 +1,23 @@
+import { useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./auth/LoginPage";
 import ProtectedRoute from "./auth/ProtectedRoute";
 import Dashboard from "./components/dashboard/Dashboard";
 import OnboardingWizard from "./components/onboarding/OnboardingWizard";
-import VehicleSettings from "./components/vehicle-settings/VehicleSettings";
 import VehicleApiTest from "./components/VehicleApiTest";
+import { useAppStore } from "./store";
+
+/**
+ * Vehicle Preferences used to be a page. It is a panel on the dashboard now,
+ * so the old address opens the panel there instead of 404ing to a blank map.
+ */
+function OpenPreferences() {
+  const setPreferencesOpen = useAppStore((s) => s.setPreferencesOpen);
+  useEffect(() => {
+    setPreferencesOpen(true);
+  }, [setPreferencesOpen]);
+  return <Navigate to="/dashboard" replace />;
+}
 
 export default function App() {
   return (
@@ -27,13 +40,13 @@ export default function App() {
         }
       />
       <Route
-      path="/vehicle-settings"
-      element={
-        <ProtectedRoute>
-          <VehicleSettings />
-        </ProtectedRoute>
-      }
-/>
+        path="/vehicle-settings"
+        element={
+          <ProtectedRoute>
+            <OpenPreferences />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/vehicle-test"
         element={
