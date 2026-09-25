@@ -2109,6 +2109,108 @@ a:hover {
   animation: assistant-listening 1.2s ease-in-out infinite;
 }
 
+/* ── User-to-user call launcher ── */
+/*
+   The launcher floats below the top bar so it does not become a full-height
+   grid row or push the cockpit content down. The incoming-call modal remains
+   responsible for the full-screen call prompt when a call arrives.
+*/
+.dashboard {
+  position: relative;
+}
+
+.call-session {
+  position: absolute;
+  top: calc(var(--topbar-height) + var(--space-3));
+  right: var(--space-4);
+  z-index: 30;
+}
+
+.call-launcher {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: max-content;
+  max-width: calc(100vw - 2 * var(--space-4));
+  padding: var(--space-2);
+  background: color-mix(in srgb, var(--surface-sunken) 94%, transparent);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.call-launcher-input {
+  width: 220px;
+  height: 34px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  background: var(--surface-primary);
+  outline: none;
+  font: inherit;
+}
+
+.call-launcher-input:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-primary-light);
+}
+
+.call-launcher-button {
+  height: 34px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--accent-primary);
+  border-radius: var(--radius-md);
+  color: var(--on-accent);
+  background: var(--accent-primary);
+  cursor: pointer;
+  font: inherit;
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+}
+
+.call-launcher-button:hover:not(:disabled) {
+  background: var(--accent-primary-hover);
+}
+
+.call-launcher-button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.call-launcher-message {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  right: 0;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  background: var(--surface-primary);
+  box-shadow: var(--shadow-md);
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .call-session {
+    left: var(--space-3);
+    right: var(--space-3);
+  }
+
+  .call-launcher {
+    width: 100%;
+    max-width: none;
+  }
+
+  .call-launcher-input {
+    min-width: 0;
+    width: auto;
+    flex: 1;
+  }
+}
+
 @keyframes assistant-listening {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.55; }
