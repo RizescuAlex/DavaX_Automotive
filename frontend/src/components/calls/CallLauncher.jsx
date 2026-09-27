@@ -1,13 +1,22 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createCall } from "../../services/calls";
 import { startCallRingtone } from "../../services/callSounds";
 import { useAppStore } from "../../store";
 
-export default function CallLauncher() {
+/**
+ * @param {() => void} [onCalled]  runs once the call is placed, so the panel
+ *                                 around this can step aside for the call dialog
+ */
+export default function CallLauncher({ onCalled }) {
   const [email, setEmail] = useState("");
+  const inputRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const setCall = useAppStore((state) => state.setCall);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -19,6 +28,7 @@ export default function CallLauncher() {
       startCallRingtone("ongoing");
       setMessage("Calling...");
       setEmail("");
+      onCalled?.();
     } catch (error) {
       setMessage(error.message);
     } finally {
@@ -29,11 +39,13 @@ export default function CallLauncher() {
   return (
     <form className="call-launcher" onSubmit={handleSubmit}>
       <input
+        ref={inputRef}
         className="call-launcher-input"
         type="email"
         value={email}
         onChange={(event) => setEmail(event.target.value)}
-        placeholder="Connected user's email"
+        placeholder="Their email address"
+        aria-label="Email address of the person to call"
         required
       />
       <button className="call-launcher-button" type="submit" disabled={loading}>

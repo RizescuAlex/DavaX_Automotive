@@ -88,6 +88,11 @@ export const EXTERIOR_LIGHT_DEFAULTS = {
  */
 const isDark = (date = new Date()) => date.getHours() >= 19 || date.getHours() < 7;
 
+const PANEL_KEYS = ["assistantOpen", "preferencesOpen", "userSettingsOpen", "callOpen"];
+
+/** { assistantOpen: false, ..., [key]: true } — one panel open, the rest shut. */
+const onlyPanelOpen = (key) => Object.fromEntries(PANEL_KEYS.map((k) => [k, k === key]));
+
 /** Writes are debounced so holding the +/- buttons does not spam the API. */
 const CLIMATE_SAVE_DELAY = 700;
 
@@ -140,28 +145,33 @@ export const useAppStore = create((set, get) => ({
 
   toggleTheme: () => get().setTheme(get().theme === "dark" ? "light" : "dark"),
 
-  // ── Assistant ─────────────────────────────────────────────────────────────
-  // Open state lives here because the button that opens the panel is in the
-  // top bar while the panel itself is over the map — two siblings that would
-  // otherwise have to thread a prop through Dashboard to reach each other.
+  // ── Top-bar panels ────────────────────────────────────────────────────────
+  // Each top-bar button opens a panel over the same corner of the map, so at
+  // most one is open: opening any closes the rest instead of stacking them.
+  // Open state lives here because the buttons are in the top bar and the
+  // panels are over the map — siblings that would otherwise need a prop
+  // threaded through Dashboard to reach each other.
   assistantOpen: false,
+  preferencesOpen: false,
+  userSettingsOpen: false,
+  callOpen: false,
 
-  // Both panels hang over the same corner of the map, so opening one closes
-  // the other rather than stacking them.
-  setAssistantOpen: (open) =>
-    set(open ? { assistantOpen: true, preferencesOpen: false } : { assistantOpen: false }),
+  _setPanelOpen: (key, open) =>
+    set(open ? onlyPanelOpen(key) : { [key]: false }),
 
+  setAssistantOpen: (open) => get()._setPanelOpen("assistantOpen", open),
   toggleAssistant: () => get().setAssistantOpen(!get().assistantOpen),
 
-  // ── Vehicle Preferences ───────────────────────────────────────────────────
-  // A panel over the map rather than a page, so the cockpit stays live behind
-  // it and changes land in the dock the moment they are saved.
-  preferencesOpen: false,
-
-  setPreferencesOpen: (open) =>
-    set(open ? { preferencesOpen: true, assistantOpen: false } : { preferencesOpen: false }),
-
+  // Vehicle Preferences is a panel rather than a page, so the cockpit stays
+  // live behind it and changes land in the dock the moment they are saved.
+  setPreferencesOpen: (open) => get()._setPanelOpen("preferencesOpen", open),
   togglePreferences: () => get().setPreferencesOpen(!get().preferencesOpen),
+
+  setUserSettingsOpen: (open) => get()._setPanelOpen("userSettingsOpen", open),
+  toggleUserSettings: () => get().setUserSettingsOpen(!get().userSettingsOpen),
+
+  setCallOpen: (open) => get()._setPanelOpen("callOpen", open),
+  toggleCall: () => get().setCallOpen(!get().callOpen),
 
   // ── Climate ───────────────────────────────────────────────────────────────
   // Target/fan/A-C are the driver's settings and persist to the backend.

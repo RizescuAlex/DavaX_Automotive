@@ -9,6 +9,8 @@ import VehicleGauges from "./VehicleGauges";
 import BottomDock from "./BottomDock";
 import AssistantPanel from "./AssistantPanel";
 import CallSession from "../calls/CallSession";
+import CallPanel from "../calls/CallPanel";
+import UserSettingsPanel from "../user-settings/UserSettingsPanel";
 import VehiclePreferencesPanel from "../vehicle-settings/VehiclePreferencesPanel";
 /**
  * Fixed three-column cockpit. There is no section switching any more: every
@@ -17,7 +19,7 @@ import VehiclePreferencesPanel from "../vehicle-settings/VehiclePreferencesPanel
  * toggles live in the dock at the foot of the shell.
  */
 export default function Dashboard() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const startSimulation = useAppStore((s) => s.startSimulation);
   const stopSimulation = useAppStore((s) => s.stopSimulation);
 
@@ -28,7 +30,7 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard">
-      <TopBar user={user} onLogout={logout} />
+      <TopBar user={user} />
       <CallSession />
 
       <div className="dashboard-body">
@@ -48,6 +50,8 @@ export default function Dashboard() {
           </div>
           <AssistantPanel />
           <VehiclePreferencesPanel />
+          <CallPanel />
+          <UserSettingsPanel />
         </main>
       </div>
 
