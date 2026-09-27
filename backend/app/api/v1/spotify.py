@@ -80,6 +80,9 @@ def currently_playing() -> dict:
             "image_url": images[0].get("url") if images else None,
             "progress_ms": playback.get("progress_ms", 0),
             "duration_ms": track.get("duration_ms", 0),
+            # The dashboard steps volume up and down from here; there is no
+            # other way for it to learn the device's current level.
+            "volume_percent": (playback.get("device") or {}).get("volume_percent"),
         }
     except RuntimeError as error:
         raise spotify_runtime_error(error) from error
