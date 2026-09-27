@@ -8,6 +8,7 @@ from collections import deque
 
 from motion.platform_backend_client import PlatformBackendClient
 from motion.latest_iphone_receiver import LatestIPhoneReceiver
+from motion.call_gesture_bridge import CallGestureBridge
 
 
 # ============================================================
@@ -1158,6 +1159,9 @@ def main():
         cooldown=0.30,
     )
 
+    # Forward stable thumb gestures to the backend call endpoint.
+    call_gesture_bridge = CallGestureBridge()
+
 
     # --------------------------------------------------------
     # Gesture recognizers
@@ -1370,6 +1374,8 @@ def main():
                             time.monotonic()
                             + 0.75
                         )
+
+                        call_gesture_bridge.send(thumb_result)
 
                         two_finger_recognizer.reset()
 

@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from app.api.v1 import calls
 from app.api.v1 import assistant, auth, users, onboarding, navigation, spotify, vehicle_settings, vehicles, vehicle_specs, preferences
 
 api_router = APIRouter()
@@ -13,3 +14,4 @@ api_router.include_router(assistant.router, prefix="/assistant", tags=["assistan
 api_router.include_router(vehicles.router, prefix="/vehicles", tags=["vehicles"])
 api_router.include_router(vehicle_specs.router, prefix="/vehicle-specs", tags=["vehicle-specs"])
 api_router.include_router(preferences.router, prefix="/preferences", tags=["preferences"])
+api_router.include_router(calls.router, prefix="/calls", tags=["calls"])

@@ -429,6 +429,32 @@ export const useAppStore = create((set, get) => ({
     if (on !== headlightsOn) set({ headlightsOn: on });
   },
 
+    // ── Calls ────────────────────────────────────────────────────────────────
+  call: null,
+  setCall: (call) => set({ call }),
+  clearCall: () => set({ call: null }),
+
+  customToken: localStorage.getItem(CUSTOM_TOKEN_KEY) || null,
+  customUser: (() => {
+    try {
+      return JSON.parse(localStorage.getItem(CUSTOM_USER_KEY)) || null;
+    } catch {
+      return null;
+    }
+  })(),
+
+  setCustomAuth: (token, user) => {
+    localStorage.setItem(CUSTOM_TOKEN_KEY, token);
+    localStorage.setItem(CUSTOM_USER_KEY, JSON.stringify(user));
+    set({ customToken: token, customUser: user });
+  },
+
+  clearCustomAuth: () => {
+    localStorage.removeItem(CUSTOM_TOKEN_KEY);
+    localStorage.removeItem(CUSTOM_USER_KEY);
+    set({ customToken: null, customUser: null });
+  },
+
   // ── Vehicle Simulation ────────────────────────────────────────────────────
   speed: 0,
   fuelLevel: 78,
