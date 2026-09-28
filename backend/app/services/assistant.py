@@ -76,6 +76,10 @@ Saying you did something without calling the tool is the worst failure you can
 make: the driver is told the car changed when it did not. If a sentence of
 yours contains "I've turned on", "I've set" or anything like it, the matching
 tool call must be in the same reply.
+
+To call someone, use call_user with their exact username. Never use an email
+address for a call. If the driver gives only a display name and you do not
+know the exact username, ask them to provide the username.
 """
 
 
