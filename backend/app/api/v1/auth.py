@@ -14,6 +14,7 @@ from app.core.security import (
     verify_password,
 )
 from app.models.user import User
+from app.services.usernames import make_unique_username, validate_username
 from app.schemas.auth import (
     AuthResponse,
     EmailLoginRequest,
@@ -68,12 +69,14 @@ async def firebase_login(
     is_new = False
 
     if user is None:
+        username = await make_unique_username(db, email.split("@", 1)[0])
         user = User(
             firebase_uid=firebase_uid,
             email=email,
             display_name=display_name,
             avatar_url=avatar_url,
             auth_provider="google",
+            username=username,
         )
         db.add(user)
         is_new = True
@@ -92,6 +95,7 @@ async def firebase_login(
         user_id=str(user.id),
         email=user.email,
         display_name=user.display_name,
+        username=user.username,
         onboarding_completed=user.onboarding_completed,
         is_new_user=is_new,
     )
@@ -110,11 +114,22 @@ async def register(
     if result.scalar_one_or_none() is not None:
         raise ConflictError("An account with this email already exists")
 
+    try:
+        username = validate_username(body.username) if body.username else await make_unique_username(
+            db, body.email.split("@", 1)[0]
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    username_result = await db.execute(select(User).where(User.username == username))
+    if username_result.scalar_one_or_none() is not None:
+        raise ConflictError("That username is already taken")
+
     user = User(
         email=body.email,
         display_name=body.display_name,
         password_hash=hash_password(body.password),
         auth_provider="email",
+        username=username,
     )
     db.add(user)
     await db.flush()
@@ -126,6 +141,7 @@ async def register(
         user_id=str(user.id),
         email=user.email,
         display_name=user.display_name,
+        username=user.username,
         onboarding_completed=user.onboarding_completed,
         is_new_user=True,
     )
@@ -164,6 +180,7 @@ async def login_email(
         user_id=str(user.id),
         email=user.email,
         display_name=user.display_name,
+        username=user.username,
         onboarding_completed=user.onboarding_completed,
         is_new_user=False,
     )
@@ -183,6 +200,7 @@ async def get_current_user(
         "id": str(user.id),
         "email": user.email,
         "display_name": user.display_name,
+        "username": user.username,
         "avatar_url": user.avatar_url,
         "onboarding_completed": user.onboarding_completed,
         "auth_provider": user.auth_provider,

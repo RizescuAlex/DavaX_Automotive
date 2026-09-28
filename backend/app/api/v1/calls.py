@@ -11,6 +11,7 @@ from app.config import settings
 from app.core.dependencies import get_db
 from app.core.security import get_current_token
 from app.models.call import CallSession
+from app.models.contact import UserContact
 from app.models.user import User
 from app.schemas.call import CallCreate, CallOut, CallResponse, CallTokenOut
 from app.services.calling import create_livekit_token, create_room_name
@@ -23,8 +24,8 @@ def serialize_call(call: CallSession) -> CallOut:
         id=call.id,
         caller_id=call.caller_id,
         callee_id=call.callee_id,
-        caller_name=call.caller.display_name or call.caller.email if call.caller else None,
-        callee_name=call.callee.display_name or call.callee.email if call.callee else None,
+        caller_name=call.caller.username if call.caller else None,
+        callee_name=call.callee.username if call.callee else None,
         status=call.status,
         room_name=call.room_name,
         created_at=call.created_at,
@@ -44,13 +45,22 @@ async def create_call(
     token: dict = Depends(get_current_token),
 ):
     caller = await current_user(token, db)
-    result = await db.execute(select(User).where(User.email == str(body.callee_email).lower()))
+    result = await db.execute(select(User).where(User.username == body.callee_username.strip().lower()))
     callee = result.scalar_one_or_none()
 
     if callee is None:
         raise HTTPException(status_code=404, detail="Recipient not found")
     if callee.id == caller.id:
         raise HTTPException(status_code=400, detail="You cannot call yourself")
+
+    contact_result = await db.execute(
+        select(UserContact).where(
+            UserContact.user_id == caller.id,
+            UserContact.contact_user_id == callee.id,
+        )
+    )
+    if contact_result.scalar_one_or_none() is None:
+        raise HTTPException(status_code=403, detail="You can only call users in your contacts")
 
     active = await db.execute(
         select(CallSession).where(

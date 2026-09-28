@@ -14,6 +14,7 @@ class User(Base):
         String(128), unique=True, nullable=True, index=True
     )
     email: Mapped[str | None] = mapped_column(String(255), unique=True)
+    username: Mapped[str] = mapped_column(String(32), unique=True, nullable=False, index=True)
     display_name: Mapped[str | None] = mapped_column(String(100))
     avatar_url: Mapped[str | None] = mapped_column(Text)
 
@@ -61,4 +62,16 @@ class User(Base):
         "CallSession",
         foreign_keys="CallSession.callee_id",
         back_populates="callee",
+    )
+    contacts = relationship(
+        "UserContact",
+        foreign_keys="UserContact.user_id",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    added_by = relationship(
+        "UserContact",
+        foreign_keys="UserContact.contact_user_id",
+        back_populates="contact_user",
+        cascade="all, delete-orphan",
     )

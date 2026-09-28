@@ -194,14 +194,38 @@ CONTROL_MUSIC = {
 }
 
 
-# The whole toolset, in the order the model sees it. Keep it at four: the tool
-# count is a deliberate scope cap, and new capabilities belong as parameters on
-# an existing tool wherever they fit.
+CALL_USER = {
+    "type": "function",
+    "name": "call_user",
+    "description": (
+        "Start a voice call to a contact by their exact username. Use this only "
+        "when the driver clearly asks to call someone. The backend will reject "
+        "users who are not in the driver's contacts."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "username": {
+                "type": "string",
+                "description": "The contact's exact username, without an email domain.",
+            }
+        },
+        "required": ["username"],
+    },
+}
+
+
+# The whole toolset, in the order the model sees it. The count is a deliberate
+# scope cap: new capabilities belong as parameters on an existing tool wherever
+# they fit. call_user is the exception because it fits none of them — it is
+# neither a car control nor the screen, and it is the one tool that reaches
+# another person.
 ASSISTANT_TOOLS = [
     SET_CLIMATE,
     SET_VEHICLE_CONTROLS,
     SET_DISPLAY,
     CONTROL_MUSIC,
+    CALL_USER,
 ]
 
 # Names the dispatcher is allowed to act on. The route filters returned calls
