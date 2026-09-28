@@ -44,11 +44,18 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    # Migrate before serving: a fresh clone has an empty database, and every
-    # auth call 500s on a missing relation until `alembic upgrade head` has run.
-    # Postgres is already healthy here via depends_on, and the upgrade is a
-    # no-op once the schema is current, so this is safe on every restart.
-    command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    # Sync packages, then migrate, then serve.
+    #
+    # pip install: requirements are baked in at image build time, and a plain
+    # `docker compose up` does not rebuild, so a package a teammate adds would
+    # otherwise be missing until everyone remembers --build. It is a quick
+    # no-op when nothing changed.
+    #
+    # alembic upgrade head: a fresh clone has an empty database, and every auth
+    # call 500s on a missing relation until it has run. Postgres is already
+    # healthy here via depends_on, and the upgrade is a no-op once the schema
+    # is current, so this is safe on every restart.
+    command: sh -c "pip install --quiet --disable-pip-version-check -r requirements.txt && alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
 
   frontend:
     build:
@@ -60,8 +67,15 @@ services:
       - "5173:5173"
     volumes:
       - ./frontend:/app
+      # node_modules lives in its own volume so the Linux build of each
+      # package does not collide with a host's. Docker fills that volume once,
+      # when the container is first created, and reuses it from then on — even
+      # after the image is rebuilt with new packages. That is how a teammate's
+      # new dependency (livekit-client) went missing on every existing setup.
       - /app/node_modules
-    command: npm run dev -- --host 0.0.0.0
+    # npm install on every start brings the volume in line with
+    # package-lock.json; it takes a couple of seconds when nothing changed.
+    command: sh -c "npm install --no-audit --no-fund && npm run dev -- --host 0.0.0.0"
 
   nginx:
     image: nginx:alpine

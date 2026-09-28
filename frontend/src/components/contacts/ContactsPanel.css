@@ -1,0 +1,189 @@
+/* Contacts — the Vehicle Preferences panel shell (.prefs-panel), sized to a
+   list: it grows with the contacts and scrolls once it reaches the map's foot. */
+
+.contacts-panel {
+  width: min(420px, calc(100% - var(--space-8)));
+  bottom: auto;
+  max-height: calc(100% - var(--space-3) * 2 - 44px - var(--space-8));
+}
+
+.contacts-add {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-4) var(--space-3);
+  flex-shrink: 0;
+}
+
+.contacts-add input {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 0 var(--space-3);
+  color: var(--text-primary);
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  outline: none;
+  font: inherit;
+}
+
+.contacts-add input:focus { border-color: var(--accent-primary); }
+
+.contacts-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 40px;
+  padding: 0 var(--space-4);
+  color: var(--on-accent);
+  background: var(--accent-primary);
+  border: 0;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font: inherit;
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+}
+
+.contacts-add-btn:hover:not(:disabled) { background: var(--accent-primary-hover); }
+.contacts-add-btn:disabled { opacity: 0.55; cursor: default; }
+
+.contacts-status {
+  margin: 0;
+  padding: 0 var(--space-4) var(--space-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-success);
+}
+
+.contacts-status.error { color: var(--color-error); }
+
+/* Only the list scrolls; the add form stays in reach at the top. */
+.contacts-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.contacts-list ul {
+  margin: 0;
+  padding: var(--space-2) 0;
+  list-style: none;
+}
+
+.contacts-empty {
+  margin: 0;
+  padding: var(--space-5) var(--space-4);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.contact-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+}
+
+.contact-row:hover { background: var(--surface-secondary); }
+
+.contact-avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  color: var(--text-secondary);
+  background: var(--surface-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-semibold);
+}
+
+.contact-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.contact-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.contact-text strong,
+.contact-text span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contact-text strong { color: var(--text-primary); }
+
+.contact-text span {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.contact-call,
+.contact-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+  height: 40px;
+  min-width: 40px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  transition: background var(--transition-fast), color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.contact-call:disabled,
+.contact-remove:disabled { opacity: 0.5; cursor: default; }
+
+/* Call is the row's main action, so it carries the accent. */
+.contact-call {
+  color: var(--accent-primary);
+  background: var(--accent-primary-light);
+  border-color: var(--accent-primary);
+}
+
+.contact-call:hover:not(:disabled) {
+  color: var(--on-accent);
+  background: var(--accent-primary);
+}
+
+.contact-remove {
+  color: var(--text-muted);
+  background: transparent;
+}
+
+.contact-remove:hover:not(:disabled) {
+  color: var(--color-error);
+  border-color: var(--color-error);
+}
+
+/* Armed: waiting for the confirming second tap. */
+.contact-remove.confirming {
+  padding: 0 var(--space-3);
+  color: var(--on-accent);
+  background: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.contact-call:focus-visible,
+.contact-remove:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}

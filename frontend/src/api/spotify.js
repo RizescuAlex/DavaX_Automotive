@@ -22,6 +22,10 @@ export const seekSpotifyTrack = (positionMs) => spotifyRequest("/seek", {
   method: "POST",
   body: JSON.stringify({ position_ms: positionMs }),
 });
+export const setSpotifyVolume = (volumePercent) => spotifyRequest("/volume", {
+  method: "POST",
+  body: JSON.stringify({ volume_percent: volumePercent }),
+});
 export const transferSpotifyPlayback = (deviceId) => spotifyRequest("/transfer", {
   method: "POST",
   body: JSON.stringify({ device_id: deviceId }),

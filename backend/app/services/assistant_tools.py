@@ -103,7 +103,13 @@ SET_VEHICLE_CONTROLS = {
         "cannot indicate one way while flashing both. Never set more than one "
         "of those three to true in a single call; if the driver asks for a "
         "combination that is impossible, do the safest one and say so in the "
-        "reply. Headlights and wipers are independent of everything."
+        "reply. Headlights and wipers are independent of everything.\n\n"
+        "headlights forces them on or off. headlights_auto hands them to the "
+        "dusk sensor instead — use it for 'put the headlights on auto' or "
+        "'let the car decide', and never together with headlights in the same "
+        "call. Fog lights are separate lamps from the headlights: fog_lights is "
+        "the front pair, rear_fog_lights the rear lamp. 'Fog lights' on its own "
+        "means both."
     ),
     "parameters": {
         "type": "object",
@@ -124,26 +130,45 @@ SET_VEHICLE_CONTROLS = {
                 "description": "Right indicator. Turning it on cancels left and hazards.",
             },
             "wipers": {"type": "boolean", "description": "Windscreen wipers on or off."},
+            "headlights_auto": {
+                "type": "boolean",
+                "description": (
+                    "true puts the headlights on automatic, so the dusk sensor "
+                    "turns them on and off. false switches automatic off and "
+                    "leaves the headlights as they are now."
+                ),
+            },
+            "fog_lights": {"type": "boolean", "description": "Front fog lights on or off."},
+            "rear_fog_lights": {"type": "boolean", "description": "Rear fog light on or off."},
         },
         "required": [],
     },
 }
 
 
-SET_THEME = {
+SET_DISPLAY = {
     "type": "function",
-    "name": "set_theme",
+    "name": "set_display",
     "description": (
-        "Switch the dashboard's appearance. Use 'dark' for night driving or "
-        "glare, 'light' for daylight. These are the store's own values — do "
-        "not send 'day' or 'night', which match no stylesheet and fail silently."
+        "Change what the dashboard screen shows: its appearance, and whether "
+        "the Vehicle Preferences panel is open. Set only what the driver asked "
+        "for.\n\n"
+        "mode: 'dark' for night driving or glare, 'light' for daylight. These "
+        "are the store's own values — do not send 'day' or 'night', which match "
+        "no stylesheet and fail silently.\n\n"
+        "preferences_panel: 'open' shows Vehicle Preferences, where the driver "
+        "sets ambient lighting, mirrors, seat and steering position and "
+        "exterior-light defaults — use it when they ask to see or change "
+        "settings you have no parameter for. Opening it closes this "
+        "conversation's panel, so keep the reply short."
     ),
     "parameters": {
         "type": "object",
         "properties": {
             "mode": {"type": "string", "enum": ["dark", "light"]},
+            "preferences_panel": {"type": "string", "enum": ["open", "closed"]},
         },
-        "required": ["mode"],
+        "required": [],
     },
 }
 
@@ -169,14 +194,38 @@ CONTROL_MUSIC = {
 }
 
 
-# The whole toolset, in the order the model sees it. Keep it at four: the tool
-# count is a deliberate scope cap, and new capabilities belong as parameters on
-# an existing tool wherever they fit.
+CALL_USER = {
+    "type": "function",
+    "name": "call_user",
+    "description": (
+        "Start a voice call to a contact by their exact username. Use this only "
+        "when the driver clearly asks to call someone. The backend will reject "
+        "users who are not in the driver's contacts."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "username": {
+                "type": "string",
+                "description": "The contact's exact username, without an email domain.",
+            }
+        },
+        "required": ["username"],
+    },
+}
+
+
+# The whole toolset, in the order the model sees it. The count is a deliberate
+# scope cap: new capabilities belong as parameters on an existing tool wherever
+# they fit. call_user is the exception because it fits none of them — it is
+# neither a car control nor the screen, and it is the one tool that reaches
+# another person.
 ASSISTANT_TOOLS = [
     SET_CLIMATE,
     SET_VEHICLE_CONTROLS,
-    SET_THEME,
+    SET_DISPLAY,
     CONTROL_MUSIC,
+    CALL_USER,
 ]
 
 # Names the dispatcher is allowed to act on. The route filters returned calls

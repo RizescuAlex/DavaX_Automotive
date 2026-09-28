@@ -84,9 +84,15 @@ export default function AssistantPanel() {
       if (spoken) speak(spokenReply);
 
       if (failures.length > 0) {
-        const trouble = failures.some((failure) => failure.tool === "control_music")
-          ? "The music would not respond — that needs Spotify Premium."
-          : "Some of that did not go through.";
+        // A failed call says why — most often the person is not in the
+        // driver's contacts — since "did not go through" alone gives the
+        // driver nothing to act on.
+        const failedCall = failures.find((failure) => failure.tool === "call_user");
+        const trouble = failedCall
+          ? `The call did not go through: ${failedCall.error.message}`
+          : failures.some((failure) => failure.tool === "control_music")
+            ? "The music would not respond — that needs Spotify Premium."
+            : "Some of that did not go through.";
         say("assistant", trouble);
         if (spoken) speak(trouble);
       }
