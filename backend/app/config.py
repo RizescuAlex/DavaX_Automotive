@@ -22,16 +22,12 @@ class Settings(BaseSettings):
     MAPBOX_ACCESS_TOKEN: str = ""
     OPENWEATHERMAP_API_KEY: str = ""
 
-    # Gemini (in-car assistant). Deliberately not VITE_-prefixed: the key must
-    # stay backend-side, which is the reason the assistant route exists at all.
-    GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = "gemini-3.1-flash-lite"
+    # SmartRoute defaults
+    FUEL_TANK_CAPACITY_L: int = 50
+    FUEL_CONSUMPTION_L_PER_100KM: float = 7.5
+    FUEL_RESERVE_THRESHOLD_PCT: int = 15
+    WEATHER_API_URL: str = "https://api.open-meteo.com/v1/forecast"
 
-    # LiveKit voice calls
-    LIVEKIT_URL: str = ""
-    LIVEKIT_API_KEY: str = ""
-    LIVEKIT_API_SECRET: str = ""
-    GESTURE_BRIDGE_TOKEN: str = ""
 
     # Spotify
     SPOTIFY_CLIENT_ID: str = ""
