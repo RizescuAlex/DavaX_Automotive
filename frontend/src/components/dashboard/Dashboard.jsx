@@ -11,6 +11,7 @@ import AssistantPanel from "./AssistantPanel";
 import CallSession from "../calls/CallSession";
 import CallPanel from "../calls/CallPanel";
 import UserSettingsPanel from "../user-settings/UserSettingsPanel";
+import ContactsPanel from "../contacts/ContactsPanel";
 import VehiclePreferencesPanel from "../vehicle-settings/VehiclePreferencesPanel";
 /**
  * Fixed three-column cockpit. There is no section switching any more: every
@@ -52,6 +53,7 @@ export default function Dashboard() {
           <VehiclePreferencesPanel />
           <CallPanel />
           <UserSettingsPanel />
+          <ContactsPanel />
         </main>
       </div>
 

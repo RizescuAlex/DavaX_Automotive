@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bot, Sun, Cloud, CloudRain, User, Moon, Settings, Phone } from "lucide-react";
+import { Bot, Sun, Cloud, CloudRain, User, Moon, Settings, Phone, Users } from "lucide-react";
 import { APP_NAME } from "../../config/constants";
 import { useAppStore } from "../../store";
 
@@ -43,6 +43,25 @@ function CallButton() {
     >
       <Phone size={14} />
       Call
+    </button>
+  );
+}
+
+/** Opens Contacts, where drivers are added and called by username. */
+function ContactsButton() {
+  const open = useAppStore((s) => s.contactsOpen);
+  const toggleContacts = useAppStore((s) => s.toggleContacts);
+
+  return (
+    <button
+      type="button"
+      className={`btn btn-secondary btn-sm ${open ? "is-on" : ""}`}
+      onClick={toggleContacts}
+      aria-pressed={open}
+      aria-label={open ? "Close contacts" : "Open contacts"}
+    >
+      <Users size={14} />
+      Contacts
     </button>
   );
 }
@@ -180,6 +199,7 @@ export default function TopBar({ user }) {
       <div className="top-bar-right">
         <AssistantButton />
         <CallButton />
+        <ContactsButton />
         <PreferencesButton />
         <WeatherBadge />
         <ThemeToggle />

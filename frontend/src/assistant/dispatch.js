@@ -5,6 +5,7 @@ import {
   playMusic,
   previousSpotifyTrack,
 } from "../api/spotify";
+import { placeCall } from "../services/calls";
 
 /**
  * Applies the actions the assistant returns.
@@ -103,11 +104,25 @@ function applyMusic(args) {
   return call();
 }
 
+/**
+ * Like control_music, a network call rather than a store write, and one that
+ * can fail for reasons the driver should hear: the backend only connects
+ * people in each other's contacts. The rejection carries its message back to
+ * the panel through the failures list.
+ */
+function applyCall(args) {
+  if (typeof args.username !== "string" || !args.username.trim()) {
+    return Promise.resolve();
+  }
+  return placeCall(args.username);
+}
+
 const HANDLERS = {
   set_climate: applyClimate,
   set_vehicle_controls: applyVehicleControls,
   set_display: applyDisplay,
   control_music: applyMusic,
+  call_user: applyCall,
 };
 
 /**

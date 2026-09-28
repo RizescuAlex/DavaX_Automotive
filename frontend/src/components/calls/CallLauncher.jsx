@@ -1,18 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import { createCall } from "../../services/calls";
-import { startCallRingtone } from "../../services/callSounds";
-import { useAppStore } from "../../store";
+import { placeCall } from "../../services/calls";
 
 /**
  * @param {() => void} [onCalled]  runs once the call is placed, so the panel
  *                                 around this can step aside for the call dialog
  */
 export default function CallLauncher({ onCalled }) {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const inputRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
-  const setCall = useAppStore((state) => state.setCall);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -23,11 +20,9 @@ export default function CallLauncher({ onCalled }) {
     setLoading(true);
     setMessage(null);
     try {
-      const call = await createCall(email);
-      setCall(call);
-      startCallRingtone("ongoing");
+      await placeCall(username);
       setMessage("Calling...");
-      setEmail("");
+      setUsername("");
       onCalled?.();
     } catch (error) {
       setMessage(error.message);
@@ -41,11 +36,14 @@ export default function CallLauncher({ onCalled }) {
       <input
         ref={inputRef}
         className="call-launcher-input"
-        type="email"
-        value={email}
-        onChange={(event) => setEmail(event.target.value)}
-        placeholder="Their email address"
-        aria-label="Email address of the person to call"
+        type="text"
+        value={username}
+        onChange={(event) => setUsername(event.target.value)}
+        placeholder="@username"
+        aria-label="Username of the person to call"
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
         required
       />
       <button className="call-launcher-button" type="submit" disabled={loading}>

@@ -88,7 +88,13 @@ export const EXTERIOR_LIGHT_DEFAULTS = {
  */
 const isDark = (date = new Date()) => date.getHours() >= 19 || date.getHours() < 7;
 
-const PANEL_KEYS = ["assistantOpen", "preferencesOpen", "userSettingsOpen", "callOpen"];
+const PANEL_KEYS = [
+  "assistantOpen",
+  "preferencesOpen",
+  "userSettingsOpen",
+  "callOpen",
+  "contactsOpen",
+];
 
 /** { assistantOpen: false, ..., [key]: true } — one panel open, the rest shut. */
 const onlyPanelOpen = (key) => Object.fromEntries(PANEL_KEYS.map((k) => [k, k === key]));
@@ -155,6 +161,7 @@ export const useAppStore = create((set, get) => ({
   preferencesOpen: false,
   userSettingsOpen: false,
   callOpen: false,
+  contactsOpen: false,
 
   _setPanelOpen: (key, open) =>
     set(open ? onlyPanelOpen(key) : { [key]: false }),
@@ -172,6 +179,9 @@ export const useAppStore = create((set, get) => ({
 
   setCallOpen: (open) => get()._setPanelOpen("callOpen", open),
   toggleCall: () => get().setCallOpen(!get().callOpen),
+
+  setContactsOpen: (open) => get()._setPanelOpen("contactsOpen", open),
+  toggleContacts: () => get().setContactsOpen(!get().contactsOpen),
 
   // ── Climate ───────────────────────────────────────────────────────────────
   // Target/fan/A-C are the driver's settings and persist to the backend.

@@ -53,8 +53,10 @@ function UserSettingsContent({ onClose }) {
   // Google sign-ins carry backendUser; email/password sign-ins carry customUser.
   const profile = backendUser ?? customUser ?? {};
   const savedName = profile.display_name ?? profile.displayName ?? "";
+  const savedUsername = profile.username ?? "";
 
   const [displayName, setDisplayName] = useState(savedName);
+  const [username, setUsername] = useState(savedUsername);
   const [preferences, setPreferences] = useState(null);
   const [savedPreferences, setSavedPreferences] = useState(null);
   const [preferencesNote, setPreferencesNote] = useState("");
@@ -117,16 +119,25 @@ function UserSettingsContent({ onClose }) {
     setError("");
 
     try {
+      // One PUT for both profile fields, sending only what changed. The
+      // backend lowercases and validates the username and answers 409 if
+      // someone else has it; that message goes straight to the status line.
       const name = displayName.trim();
-      if (name && name !== savedName && !DESIGN_PREVIEW) {
+      const handle = username.trim().replace(/^@/, "").toLowerCase();
+      const profileChanges = {};
+      if (name && name !== savedName) profileChanges.display_name = name;
+      if (handle && handle !== savedUsername) profileChanges.username = handle;
+
+      if (Object.keys(profileChanges).length > 0 && !DESIGN_PREVIEW) {
         const updated = await apiFetch("/users/me", {
           method: "PUT",
-          body: JSON.stringify({ display_name: name }),
+          body: JSON.stringify(profileChanges),
         });
-        // The greeting in the top bar reads these, so update whichever
-        // sign-in this driver used.
-        if (backendUser) setBackendUser({ ...backendUser, display_name: updated.display_name });
-        if (customUser) setCustomAuth(customToken, { ...customUser, display_name: updated.display_name });
+        // The top bar reads these, so update whichever sign-in this driver used.
+        const fresh = { display_name: updated.display_name, username: updated.username };
+        if (backendUser) setBackendUser({ ...backendUser, ...fresh });
+        if (customUser) setCustomAuth(customToken, { ...customUser, ...fresh });
+        setUsername(updated.username);
       }
 
       if (preferences && JSON.stringify(preferences) !== JSON.stringify(savedPreferences)) {
@@ -176,9 +187,31 @@ function UserSettingsContent({ onClose }) {
               </div>
               <div className="user-identity-text">
                 <strong>{savedName || "Driver"}</strong>
-                <span>{profile.email || "No email on file"}</span>
+                <span>
+                  {savedUsername ? `@${savedUsername}` : ""}
+                  {savedUsername && profile.email ? " · " : ""}
+                  {profile.email || (savedUsername ? "" : "No email on file")}
+                </span>
               </div>
             </div>
+
+            <label className="settings-field">
+              Username
+              <input
+                type="text"
+                value={username}
+                maxLength={32}
+                onChange={(event) => setUsername(event.target.value)}
+                placeholder="How others find and call you"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+              />
+              <span className="user-hint">
+                2–32 characters: letters, numbers, underscores or periods. Others add
+                you as a contact with it.
+              </span>
+            </label>
 
             <label className="settings-field">
               Display name

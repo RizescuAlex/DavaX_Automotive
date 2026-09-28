@@ -35,7 +35,8 @@ export default function CallPanel() {
 
       <div className="call-panel-body">
         <p className="call-panel-hint">
-          Call another DavaX driver who is signed in right now.
+          Call a driver from your contacts by their username. They have to be
+          signed in to answer.
         </p>
         <CallLauncher onCalled={close} />
       </div>

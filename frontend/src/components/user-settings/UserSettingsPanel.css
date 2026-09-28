@@ -93,3 +93,8 @@
   outline: 2px solid var(--color-error);
   outline-offset: 2px;
 }
+
+.user-hint {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
