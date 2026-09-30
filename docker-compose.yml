@@ -71,13 +71,10 @@ services:
       # after the image is rebuilt with new packages. That is how a teammate's
       # new dependency (livekit-client) went missing on every existing setup.
       - /app/node_modules
-<<<<<<< HEAD
-    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
-=======
     # npm install on every start brings the volume in line with
     # package-lock.json; it takes a couple of seconds when nothing changed.
     command: sh -c "npm install --no-audit --no-fund && npm run dev -- --host 0.0.0.0"
->>>>>>> 982e07125b502e1fc9ce17e63b855dfd6ecfb6a7
+
 
   nginx:
     image: nginx:alpine
