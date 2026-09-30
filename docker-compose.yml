@@ -53,7 +53,11 @@ services:
     # call 500s on a missing relation until it has run. Postgres is already
     # healthy here via depends_on, and the upgrade is a no-op once the schema
     # is current, so this is safe on every restart.
-    command: sh -c "pip install --quiet --disable-pip-version-check -r requirements.txt && alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+    
+    # command: sh -c "pip install --quiet --disable-pip-version-check -r requirements.txt && alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
 
   frontend:
     build:

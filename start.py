@@ -38,9 +38,23 @@ def main():
         print("⚡ Starting services (using existing cache)...")
         run_cmd(get_prefix() + ["docker", "compose", "up", "-d"])
 
-    # Run database migrations
+    # Python packages setup inside backend
+    print("📦 Synchronizing Python dependencies...")
+    run_cmd(get_prefix() + ["docker", "compose", "exec", "backend", "pip", "install", "--quiet", "--disable-pip-version-check", "-r", "requirements.txt"])
+
+    # Reconcile split migration histories if any exist
+    print("🔄 Resolving potential database migration conflicts...")
+    subprocess.run(
+        get_prefix() + ["docker", "compose", "exec", "backend", "alembic", "merge", "-m", "Auto-reconciled divergent heads", "heads"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
+
+    # Apply database migrations safely
+    print("🗄️  Applying database migrations...")
     run_cmd(get_prefix() + ["docker", "compose", "exec", "backend", "alembic", "upgrade", "head"])
-    print("✅ App is up and running!")
+    
+    print("✅ App is up and running smoothly!")
 
 if __name__ == "__main__":
     main()
