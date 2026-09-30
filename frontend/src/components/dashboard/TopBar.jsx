@@ -190,7 +190,7 @@ export default function TopBar({ user, onLogout, onAvatarClick }) {
     <header className="top-bar">
       <div className="top-bar-left">
         <div className="top-bar-logo">
-          {APP_NAME}<span>.</span>
+	          {APP_NAME}<span>.</span>
         </div>
         <div className="top-bar-greeting">
           {getGreeting()}, <strong>{displayName}</strong>
@@ -204,26 +204,8 @@ export default function TopBar({ user, onLogout, onAvatarClick }) {
         <WeatherBadge />
         <ThemeToggle />
         <div className="top-bar-user">
-<<<<<<< HEAD
-          <div className="avatar" onClick={onAvatarClick} style={{ cursor: "pointer" }} title="Edit Profile">
-            {user?.photoURL ? (
-              <img src={user.photoURL} alt="" className="avatar-img" />
-            ) : (
-              <User size={18} />
-            )}
-          </div>
-          <button
-            id="sign-out-btn"
-            className="btn btn-secondary btn-sm"
-            onClick={onLogout}
-          >
-            <LogOut size={14} />
-            Sign Out
-          </button>
-=======
           {/* Sign out lives in the User Settings panel this opens */}
           <UserSettingsButton photoURL={user?.photoURL || user?.avatar_url} />
->>>>>>> 982e07125b502e1fc9ce17e63b855dfd6ecfb6a7
         </div>
       </div>
     </header>
