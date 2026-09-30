@@ -22,7 +22,7 @@ import OnboardingWizard from "../onboarding/OnboardingWizard";
  * toggles live in the dock at the foot of the shell.
  */
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const startSimulation = useAppStore((s) => s.startSimulation);
   const stopSimulation = useAppStore((s) => s.stopSimulation);
   
