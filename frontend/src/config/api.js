@@ -71,5 +71,7 @@ export async function apiFetch(path, options = {}) {
     throw new Error(errorMessage);
   }
 
+  // 204 No Content (a DELETE, say) has no body to parse.
+  if (response.status === 204) return null;
   return response.json();
 }

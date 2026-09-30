@@ -2,11 +2,11 @@ import uuid
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 
 class CallCreate(BaseModel):
-    callee_email: EmailStr
+    callee_username: str
 
 
 class CallResponse(BaseModel):

@@ -63,8 +63,21 @@ function describeClimate(args) {
 function describeControls(args) {
   const parts = [];
 
+  if (args.headlights_auto != null) {
+    parts.push(args.headlights_auto ? "headlights on automatic" : "automatic headlights off");
+  }
   if (args.headlights != null) {
     parts.push(args.headlights ? "headlights on" : "headlights off");
+  }
+  if (args.fog_lights != null && args.fog_lights === args.rear_fog_lights) {
+    parts.push(args.fog_lights ? "fog lights on" : "fog lights off");
+  } else {
+    if (args.fog_lights != null) {
+      parts.push(args.fog_lights ? "front fog lights on" : "front fog lights off");
+    }
+    if (args.rear_fog_lights != null) {
+      parts.push(args.rear_fog_lights ? "rear fog light on" : "rear fog light off");
+    }
   }
   if (args.wipers != null) {
     parts.push(args.wipers ? "wipers on" : "wipers off");
@@ -85,10 +98,13 @@ function describeControls(args) {
   return parts;
 }
 
-function describeTheme(args) {
-  if (args.mode === "dark") return ["switching to the dark dashboard"];
-  if (args.mode === "light") return ["switching to the light dashboard"];
-  return [];
+function describeDisplay(args) {
+  const parts = [];
+  if (args.mode === "dark") parts.push("switching to the dark dashboard");
+  if (args.mode === "light") parts.push("switching to the light dashboard");
+  if (args.preferences_panel === "open") parts.push("opening Vehicle Preferences");
+  if (args.preferences_panel === "closed") parts.push("closing Vehicle Preferences");
+  return parts;
 }
 
 const MUSIC_PHRASES = {
@@ -103,11 +119,17 @@ function describeMusic(args) {
   return phrase ? [phrase] : [];
 }
 
+function describeCall(args) {
+  const username = typeof args.username === "string" ? args.username.trim().replace(/^@/, "") : "";
+  return username ? [`calling ${username}`] : [];
+}
+
 const DESCRIBERS = {
   set_climate: describeClimate,
   set_vehicle_controls: describeControls,
-  set_theme: describeTheme,
+  set_display: describeDisplay,
   control_music: describeMusic,
+  call_user: describeCall,
 };
 
 /** "a", "a and b", "a, b and c" — spoken punctuation, not a list. */

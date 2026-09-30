@@ -76,6 +76,10 @@ Saying you did something without calling the tool is the worst failure you can
 make: the driver is told the car changed when it did not. If a sentence of
 yours contains "I've turned on", "I've set" or anything like it, the matching
 tool call must be in the same reply.
+
+To call someone, use call_user with their exact username. Never use an email
+address for a call. If the driver gives only a display name and you do not
+know the exact username, ask them to provide the username.
 """
 
 
@@ -127,9 +131,17 @@ def _describe(context: VehicleContext) -> str:
         add(f"- Right signal: {on_off(context.right_signal)}")
     if context.wipers is not None:
         add(f"- Wipers: {on_off(context.wipers)}")
+    if context.headlights_auto is not None:
+        add(f"- Automatic headlights: {on_off(context.headlights_auto)}")
+    if context.fog_lights is not None:
+        add(f"- Front fog lights: {on_off(context.fog_lights)}")
+    if context.rear_fog_lights is not None:
+        add(f"- Rear fog light: {on_off(context.rear_fog_lights)}")
 
     if context.theme is not None:
         add(f"- Dashboard appearance: {context.theme}")
+    if context.preferences_open is not None:
+        add(f"- Vehicle Preferences panel: {'open' if context.preferences_open else 'closed'}")
 
     if not lines:
         return "\nThe dashboard did not report its current state."

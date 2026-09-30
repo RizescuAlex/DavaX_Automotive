@@ -1,6 +1,5 @@
 import { useAppStore } from "../../store";
 import { useCallSession } from "../../hooks/useCallSession";
-import CallLauncher from "./CallLauncher";
 import IncomingCallModal from "./IncomingCallModal";
 
 export default function CallSession() {
@@ -10,7 +9,9 @@ export default function CallSession() {
 
   return (
     <div className="call-session">
-      <CallLauncher />
+      {/* Starting a call lives in the top bar's Call panel (CallPanel); this
+          only carries the dialog for a call in progress, which has to show
+          whatever else is open. */}
       <IncomingCallModal
         call={call}
         isIncoming={isIncoming}

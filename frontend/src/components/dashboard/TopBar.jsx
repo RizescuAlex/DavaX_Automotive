@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bot, LogOut, Sun, Cloud, CloudRain, User, Moon, Settings } from "lucide-react";
+import { Bot, Sun, Cloud, CloudRain, User, Moon, Settings, Phone, Users } from "lucide-react";
 import { APP_NAME } from "../../config/constants";
 import { useAppStore } from "../../store";
 
@@ -24,6 +24,66 @@ function AssistantButton() {
     >
       <Bot size={14} />
       AI Assistant
+    </button>
+  );
+}
+
+/** Opens the Call panel, where a call to another driver starts. */
+function CallButton() {
+  const open = useAppStore((s) => s.callOpen);
+  const toggleCall = useAppStore((s) => s.toggleCall);
+
+  return (
+    <button
+      type="button"
+      className={`btn btn-secondary btn-sm ${open ? "is-on" : ""}`}
+      onClick={toggleCall}
+      aria-pressed={open}
+      aria-label={open ? "Close the call panel" : "Open the call panel"}
+    >
+      <Phone size={14} />
+      Call
+    </button>
+  );
+}
+
+/** Opens Contacts, where drivers are added and called by username. */
+function ContactsButton() {
+  const open = useAppStore((s) => s.contactsOpen);
+  const toggleContacts = useAppStore((s) => s.toggleContacts);
+
+  return (
+    <button
+      type="button"
+      className={`btn btn-secondary btn-sm ${open ? "is-on" : ""}`}
+      onClick={toggleContacts}
+      aria-pressed={open}
+      aria-label={open ? "Close contacts" : "Open contacts"}
+    >
+      <Users size={14} />
+      Contacts
+    </button>
+  );
+}
+
+/**
+ * The avatar, doubling as the way into User Settings. A button rather than a
+ * picture, so it is reachable by keyboard and says what it does.
+ */
+function UserSettingsButton({ photoURL }) {
+  const open = useAppStore((s) => s.userSettingsOpen);
+  const toggleUserSettings = useAppStore((s) => s.toggleUserSettings);
+
+  return (
+    <button
+      type="button"
+      className={`avatar avatar-btn ${open ? "is-on" : ""}`}
+      onClick={toggleUserSettings}
+      aria-pressed={open}
+      aria-label={open ? "Close user settings" : "Open user settings"}
+      title="User settings"
+    >
+      {photoURL ? <img src={photoURL} alt="" className="avatar-img" /> : <User size={18} />}
     </button>
   );
 }
@@ -138,10 +198,13 @@ export default function TopBar({ user, onLogout, onAvatarClick }) {
       </div>
       <div className="top-bar-right">
         <AssistantButton />
+        <CallButton />
+        <ContactsButton />
         <PreferencesButton />
         <WeatherBadge />
         <ThemeToggle />
         <div className="top-bar-user">
+<<<<<<< HEAD
           <div className="avatar" onClick={onAvatarClick} style={{ cursor: "pointer" }} title="Edit Profile">
             {user?.photoURL ? (
               <img src={user.photoURL} alt="" className="avatar-img" />
@@ -157,6 +220,10 @@ export default function TopBar({ user, onLogout, onAvatarClick }) {
             <LogOut size={14} />
             Sign Out
           </button>
+=======
+          {/* Sign out lives in the User Settings panel this opens */}
+          <UserSettingsButton photoURL={user?.photoURL || user?.avatar_url} />
+>>>>>>> 982e07125b502e1fc9ce17e63b855dfd6ecfb6a7
         </div>
       </div>
     </header>

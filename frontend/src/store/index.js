@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { getVehicleSettings, saveClimateSettings } from "../api/vehicle";
+import { getVehicleSettings, saveClimateSettings, saveExteriorLights } from "../api/vehicle";
 
 const CUSTOM_TOKEN_KEY = "davax_token";
 const CUSTOM_USER_KEY = "davax_user";
@@ -88,6 +88,17 @@ export const EXTERIOR_LIGHT_DEFAULTS = {
  */
 const isDark = (date = new Date()) => date.getHours() >= 19 || date.getHours() < 7;
 
+const PANEL_KEYS = [
+  "assistantOpen",
+  "preferencesOpen",
+  "userSettingsOpen",
+  "callOpen",
+  "contactsOpen",
+];
+
+/** { assistantOpen: false, ..., [key]: true } — one panel open, the rest shut. */
+const onlyPanelOpen = (key) => Object.fromEntries(PANEL_KEYS.map((k) => [k, k === key]));
+
 /** Writes are debounced so holding the +/- buttons does not spam the API. */
 const CLIMATE_SAVE_DELAY = 700;
 
@@ -140,28 +151,37 @@ export const useAppStore = create((set, get) => ({
 
   toggleTheme: () => get().setTheme(get().theme === "dark" ? "light" : "dark"),
 
-  // ── Assistant ─────────────────────────────────────────────────────────────
-  // Open state lives here because the button that opens the panel is in the
-  // top bar while the panel itself is over the map — two siblings that would
-  // otherwise have to thread a prop through Dashboard to reach each other.
+  // ── Top-bar panels ────────────────────────────────────────────────────────
+  // Each top-bar button opens a panel over the same corner of the map, so at
+  // most one is open: opening any closes the rest instead of stacking them.
+  // Open state lives here because the buttons are in the top bar and the
+  // panels are over the map — siblings that would otherwise need a prop
+  // threaded through Dashboard to reach each other.
   assistantOpen: false,
+  preferencesOpen: false,
+  userSettingsOpen: false,
+  callOpen: false,
+  contactsOpen: false,
 
-  // Both panels hang over the same corner of the map, so opening one closes
-  // the other rather than stacking them.
-  setAssistantOpen: (open) =>
-    set(open ? { assistantOpen: true, preferencesOpen: false } : { assistantOpen: false }),
+  _setPanelOpen: (key, open) =>
+    set(open ? onlyPanelOpen(key) : { [key]: false }),
 
+  setAssistantOpen: (open) => get()._setPanelOpen("assistantOpen", open),
   toggleAssistant: () => get().setAssistantOpen(!get().assistantOpen),
 
-  // ── Vehicle Preferences ───────────────────────────────────────────────────
-  // A panel over the map rather than a page, so the cockpit stays live behind
-  // it and changes land in the dock the moment they are saved.
-  preferencesOpen: false,
-
-  setPreferencesOpen: (open) =>
-    set(open ? { preferencesOpen: true, assistantOpen: false } : { preferencesOpen: false }),
-
+  // Vehicle Preferences is a panel rather than a page, so the cockpit stays
+  // live behind it and changes land in the dock the moment they are saved.
+  setPreferencesOpen: (open) => get()._setPanelOpen("preferencesOpen", open),
   togglePreferences: () => get().setPreferencesOpen(!get().preferencesOpen),
+
+  setUserSettingsOpen: (open) => get()._setPanelOpen("userSettingsOpen", open),
+  toggleUserSettings: () => get().setUserSettingsOpen(!get().userSettingsOpen),
+
+  setCallOpen: (open) => get()._setPanelOpen("callOpen", open),
+  toggleCall: () => get().setCallOpen(!get().callOpen),
+
+  setContactsOpen: (open) => get()._setPanelOpen("contactsOpen", open),
+  toggleContacts: () => get().setContactsOpen(!get().contactsOpen),
 
   // ── Climate ───────────────────────────────────────────────────────────────
   // Target/fan/A-C are the driver's settings and persist to the backend.
@@ -354,8 +374,8 @@ export const useAppStore = create((set, get) => ({
   },
 
   // ── Exterior lighting ─────────────────────────────────────────────────────
-  // The preferences are set on the Vehicle Preferences page and only read
-  // here; the cockpit never writes them back.
+  // Set on the Vehicle Preferences panel, and by the assistant through
+  // setExteriorLight below.
   exteriorLights: EXTERIOR_LIGHT_DEFAULTS,
 
   // With automatic headlights, a tap in the dock overrides the sensor for the
@@ -381,6 +401,44 @@ export const useAppStore = create((set, get) => ({
       headlightsOverride: null,
     });
     get()._syncHeadlights();
+  },
+
+  /**
+   * Change one exterior-light preference and save it.
+   *
+   * Applied locally first so the cockpit answers at once; a failed save is
+   * logged rather than rolled back, the same trade the climate writes make.
+   */
+  setExteriorLight: (group, field, value) => {
+    const current = get().exteriorLights;
+    const exteriorLights = {
+      ...current,
+      [group]: { ...current[group], [field]: value },
+    };
+    set({ exteriorLights });
+    get()._syncHeadlights();
+    saveExteriorLights(exteriorLights).catch((error) =>
+      console.error("Could not save exterior lights", error)
+    );
+  },
+
+  /**
+   * Hand the headlights to the dusk sensor, or take them back.
+   *
+   * On: drop any override, and switch the automatic preference on if the
+   * driver had turned it off. Off: switch the preference off, leaving the
+   * headlights exactly as they are now rather than snapping them to a default.
+   */
+  setHeadlightsAuto: (on) => {
+    const { exteriorLights } = get();
+    if (on) {
+      set({ headlightsOverride: null });
+      if (exteriorLights.headlights.automatic) get()._syncHeadlights();
+      else get().setExteriorLight("headlights", "automatic", true);
+    } else if (exteriorLights.headlights.automatic) {
+      set({ headlightsOverride: null });
+      get().setExteriorLight("headlights", "automatic", false);
+    }
   },
 
   /** In automatic mode, put the headlights where the sensor (or override) says. */
