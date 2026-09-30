@@ -123,7 +123,7 @@ function WeatherBadge() {
   );
 }
 
-export default function TopBar({ user, onLogout }) {
+export default function TopBar({ user, onLogout, onAvatarClick }) {
   const displayName = user?.displayName || user?.display_name || user?.email?.split("@")[0] || "Driver";
 
   return (
@@ -142,7 +142,7 @@ export default function TopBar({ user, onLogout }) {
         <WeatherBadge />
         <ThemeToggle />
         <div className="top-bar-user">
-          <div className="avatar">
+          <div className="avatar" onClick={onAvatarClick} style={{ cursor: "pointer" }} title="Edit Profile">
             {user?.photoURL ? (
               <img src={user.photoURL} alt="" className="avatar-img" />
             ) : (

@@ -4,22 +4,9 @@ import { MAP_CONFIG } from "../../config/constants";
 import MapSearch from "./MapSearch";
 import { apiFetch } from "../../config/api"; 
 import { useAppStore } from "../../store";
+import { darkMapStyle, lightMapStyle } from "../../config/mapStyles";
 
 const mapContainerStyle = { width: "100%", height: "100%" };
-const mapOptions = {
-  disableDefaultUI: false,
-  zoomControl: true,
-  streetViewControl: true,
-  mapTypeControl: true,
-  fullscreenControl: true,
-  styles: [
-    {
-      featureType: "poi",
-      elementType: "labels",
-      stylers: [{ visibility: "off" }],
-    },
-  ],
-};
 
 const LIBRARIES = ["places", "geometry"];
 
@@ -41,12 +28,22 @@ export default function MapPanel() {
   const [tripConfirmed, setTripConfirmed] = useState(false);
 
   const fuelLevel = useAppStore((s) => Math.round(s.fuelLevel));
+  const theme = useAppStore((s) => s.theme);
 
   const [zoom, setZoom] = useState(MAP_CONFIG.DEFAULT_ZOOM);
   const [geoError, setGeoError] = useState(false);
   
   const mapRef = useRef(null);
   const hasCenteredRef = useRef(false);
+
+  const mapOptions = {
+    disableDefaultUI: false,
+    zoomControl: true,
+    streetViewControl: true,
+    mapTypeControl: true,
+    fullscreenControl: true,
+    styles: theme === "dark" ? darkMapStyle : lightMapStyle,
+  };
 
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "",

@@ -1,0 +1,70 @@
+{
+  "hash": "d441fcce",
+  "configHash": "16a1459d",
+  "lockfileHash": "bed5c4ec",
+  "browserHash": "f0296075",
+  "optimized": {
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "231a4229",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "91e0a1ef",
+      "needsInterop": true
+    },
+    "react-router-dom": {
+      "src": "../../node_modules/react-router-dom/dist/index.mjs",
+      "file": "react-router-dom.js",
+      "fileHash": "73a7d9f8",
+      "needsInterop": false
+    },
+    "firebase/auth": {
+      "src": "../../node_modules/firebase/auth/dist/esm/index.esm.js",
+      "file": "firebase_auth.js",
+      "fileHash": "f6e39714",
+      "needsInterop": false
+    },
+    "firebase/app": {
+      "src": "../../node_modules/firebase/app/dist/esm/index.esm.js",
+      "file": "firebase_app.js",
+      "fileHash": "3b4d316c",
+      "needsInterop": false
+    },
+    "zustand": {
+      "src": "../../node_modules/zustand/esm/index.mjs",
+      "file": "zustand.js",
+      "fileHash": "c2da0421",
+      "needsInterop": false
+    },
+    "lucide-react": {
+      "src": "../../node_modules/lucide-react/dist/esm/lucide-react.js",
+      "file": "lucide-react.js",
+      "fileHash": "ce7d08e0",
+      "needsInterop": false
+    },
+    "@react-google-maps/api": {
+      "src": "../../node_modules/@react-google-maps/api/dist/esm.js",
+      "file": "@react-google-maps_api.js",
+      "fileHash": "1d9a4d7b",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-XJ7LHJJS": {
+      "file": "chunk-XJ7LHJJS.js"
+    },
+    "chunk-R3P7LEPV": {
+      "file": "chunk-R3P7LEPV.js"
+    },
+    "chunk-P5PVDEGM": {
+      "file": "chunk-P5PVDEGM.js"
+    },
+    "chunk-G3PMV62Z": {
+      "file": "chunk-G3PMV62Z.js"
+    }
+  }
+}

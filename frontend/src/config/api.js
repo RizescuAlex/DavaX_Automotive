@@ -51,10 +51,10 @@ export async function apiFetch(path, options = {}) {
 
     // Handle 401 Unauthorized (Expired token, wrong credentials)
     // Handle 403 Forbidden (Account disabled/banned)
-    if (response.status === 401 || response.status === 403) {
+    if (response.status === 401 || response.status === 403 || response.status === 404) {
       
       // If they are NOT actively trying to log in/register, wipe the session and redirect
-      if (!path.includes("/auth/login") && !path.includes("/auth/register")) {
+      if (!path.includes("/auth/login") && !path.includes("/auth/register") && window.location.pathname !== "/login") {
         localStorage.removeItem("davax_token");
         localStorage.removeItem("davax_user");
         if (firebaseAuth) {

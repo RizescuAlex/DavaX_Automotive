@@ -17,4 +17,5 @@ else
     sudo docker compose up -d
 fi
 
+sudo docker compose exec backend alembic upgrade head
 echo "✅ App is up and running!"
