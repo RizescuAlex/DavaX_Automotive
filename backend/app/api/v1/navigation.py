@@ -21,7 +21,7 @@ from app.services.fuel import build_fuel_plan, get_fuel_config, rank_fuel_stops
 from app.services.personalization import get_user_weights, get_user_fuel_type, upsert_frequented_location
 from app.services.places import find_fuel_stops, find_family_stops, find_scenic_stops
 from app.services.routing import compute_routes
-from app.services.scoring import RouteFeatures, UserWeights, score_and_rank
+from app.services.scoring import RouteFeatures, score_and_rank
 from app.services.weather import assess_route_weather
 
 logger = logging.getLogger("davax.navigation")
@@ -259,6 +259,7 @@ async def get_route(
                 destination_address=route["destination_address"],
                 toll_estimate=route["toll_estimate"],
                 labels=route.get("labels", []),
+                maneuvers=route.get("maneuvers", []),
                 scores=RouteScores(
                     time=round(scored.time_score, 1),
                     cost=round(scored.cost_score, 1),
@@ -310,6 +311,7 @@ async def get_route(
         weather_warnings=unique_warnings,
         suggested_stops=suggested_stops,
         trip_id=trip_id_str,
+        maneuvers=selected.maneuvers if selected else [],
     )
 
 

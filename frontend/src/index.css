@@ -1690,7 +1690,14 @@ a:hover {
   background: var(--color-warning-light);
   border-color: var(--color-warning);
   color: var(--color-warning);
-  animation: signal-blink 700ms steps(1, end) infinite;
+  animation: signal-blink 1000ms steps(1, end) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .car-lamp.blink {
+    animation: none;
+    opacity: 1;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════

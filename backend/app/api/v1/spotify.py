@@ -23,6 +23,26 @@ def spotify_error(error: SpotifyException) -> HTTPException:
             status_code=status.HTTP_409_CONFLICT,
             detail="Spotify has no active playback device. Open Spotify and start a song first.",
         )
+    reason = getattr(error, "reason", None)
+    message = getattr(error, "msg", "")
+    if error.http_status == 403 and (
+        reason == "VOLUME_CONTROL_DISALLOW"
+        or "Cannot control device volume" in str(message)
+    ):
+        return HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="The active Spotify device does not support remote volume control.",
+        )
+    if error.http_status == 403:
+        return HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Spotify rejected the playback command.",
+        )
+    if error.http_status == 429:
+        return HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Spotify rate limit reached. Please try again shortly.",
+        )
     return HTTPException(
         status_code=status.HTTP_502_BAD_GATEWAY,
         detail="Spotify playback request failed",

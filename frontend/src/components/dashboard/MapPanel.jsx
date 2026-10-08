@@ -1,337 +1,1031 @@
-import { useState, useCallback, useRef, useEffect } from "react";
-import { GoogleMap, useJsApiLoader, Marker, Polyline } from "@react-google-maps/api";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
+import {
+  GoogleMap,
+  useJsApiLoader,
+  Marker,
+} from "@react-google-maps/api";
+import { X } from "lucide-react";
 import { MAP_CONFIG } from "../../config/constants";
 import MapSearch from "./MapSearch";
-import { apiFetch } from "../../config/api"; 
+import { apiFetch } from "../../config/api";
 import { useAppStore } from "../../store";
-import { darkMapStyle, lightMapStyle } from "../../config/mapStyles";
+import {
+  advanceTurnSignal,
+  detectRouteTurns,
+} from "../../utils/routeManeuvers";
+
+function token(name) {
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue(name)
+    .trim();
+}
 
 const mapContainerStyle = { width: "100%", height: "100%" };
-
 const LIBRARIES = ["places", "geometry"];
 
-// Helper to decode google polyline strings
-const decodePolyline = (encoded) => {
-  if (!window.google) return [];
-  return window.google.maps.geometry.encoding.decodePath(encoded);
+const FALLBACK_LOCATION =
+  MAP_CONFIG.FALLBACK_CENTER ??
+  MAP_CONFIG.ENDAVA_HEADQUARTERS ??
+  { lat: 44.4135, lng: 26.1132 };
+
+const BASE_MAP_OPTIONS = {
+  disableDefaultUI: false,
+  zoomControl: true,
+  streetViewControl: false,
+  mapTypeControl: false,
+  fullscreenControl: false,
+  gestureHandling: "auto",
+  keyboardShortcuts: true,
+};
+
+const DRIVING = {
+  SPEED: 14,
+  ZOOM: 19,
+  TILT: 67.5,
+  LOOK_AHEAD: 25,
 };
 
 export default function MapPanel() {
-  const [center, setCenter] = useState(MAP_CONFIG.FALLBACK_CENTER);
-  const [currentLocation, setCurrentLocation] = useState(null); 
-  const [destLocation, setDestLocation] = useState(null);       
-  
-  // SmartRoute State
-  const [tripData, setTripData] = useState(null);             
+  const theme = useAppStore((s) => s.theme);
+  const fuelLevel = useAppStore((s) => Math.round(s.fuelLevel));
+  const setAutomaticTurnSignal = useAppStore((s) => s.setAutomaticTurnSignal);
+
+  const [center, setCenter] = useState(FALLBACK_LOCATION);
+  const [currentLocation, setCurrentLocation] = useState(null);
+  const [destLocation, setDestLocation] = useState(null);
+  const [tripData, setTripData] = useState(null);
+  const [plannedStops, setPlannedStops] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isRouting, setIsRouting] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [tripConfirmed, setTripConfirmed] = useState(false);
-
-  const fuelLevel = useAppStore((s) => Math.round(s.fuelLevel));
-  const theme = useAppStore((s) => s.theme);
-
-  const [zoom, setZoom] = useState(MAP_CONFIG.DEFAULT_ZOOM);
+  const [isDriving, setIsDriving] = useState(false);
+  const [mapInstance, setMapInstance] = useState(null);
   const [geoError, setGeoError] = useState(false);
-  
-  const mapRef = useRef(null);
-  const hasCenteredRef = useRef(false);
+  const [navigationError, setNavigationError] = useState("");
+  const [searchResetKey, setSearchResetKey] = useState(0);
 
-  const mapOptions = {
-    disableDefaultUI: false,
-    zoomControl: true,
-    streetViewControl: true,
-    mapTypeControl: true,
-    fullscreenControl: true,
-    styles: theme === "dark" ? darkMapStyle : lightMapStyle,
-  };
+  const mapRef = useRef(null);
+  const carMarkerRef = useRef(null);
+  const routePolylinesRef = useRef(new Set());
+  const animationFrameRef = useRef(null);
+  const savedCameraRef = useRef(null);
+  const drivingRef = useRef(false);
+  const hasCenteredRef = useRef(false);
+  const routeRequestRef = useRef(0);
+  const latestLocationRef = useRef(null);
+
+  const selectedRoute = tripData?.routes?.[selectedIndex] ?? null;
+  const routeData = useMemo(() => {
+    if (!selectedRoute) return null;
+    return {
+      ...selectedRoute,
+      path: selectedRoute.decodedPath ?? [],
+      distance: selectedRoute.distance_text,
+      duration: selectedRoute.duration_text,
+      maneuvers: selectedRoute.maneuvers ?? [],
+    };
+  }, [selectedRoute]);
 
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "",
     libraries: LIBRARIES,
+    version: "weekly",
   });
 
+  const mapOptions = useMemo(() => {
+    if (!isLoaded) return BASE_MAP_OPTIONS;
+
+    const maps = window.google.maps;
+    const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID;
+
+    return {
+      ...BASE_MAP_OPTIONS,
+      renderingType: maps.RenderingType.VECTOR,
+      colorScheme:
+        theme === "light"
+          ? maps.ColorScheme.LIGHT
+          : maps.ColorScheme.DARK,
+      ...(mapId ? { mapId } : {}),
+    };
+  }, [isLoaded, theme]);
+
+  const polylineOptions = useMemo(() => {
+    if (!isLoaded) return {};
+
+    return {
+      strokeColor: token("--accent-primary"),
+      strokeOpacity: 0.9,
+      strokeWeight: 6,
+      clickable: false,
+    };
+  }, [isLoaded, theme]);
+
+  const stopDrivingSimulation = useCallback((restoreCamera = true) => {
+    drivingRef.current = false;
+    setAutomaticTurnSignal(null);
+
+    if (animationFrameRef.current !== null) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+
+    if (carMarkerRef.current) {
+      carMarkerRef.current.setMap(null);
+      carMarkerRef.current = null;
+    }
+
+    const map = mapRef.current;
+
+    if (map) {
+      map.setOptions({
+        gestureHandling: "auto",
+        keyboardShortcuts: true,
+        zoomControl: true,
+      });
+
+      if (restoreCamera && savedCameraRef.current) {
+        map.moveCamera(savedCameraRef.current);
+      }
+    }
+
+    savedCameraRef.current = null;
+    setIsDriving(false);
+  }, [setAutomaticTurnSignal]);
+
+  const clearRoutePolylines = useCallback(() => {
+    routePolylinesRef.current.forEach((polyline) => {
+      polyline.setPath([]);
+      polyline.setMap(null);
+    });
+    routePolylinesRef.current.clear();
+  }, []);
+
+  // Keep explicit ownership of Google Maps overlays so replacement and
+  // cancellation detach every rendered route before React updates the preview.
   useEffect(() => {
-    if (!navigator.geolocation) {
+    if (!mapInstance || !tripData?.routes?.length || !window.google?.maps) {
+      return undefined;
+    }
+
+    const overlays = [];
+    tripData.routes.forEach((route, index) => {
+      const path = route.decodedPath ?? [];
+      if (path.length < 2) return;
+
+      const isSelected = index === selectedIndex;
+      const polyline = new window.google.maps.Polyline({
+        map: mapInstance,
+        path,
+        ...polylineOptions,
+        strokeColor: isSelected
+          ? polylineOptions.strokeColor
+          : token("--text-secondary"),
+        strokeOpacity: isSelected ? 0.92 : 0.42,
+        strokeWeight: isSelected ? 6 : 4,
+        zIndex: isSelected ? 3 : 1,
+        clickable: !isDriving && !tripConfirmed && !isConfirming,
+      });
+      const clickListener = polyline.addListener("click", () => {
+        if (!isDriving && !tripConfirmed && !isConfirming) {
+          setSelectedIndex(index);
+        }
+      });
+      routePolylinesRef.current.add(polyline);
+      overlays.push({ polyline, clickListener });
+    });
+
+    return () => {
+      overlays.forEach(({ polyline, clickListener }) => {
+        clickListener.remove();
+        polyline.setPath([]);
+        polyline.setMap(null);
+        routePolylinesRef.current.delete(polyline);
+      });
+    };
+  }, [isConfirming, isDriving, mapInstance, polylineOptions, selectedIndex, tripConfirmed, tripData]);
+
+  useEffect(() => {
+    if (!mapInstance || !routeData?.path?.length || !window.google?.maps) return;
+
+    const bounds = new window.google.maps.LatLngBounds();
+    routeData.path.forEach((point) => bounds.extend(point));
+    if (bounds.isEmpty()) return;
+
+    mapInstance.moveCamera({ tilt: 0, heading: 0 });
+    mapInstance.fitBounds(bounds, { top: 60, bottom: 60, left: 360, right: 60 });
+  }, [mapInstance, routeData]);
+
+  useEffect(() => {
+    const useFallback = () => {
       setGeoError(true);
-      return;
+
+      if (!drivingRef.current) {
+        setCenter(FALLBACK_LOCATION);
+      }
+    };
+
+    if (!navigator.geolocation) {
+      useFallback();
+      return undefined;
     }
 
     const watchId = navigator.geolocation.watchPosition(
       (pos) => {
-        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        const loc = {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        };
+
+        latestLocationRef.current = { location: loc, timestamp: Date.now() };
         setCurrentLocation(loc);
-        
+        setGeoError(false);
+
         if (!hasCenteredRef.current) {
-          setCenter(loc);
           hasCenteredRef.current = true;
+
+          if (!drivingRef.current) {
+            setCenter(loc);
+          }
         }
       },
-      () => setGeoError(true),
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      useFallback,
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
     );
 
     return () => navigator.geolocation.clearWatch(watchId);
   }, []);
 
-  const onLoad = useCallback((map) => {
+  useEffect(() => {
+    return () => {
+      drivingRef.current = false;
+      routeRequestRef.current += 1;
+      setAutomaticTurnSignal(null);
+      clearRoutePolylines();
+
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+
+      carMarkerRef.current?.setMap(null);
+    };
+  }, [clearRoutePolylines, setAutomaticTurnSignal]);
+
+  const onMapLoad = useCallback((map) => {
     mapRef.current = map;
+    setMapInstance(map);
   }, []);
 
-  const handlePlaceSelect = useCallback(async (place) => {
-    if (!place?.geometry?.location) return;
-    
-    const destLoc = {
-      lat: place.geometry.location.lat(),
-      lng: place.geometry.location.lng(),
+  const onMapUnmount = useCallback(() => {
+    stopDrivingSimulation(false);
+    clearRoutePolylines();
+    mapRef.current = null;
+    setMapInstance(null);
+  }, [clearRoutePolylines, stopDrivingSimulation]);
+
+  const startDrivingSimulation = useCallback(() => {
+    const map = mapRef.current;
+    const path = routeData?.path;
+    const maps = window.google?.maps;
+
+    if (drivingRef.current) return false;
+    if (!map || !maps || !destLocation || !path || path.length < 2) {
+      setNavigationError("The map or route is not ready to start driving.");
+      return false;
+    }
+    if (!maps.geometry?.spherical) {
+      setNavigationError("Google Maps route geometry is unavailable.");
+      return false;
+    }
+
+    const supportsVectorCamera =
+      map.getRenderingType?.() === maps.RenderingType.VECTOR;
+
+    const spherical = maps.geometry.spherical;
+    const { turns } = detectRouteTurns(path, routeData?.maneuvers);
+    const segments = [];
+    let totalDistance = 0;
+
+    for (let i = 0; i < path.length - 1; i += 1) {
+      const start = new maps.LatLng(path[i].lat, path[i].lng);
+      const end = new maps.LatLng(path[i + 1].lat, path[i + 1].lng);
+      const length = spherical.computeDistanceBetween(start, end);
+
+      if (length < 0.01) continue;
+
+      segments.push({
+        start,
+        end,
+        length,
+        startDistance: totalDistance,
+        endDistance: totalDistance + length,
+      });
+
+      totalDistance += length;
+    }
+
+    if (!segments.length) {
+      setNavigationError("This route has no drivable coordinates.");
+      return false;
+    }
+
+    const positionAtDistance = (distance) => {
+      const clamped = Math.max(0, Math.min(distance, totalDistance));
+
+      let low = 0;
+      let high = segments.length - 1;
+
+      while (low < high) {
+        const middle = Math.floor((low + high) / 2);
+
+        if (clamped > segments[middle].endDistance) {
+          low = middle + 1;
+        } else {
+          high = middle;
+        }
+      }
+
+      const segment = segments[low];
+      const fraction = Math.max(
+        0,
+        Math.min(
+          1,
+          (clamped - segment.startDistance) / segment.length
+        )
+      );
+
+      return spherical.interpolate(
+        segment.start,
+        segment.end,
+        fraction
+      );
     };
-    
-    setDestLocation({
-      ...destLoc,
-      place_id: place.place_id
+
+    savedCameraRef.current = {
+      center: map.getCenter()?.toJSON() ?? center,
+      zoom: map.getZoom() ?? MAP_CONFIG.DEFAULT_ZOOM,
+      heading: map.getHeading() ?? 0,
+      tilt: map.getTilt() ?? 0,
+    };
+
+    const initialCamera = savedCameraRef.current;
+    const startPosition = positionAtDistance(0);
+
+    let heading = spherical.computeHeading(
+      startPosition,
+      positionAtDistance(Math.min(DRIVING.LOOK_AHEAD, totalDistance))
+    );
+
+    // Small circle representing the car.
+    carMarkerRef.current = new maps.Marker({
+      map,
+      position: startPosition,
+      zIndex: 100,
+      icon: {
+        path: maps.SymbolPath.CIRCLE,
+        scale: 7,
+        fillColor: token("--accent-primary"),
+        fillOpacity: 1,
+        strokeColor: token("--surface-primary"),
+        strokeWeight: 2,
+      },
     });
-    setTripData(null);
-    setTripConfirmed(false);
-    
-    if (!currentLocation) {
-      setCenter(destLoc);
-      mapRef.current?.panTo(destLoc);
-      return;
-    }
 
-    try {
-      const data = await apiFetch("/navigation/route", {
-        method: "POST",
-        body: JSON.stringify({
-          origin_lat: currentLocation.lat,
-          origin_lng: currentLocation.lng,
-          dest_lat: destLoc.lat,
-          dest_lng: destLoc.lng,
-          current_fuel_level: fuelLevel
-        })
-      });
+    map.setOptions({
+      gestureHandling: "none",
+      keyboardShortcuts: false,
+      zoomControl: false,
+    });
 
-      // Parse polylines for each route
-      if (data.routes) {
-        data.routes.forEach(route => {
-          let fullPath = [];
-          route.polylines.forEach(encoded => {
-            fullPath = fullPath.concat(decodePolyline(encoded));
-          });
-          route.decodedPath = fullPath;
-        });
+    setNavigationError(
+      supportsVectorCamera
+        ? ""
+        : "Driving simulation started; this map does not support the tilted camera view."
+    );
+    drivingRef.current = true;
+    setIsDriving(true);
+
+    let previousTimestamp = null;
+    let distanceTravelled = 0;
+    let animationTime = 0;
+    let nextTurnIndex = 0;
+    let automaticSignal = null;
+
+    const animate = (timestamp) => {
+      if (!drivingRef.current || mapRef.current !== map) return;
+
+      const deltaSeconds =
+        previousTimestamp === null
+          ? 0
+          : Math.min((timestamp - previousTimestamp) / 1000, 0.1);
+
+      previousTimestamp = timestamp;
+      animationTime += deltaSeconds;
+
+      distanceTravelled = Math.min(
+        distanceTravelled + DRIVING.SPEED * deltaSeconds,
+        totalDistance
+      );
+
+      const signalProgress = advanceTurnSignal(
+        turns,
+        distanceTravelled,
+        nextTurnIndex
+      );
+      nextTurnIndex = signalProgress.nextTurnIndex;
+      if (automaticSignal !== signalProgress.signal) {
+        automaticSignal = signalProgress.signal;
+        setAutomaticTurnSignal(automaticSignal);
       }
 
-      setTripData(data);
+      const position = positionAtDistance(distanceTravelled);
+      const lookAheadDistance = Math.min(
+        distanceTravelled + DRIVING.LOOK_AHEAD,
+        totalDistance
+      );
+
+      if (lookAheadDistance > distanceTravelled) {
+        const targetHeading = spherical.computeHeading(
+          position,
+          positionAtDistance(lookAheadDistance)
+        );
+
+        const headingDifference =
+          ((targetHeading - heading + 540) % 360) - 180;
+        const smoothing = 1 - Math.exp(-8 * deltaSeconds);
+
+        heading += headingDifference * smoothing;
+      }
+
+      const transition = Math.min(animationTime, 1);
+      const easedTransition =
+        transition * transition * (3 - 2 * transition);
+
+      const camera = {
+        center: position,
+        zoom:
+          initialCamera.zoom +
+          (DRIVING.ZOOM - initialCamera.zoom) * easedTransition,
+      };
+      if (supportsVectorCamera) {
+        camera.heading = heading;
+        camera.tilt =
+          initialCamera.tilt +
+          (DRIVING.TILT - initialCamera.tilt) * easedTransition;
+      }
+      map.moveCamera(camera);
+
+      carMarkerRef.current?.setPosition(position);
+
+      if (distanceTravelled >= totalDistance) {
+        stopDrivingSimulation();
+        return;
+      }
+
+      animationFrameRef.current = requestAnimationFrame(animate);
+    };
+
+    animationFrameRef.current = requestAnimationFrame(animate);
+    return true;
+  }, [center, destLocation, routeData, setAutomaticTurnSignal, stopDrivingSimulation]);
+
+  const loadRoute = useCallback(
+    async (destLoc, stops = []) => {
+      stopDrivingSimulation();
+      clearRoutePolylines();
+
+      const requestId = ++routeRequestRef.current;
+
+      setDestLocation(destLoc);
+      setPlannedStops(stops);
+      setTripData(null);
       setSelectedIndex(0);
+      setTripConfirmed(false);
+      setIsRouting(true);
+      setNavigationError("");
 
-      // Fit bounds to show the entire primary route
-      if (mapRef.current && data.routes && data.routes[0].decodedPath.length > 0) {
-        const bounds = new window.google.maps.LatLngBounds();
-        data.routes[0].decodedPath.forEach(point => bounds.extend(point));
-        mapRef.current.fitBounds(bounds, { top: 50, bottom: 50, left: 350, right: 50 }); // Leave space for side panel
+      try {
+        // A destination can be selected before watchPosition delivers its first
+        // fix. Request a fresh fix in that case instead of routing from the map
+        // fallback, which is only intended for the initial camera position.
+        let origin = currentLocation ?? FALLBACK_LOCATION;
+        const recentLocation = latestLocationRef.current;
+        if (recentLocation && Date.now() - recentLocation.timestamp < 20_000) {
+          origin = recentLocation.location;
+        } else if (navigator.geolocation) {
+          origin = await new Promise((resolve) => {
+            navigator.geolocation.getCurrentPosition(
+              (position) => {
+                const location = {
+                  lat: position.coords.latitude,
+                  lng: position.coords.longitude,
+                };
+                latestLocationRef.current = {
+                  location,
+                  timestamp: Date.now(),
+                };
+                setCurrentLocation(location);
+                setGeoError(false);
+                resolve(location);
+              },
+              () => {
+                const lastKnown = latestLocationRef.current;
+                resolve(lastKnown?.location ?? currentLocation ?? FALLBACK_LOCATION);
+              },
+              { enableHighAccuracy: true, timeout: 10_000, maximumAge: 10_000 }
+            );
+          });
+        }
+
+        if (requestId !== routeRequestRef.current) return;
+
+        const data = await apiFetch("/navigation/route", {
+          method: "POST",
+          body: JSON.stringify({
+            origin_lat: origin.lat,
+            origin_lng: origin.lng,
+            dest_lat: destLoc.lat,
+            dest_lng: destLoc.lng,
+            waypoints: stops.map(({ lat, lng }) => ({ lat, lng })),
+            current_fuel_level: fuelLevel,
+          }),
+        });
+
+        if (requestId !== routeRequestRef.current) return;
+
+        const candidateRoutes = data.routes?.length
+          ? data.routes
+          : [{
+              index: 0,
+              selected: true,
+              polylines: data.polylines ?? [],
+              distance_text: data.distance_text,
+              duration_text: data.duration_text,
+              destination_address: data.destination_address,
+              maneuvers: data.maneuvers ?? [],
+            }];
+        const decodedRoutes = candidateRoutes.map((route) => ({
+          ...route,
+          maneuvers:
+            route.maneuvers ?? (route.selected ? data.maneuvers ?? [] : []),
+          decodedPath: (route.polylines ?? []).flatMap((encoded) =>
+            window.google.maps.geometry.encoding
+              .decodePath(encoded)
+              .map((point) => point.toJSON())
+          ),
+        }));
+        const firstRouteIndex = Math.max(
+          0,
+          decodedRoutes.findIndex((route) => route.selected)
+        );
+
+        if ((decodedRoutes[firstRouteIndex]?.decodedPath?.length ?? 0) < 2) {
+          throw new Error("The route response contains no usable path.");
+        }
+
+        setTripData({ ...data, routes: decodedRoutes, requestId });
+        setSelectedIndex(firstRouteIndex);
+      } catch (error) {
+        if (requestId !== routeRequestRef.current) return;
+
+        console.error("Routing failed:", error);
+        setNavigationError(
+          "Unable to load a route. Try another destination."
+        );
+      } finally {
+        if (requestId === routeRequestRef.current) setIsRouting(false);
       }
-    } catch (error) {
-      console.error("Routing failed:", error);
-    }
-  }, [currentLocation, fuelLevel]);
+    },
+    [clearRoutePolylines, currentLocation, fuelLevel, stopDrivingSimulation]
+  );
 
-  const handleConfirmTrip = async () => {
-    if (!tripData?.trip_id) return;
-    
-    setIsConfirming(true);
-    try {
-      await apiFetch(`/navigation/trips/${tripData.trip_id}/confirm`, {
+  const handlePlaceSelect = useCallback(
+    (place) => {
+      if (!place?.geometry?.location) return;
+
+      const destLoc = {
+        lat: place.geometry.location.lat(),
+        lng: place.geometry.location.lng(),
+        place_id: place.place_id,
+      };
+      loadRoute(destLoc, []);
+    },
+    [loadRoute]
+  );
+
+  const addSuggestedStop = useCallback((stop) => {
+    if (!destLocation || isDriving || tripConfirmed || isRouting) return;
+    if (plannedStops.some((planned) => planned.place_id === stop.place_id)) return;
+
+    loadRoute(destLocation, [...plannedStops, stop]);
+  }, [destLocation, isDriving, isRouting, loadRoute, plannedStops, tripConfirmed]);
+
+  const removePlannedStop = useCallback((placeId) => {
+    if (!destLocation || isDriving || tripConfirmed || isRouting) return;
+    loadRoute(
+      destLocation,
+      plannedStops.filter((stop) => stop.place_id !== placeId)
+    );
+  }, [destLocation, isDriving, isRouting, loadRoute, plannedStops, tripConfirmed]);
+
+  const handleStartDriving = useCallback(() => {
+    if (!routeData || isConfirming) return;
+
+    if (!startDrivingSimulation()) return;
+
+    if (tripData?.trip_id && !tripConfirmed) {
+      const requestId = routeRequestRef.current;
+      setIsConfirming(true);
+      apiFetch(`/navigation/trips/${tripData.trip_id}/confirm`, {
         method: "POST",
         body: JSON.stringify({
-          selected_route_index: selectedIndex,
-          kept_stops: tripData.suggested_stops?.map(s => s.place_id) || [],
-          destination_place_id: destLocation.place_id || null,
+          selected_route_index: routeData.index,
+          kept_stops: plannedStops.map((stop) => stop.place_id),
+          destination_place_id: destLocation?.place_id ?? null,
+        }),
+      })
+        .then(() => {
+          if (requestId === routeRequestRef.current) setTripConfirmed(true);
         })
-      });
-      setTripConfirmed(true);
-    } catch (error) {
-      console.error("Failed to confirm trip:", error);
-    } finally {
-      setIsConfirming(false);
+        .catch((error) => {
+          if (requestId !== routeRequestRef.current) return;
+          console.error("Failed to confirm trip:", error);
+          setNavigationError(
+            "Driving started, but the trip could not be saved."
+          );
+        })
+        .finally(() => setIsConfirming(false));
     }
-  };
+  }, [destLocation, isConfirming, plannedStops, routeData, startDrivingSimulation, tripConfirmed, tripData]);
 
-  if (loadError) return <div className="map-panel"><div className="map-error">Failed to load Google Maps.</div></div>;
-  if (!isLoaded) return <div className="map-panel"><div className="map-loading"><div className="spinner-small" /><span>Loading map…</span></div></div>;
+  const cancelRoute = useCallback(() => {
+    routeRequestRef.current += 1;
+    stopDrivingSimulation();
+    clearRoutePolylines();
+    setDestLocation(null);
+    setPlannedStops([]);
+    setTripData(null);
+    setSelectedIndex(0);
+    setIsRouting(false);
+    setTripConfirmed(false);
+    setNavigationError("");
+    setSearchResetKey((key) => key + 1);
+
+    const map = mapRef.current;
+    if (map) {
+      map.moveCamera({
+        center: currentLocation ?? center,
+        zoom: MAP_CONFIG.DEFAULT_ZOOM,
+        heading: 0,
+        tilt: 0,
+      });
+    }
+  }, [center, clearRoutePolylines, currentLocation, stopDrivingSimulation]);
+
+  if (loadError) {
+    return (
+      <div className="map-panel">
+        <div className="map-error">Failed to load Google Maps.</div>
+      </div>
+    );
+  }
+
+  if (!isLoaded) {
+    return (
+      <div className="map-panel">
+        <div className="map-loading">
+          <div className="spinner-small" />
+          <span>Loading map…</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="map-panel" style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}>
-      <MapSearch onPlaceSelect={handlePlaceSelect} />
-      
+    <div
+      className="map-panel"
+      style={{ position: "relative", width: "100%", height: "100%" }}
+    >
+      <MapSearch
+        onPlaceSelect={handlePlaceSelect}
+        resetKey={searchResetKey}
+      />
+
       <GoogleMap
+        key={theme}
         mapContainerStyle={mapContainerStyle}
         center={center}
-        zoom={zoom}
+        zoom={MAP_CONFIG.DEFAULT_ZOOM}
         options={mapOptions}
-        onLoad={onLoad}
+        onLoad={onMapLoad}
+        onUnmount={onMapUnmount}
       >
-        {/* Current Location Marker */}
-        {currentLocation && (
-          <Marker 
-            position={currentLocation} 
+        {currentLocation && !isDriving && (
+          <Marker
+            position={currentLocation}
             icon={{
               path: window.google.maps.SymbolPath.CIRCLE,
               scale: 8,
-              fillColor: "#4285F4",
+              fillColor: token("--accent-primary"),
               fillOpacity: 1,
               strokeWeight: 2,
-              strokeColor: "#ffffff",
+              strokeColor: token("--surface-primary"),
             }}
-            zIndex={10}
+            zIndex={2}
           />
         )}
 
-        {/* Destination Marker */}
-        {destLocation && <Marker position={destLocation} zIndex={5} />}
+        {destLocation && <Marker position={destLocation} />}
 
-        {/* Render Routes */}
-        {tripData?.routes?.map((route, idx) => {
-          const isSelected = idx === selectedIndex;
-          return (
-            <Polyline
-              key={`route-${route.index}`}
-              path={route.decodedPath}
-              options={{
-                strokeColor: isSelected ? "#4285F4" : "#808080",
-                strokeOpacity: isSelected ? 0.9 : 0.4,
-                strokeWeight: isSelected ? 6 : 4,
-                zIndex: isSelected ? 3 : 1,
-              }}
-              onClick={() => !tripConfirmed && setSelectedIndex(idx)}
-            />
-          );
-        })}
-
-        {/* Render Weather Warnings */}
-        {tripData?.weather_warnings?.map((w, idx) => (
+        {tripData?.weather_warnings
+          ?.filter(
+            (warning) =>
+              warning.condition !== "fuel_warning" &&
+              Number.isFinite(warning.lat) &&
+              Number.isFinite(warning.lng)
+          )
+          .map((warning, index) => (
           <Marker
-            key={`weather-${idx}`}
-            position={{ lat: w.lat, lng: w.lng }}
-            title={w.message}
-            icon={{
-              url: `data:image/svg+xml;utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%23fa5252"><path d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 16h2v2h-2zm0-6h2v4h-2z"/></svg>`,
-              scaledSize: new window.google.maps.Size(32, 32),
-              anchor: new window.google.maps.Point(16, 16)
-            }}
-            zIndex={4}
+            key={`weather-${index}`}
+            position={{ lat: warning.lat, lng: warning.lng }}
+            title={warning.message}
+            label={{ text: "!", color: "#ffffff", fontWeight: "700" }}
+            zIndex={5}
           />
-        ))}
+          ))}
 
-        {/* Render Fuel Stops */}
-        {tripData?.suggested_stops?.map((s, idx) => (
+        {[
+          ...plannedStops,
+          ...(tripData?.suggested_stops ?? []).filter(
+            (suggestion) => !plannedStops.some((stop) => stop.place_id === suggestion.place_id)
+          ),
+        ].map((stop) => (
           <Marker
-            key={`stop-${idx}`}
-            position={{ lat: s.lat, lng: s.lng }}
-            title={`${s.name} - ${s.fuel_price || '?'} RON`}
-            icon={{
-              url: `data:image/svg+xml;utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%2315aabf"><path d="M19.36 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.36 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.64-4.96zM19 18H6c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4v1h2v-1c0-2.21 1.79-4 4-4s4 1.79 4 4-1.79 4-4 4z"/></svg>`,
-              scaledSize: new window.google.maps.Size(28, 28),
-              anchor: new window.google.maps.Point(14, 14)
-            }}
+            key={`stop-${stop.place_id}`}
+            position={{ lat: stop.lat, lng: stop.lng }}
+            title={`${stop.name} · ${stop.arrival_fuel_pct}% fuel on arrival`}
+            label={{ text: "⛽", fontSize: "16px" }}
             zIndex={4}
           />
         ))}
 
       </GoogleMap>
 
-      {/* SmartRoute Overlay Panel */}
-      {tripData && (
-        <div style={{
-          position: "absolute", top: "80px", left: "20px", width: "320px",
-          background: "rgba(255, 255, 255, 0.95)",
-          backdropFilter: "blur(12px)", borderRadius: "16px",
-          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
-          display: "flex", flexDirection: "column", maxHeight: "calc(100% - 100px)",
-          overflow: "hidden", border: "1px solid rgba(0,0,0,0.05)", zIndex: 10
-        }}>
-          {/* Header */}
-          <div style={{ padding: "16px 20px", borderBottom: "1px solid #e9ecef", background: "#f8f9fa" }}>
-            <h3 style={{ margin: 0, fontSize: "1.1rem", color: "#212529" }}>Route Options</h3>
-            <p style={{ margin: "4px 0 0 0", fontSize: "0.85rem", color: "#868e96" }}>
-              {tripData.destination_address || "Custom Destination"}
-            </p>
+      {!isDriving && tripData?.routes?.length > 0 && (
+        <aside
+          aria-label="Route options"
+          style={{
+            position: "absolute",
+            top: "76px",
+            left: "20px",
+            width: "min(320px, calc(100% - 40px))",
+            maxHeight: "calc(100% - 190px)",
+            overflowY: "auto",
+            background: "var(--surface-primary)",
+            color: "var(--text-primary)",
+            border: "1px solid var(--border-default)",
+            borderRadius: "16px",
+            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.24)",
+            backdropFilter: "blur(12px)",
+            zIndex: 10,
+          }}
+        >
+          <div style={{ padding: "16px 18px 12px", borderBottom: "1px solid var(--border-default)" }}>
+            <strong style={{ fontSize: "1rem" }}>Route Options</strong>
+            <div style={{ marginTop: "4px", color: "var(--text-secondary)", fontSize: "0.8rem" }}>
+              {tripData.destination_address || "Choose a route"}
+            </div>
           </div>
-
-          {/* Route List */}
-          <div style={{ overflowY: "auto", padding: "8px 0" }}>
-            {tripData.routes.map((route, idx) => {
-              const isSelected = idx === selectedIndex;
-              return (
-                <div 
-                  key={idx} 
-                  onClick={() => !tripConfirmed && setSelectedIndex(idx)}
-                  style={{
-                    padding: "16px 20px", cursor: tripConfirmed ? "default" : "pointer",
-                    borderLeft: `4px solid ${isSelected ? "#4285F4" : "transparent"}`,
-                    background: isSelected ? "rgba(66, 133, 244, 0.05)" : "transparent",
-                    transition: "all 0.2s ease"
-                  }}
-                >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                    <strong style={{ fontSize: "1.1rem", color: isSelected ? "#4285F4" : "#212529" }}>
-                      {route.duration_text}
-                    </strong>
-                    <span style={{ fontSize: "0.9rem", color: "#495057", fontWeight: "500" }}>
-                      {route.distance_text}
-                    </span>
-                  </div>
-                  
-                  <p style={{ margin: "0 0 8px 0", fontSize: "0.85rem", color: "#495057", lineHeight: "1.4" }}>
+          {tripData.routes.map((route, index) => {
+            const isSelected = index === selectedIndex;
+            return (
+              <button
+                key={route.index}
+                type="button"
+                onClick={() => setSelectedIndex(index)}
+                disabled={tripConfirmed || isDriving || isConfirming}
+                aria-pressed={isSelected}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  padding: "14px 18px",
+                  textAlign: "left",
+                  color: "var(--text-primary)",
+                  background: isSelected ? "var(--surface-sunken)" : "transparent",
+                  border: 0,
+                  borderLeft: `4px solid ${isSelected ? "var(--accent-primary)" : "transparent"}`,
+                  borderBottom: "1px solid var(--border-default)",
+                  cursor: tripConfirmed || isDriving || isConfirming ? "default" : "pointer",
+                  opacity: tripConfirmed || isDriving || isConfirming ? 0.8 : 1,
+                }}
+              >
+                <span style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
+                  <strong>{route.duration_text}</strong>
+                  <span>{route.distance_text}</span>
+                </span>
+                {route.explanation && (
+                  <span style={{ display: "block", marginTop: "6px", color: "var(--text-secondary)", fontSize: "0.8rem", lineHeight: 1.4 }}>
                     {route.explanation}
-                  </p>
-                  
-                  {/* Score Pills */}
-                  <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-                    <span style={{ background: "#e7f5ff", color: "#1c7ed6", fontSize: "0.75rem", padding: "2px 6px", borderRadius: "4px", fontWeight: "600" }}>
+                  </span>
+                )}
+                <span style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "8px" }}>
+                  {Number.isFinite(route.scores?.utility) && (
+                    <span style={{ fontSize: "0.72rem", color: "var(--text-secondary)" }}>
                       Utility: {(route.scores.utility * 100).toFixed(0)}%
                     </span>
-                    {route.scores.weather_risk > 0.3 && (
-                      <span style={{ background: "#fff5f5", color: "#fa5252", fontSize: "0.75rem", padding: "2px 6px", borderRadius: "4px", fontWeight: "600" }}>
-                        Weather Risk
-                      </span>
-                    )}
-                    {route.labels.includes("FUEL_EFFICIENT") && (
-                      <span style={{ background: "#ebfbee", color: "#2b8a3e", fontSize: "0.75rem", padding: "2px 6px", borderRadius: "4px", fontWeight: "600" }}>
-                        Eco
-                      </span>
-                    )}
-                  </div>
+                  )}
+                  {route.labels?.includes("FUEL_EFFICIENT") && (
+                    <span style={{ fontSize: "0.72rem", color: "var(--accent-primary)" }}>Eco</span>
+                  )}
+                  {route.scores?.weather_risk > 0.3 && (
+                    <span style={{ fontSize: "0.72rem", color: "#e8590c" }}>Weather risk</span>
+                  )}
+                </span>
+              </button>
+            );
+          })}
+          {plannedStops.length > 0 && (
+            <section style={{ padding: "12px 18px", borderTop: "1px solid var(--border-default)" }}>
+              <strong style={{ display: "block", marginBottom: "8px", fontSize: "0.82rem" }}>
+                Stops on this route
+              </strong>
+              {plannedStops.map((stop) => (
+                <div
+                  key={stop.place_id}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", padding: "6px 0" }}
+                >
+                  <span style={{ minWidth: 0, fontSize: "0.78rem", color: "var(--text-secondary)" }}>
+                    ⛽ {stop.name}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removePlannedStop(stop.place_id)}
+                    aria-label={`Remove ${stop.name} from the route`}
+                    disabled={isRouting || isDriving || tripConfirmed || isConfirming}
+                    style={{ border: 0, background: "transparent", color: "var(--accent-primary)", cursor: "pointer", fontSize: "0.75rem", whiteSpace: "nowrap" }}
+                  >
+                    Remove
+                  </button>
                 </div>
-              );
-            })}
-          </div>
+              ))}
+            </section>
+          )}
 
-          {/* Action Footer */}
-          <div style={{ padding: "16px 20px", borderTop: "1px solid #e9ecef", background: "#f8f9fa" }}>
-            <button
-              onClick={handleConfirmTrip}
-              disabled={tripConfirmed || isConfirming}
-              style={{
-                width: "100%", padding: "12px", borderRadius: "8px", border: "none",
-                background: tripConfirmed ? "#40c057" : "#4285F4", 
-                color: "white", fontSize: "1rem", fontWeight: "600",
-                cursor: (tripConfirmed || isConfirming) ? "not-allowed" : "pointer",
-                transition: "background 0.2s"
-              }}
-            >
-              {isConfirming ? "Confirming..." : tripConfirmed ? "Trip Confirmed ✓" : "Start Navigation"}
-            </button>
-            
-            {tripData.suggested_stops?.length > 0 && (
-              <p style={{ margin: "12px 0 0 0", fontSize: "0.8rem", color: "#868e96", textAlign: "center" }}>
-                Includes {tripData.suggested_stops.length} planned stop(s)
-              </p>
-            )}
-          </div>
+          {(tripData.suggested_stops ?? []).some(
+            (stop) => !plannedStops.some((planned) => planned.place_id === stop.place_id)
+          ) && (
+            <section style={{ padding: "12px 18px", borderTop: "1px solid var(--border-default)" }}>
+              <strong style={{ display: "block", marginBottom: "6px", fontSize: "0.82rem" }}>
+                Suggested fuel stops
+              </strong>
+              {(tripData.suggested_stops ?? [])
+                .filter((stop) => !plannedStops.some((planned) => planned.place_id === stop.place_id))
+                .map((stop) => (
+                  <div
+                    key={stop.place_id}
+                    style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", padding: "8px 0", borderTop: "1px solid var(--border-default)" }}
+                  >
+                    <span style={{ minWidth: 0, fontSize: "0.78rem" }}>
+                      <span style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{stop.name}</span>
+                      <span style={{ color: "var(--text-secondary)", fontSize: "0.72rem" }}>
+                        {stop.arrival_fuel_pct}% fuel · {stop.detour_min} min detour
+                      </span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => addSuggestedStop(stop)}
+                      aria-label={`Add ${stop.name} as a route stop`}
+                      disabled={isRouting || isDriving || tripConfirmed || isConfirming}
+                      style={{ border: "1px solid var(--accent-primary)", borderRadius: "14px", padding: "5px 9px", background: "transparent", color: "var(--accent-primary)", cursor: "pointer", fontSize: "0.72rem", whiteSpace: "nowrap" }}
+                    >
+                      Add stop
+                    </button>
+                  </div>
+                ))}
+            </section>
+          )}
+        </aside>
+      )}
+
+      {isRouting && (
+        <div
+          role="status"
+          style={{ position: "absolute", top: "76px", left: "20px", padding: "12px 16px", borderRadius: "12px", background: "var(--surface-primary)", color: "var(--text-primary)", border: "1px solid var(--border-default)", boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)", zIndex: 10 }}
+        >
+          {plannedStops.length > 0 ? "Updating route through selected stops…" : "Finding route…"}
         </div>
       )}
 
-      {geoError && <div className="map-geo-notice">Location access denied</div>}
+      {routeData && (
+        <div
+          style={{
+            position: "absolute",
+            bottom: "30px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            background: "var(--surface-primary)",
+            padding: "14px 28px",
+            borderRadius: "30px",
+            color: "var(--text-primary)",
+            display: "flex",
+            alignItems: "center",
+            gap: "24px",
+            fontWeight: "600",
+            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
+            backdropFilter: "blur(12px)",
+            border: "1px solid var(--border-default)",
+            zIndex: 10,
+          }}
+        >
+          <div
+            style={{ display: "flex", alignItems: "center", gap: "8px" }}
+          >
+            <span style={{ fontSize: "1.2rem" }}>🚗</span>
+            {routeData.duration}
+          </div>
+
+          <div
+            style={{ display: "flex", alignItems: "center", gap: "8px" }}
+          >
+            <span style={{ fontSize: "1.2rem" }}>📏</span>
+            {routeData.distance}
+          </div>
+
+          {destLocation && !isDriving && (
+            <button
+              type="button"
+              onClick={handleStartDriving}
+              disabled={isConfirming}
+              style={{
+                marginLeft: "16px",
+                padding: "8px 16px",
+                borderRadius: "20px",
+                background: "var(--accent-primary)",
+                color: "white",
+                border: "none",
+                cursor: isConfirming ? "wait" : "pointer",
+                opacity: isConfirming ? 0.7 : 1,
+              }}
+            >
+              {isConfirming ? "Confirming…" : "Start Driving"}
+            </button>
+          )}
+
+          {isDriving && (
+            <button
+              type="button"
+              onClick={() => stopDrivingSimulation()}
+              style={{
+                marginLeft: "16px",
+                padding: "8px 16px",
+                borderRadius: "20px",
+                background: "var(--accent-primary)",
+                color: "white",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              Stop Driving
+            </button>
+          )}
+
+          {!isDriving && (
+            <button
+              type="button"
+              onClick={cancelRoute}
+              aria-label="Cancel route"
+              title="Cancel route"
+              style={{
+                marginLeft: "-12px",
+                width: "36px",
+                height: "36px",
+                padding: 0,
+                borderRadius: "50%",
+                background: "var(--surface-sunken)",
+                color: "var(--text-secondary)",
+                border: "1px solid var(--border-default)",
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <X size={15} aria-hidden="true" />
+            </button>
+          )}
+        </div>
+      )}
+
+      {(navigationError || geoError) && (
+        <div className="map-geo-notice">
+          {navigationError ||
+            "Location unavailable. Using the fallback location."}
+        </div>
+      )}
     </div>
   );
 }

@@ -27,6 +27,9 @@ FIELD_MASK = ",".join([
     "routes.legs.startLocation",
     "routes.legs.endLocation",
     "routes.legs.steps.polyline.encodedPolyline",
+    "routes.legs.steps.startLocation",
+    "routes.legs.steps.endLocation",
+    "routes.legs.steps.navigationInstruction.maneuver",
     "routes.legs.steps.distanceMeters",
     "routes.legs.steps.staticDuration",
     "routes.routeLabels",
@@ -147,12 +150,29 @@ def _parse_route(route: dict, index: int) -> dict[str, Any]:
 
     # Extract step-level polylines for high-resolution rendering
     polylines = []
+    maneuvers = []
     legs = route.get("legs", [])
     for leg in legs:
         for step in leg.get("steps", []):
             encoded = step.get("polyline", {}).get("encodedPolyline")
             if encoded:
                 polylines.append(encoded)
+
+            start = step.get("startLocation", {}).get("latLng", {})
+            end = step.get("endLocation", {}).get("latLng", {})
+            if start and end:
+                instruction = step.get("navigationInstruction", {})
+                maneuvers.append({
+                    "type": instruction.get("maneuver"),
+                    "start_location": {
+                        "lat": start.get("latitude"),
+                        "lng": start.get("longitude"),
+                    },
+                    "end_location": {
+                        "lat": end.get("latitude"),
+                        "lng": end.get("longitude"),
+                    },
+                })
 
     # Fallback to route-level polyline if steps are missing
     if not polylines:
@@ -190,6 +210,7 @@ def _parse_route(route: dict, index: int) -> dict[str, Any]:
         "destination_address": route.get("description", dest_address),
         "toll_estimate": toll_estimate,
         "labels": labels,
+        "maneuvers": maneuvers,
     }
 
 
@@ -208,7 +229,7 @@ async def compute_routes(
 
     Returns a list of parsed route dicts, each with:
     - index, polylines, distance_m, distance_text, duration_s, duration_text,
-      destination_address, toll_estimate, labels
+      destination_address, toll_estimate, labels, maneuvers
     """
     body = _build_request_body(
         origin_lat, origin_lng, dest_lat, dest_lng,
