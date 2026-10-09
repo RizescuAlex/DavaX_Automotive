@@ -78,10 +78,12 @@
   /* The pool of headlight on the road: lamp light, not the route's blue */
   --stage-headlight: rgba(242, 242, 236, 0.22);
 
-  /* Typography — Geist for everything; Geist Mono where digits must hold
-     their width as they change (clock, temperature, readings) */
-  --font-sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-mono: "Geist Mono", ui-monospace, "Cascadia Mono", monospace;
+  /* Typography — Overpass, drawn from Highway Gothic, the lettering on US
+     road signs: made to be read at a glance from a moving car. Overpass Mono
+     where digits must hold their width as they change (clock, temperature,
+     readings). */
+  --font-sans: "Overpass", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "Overpass Mono", ui-monospace, "Cascadia Mono", monospace;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.8125rem;
   --font-size-base: 0.875rem;
