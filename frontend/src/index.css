@@ -681,6 +681,20 @@ a:hover {
 
 .top-nav-btn:hover { color: var(--text-primary); background: var(--surface-hover); }
 
+.top-nav-btn,
+.top-bar-greeting { white-space: nowrap; }
+
+/* Narrow screens: the greeting goes first, then the tabs drop to icons.
+   Each tab keeps its aria-label, so its name is still announced. */
+@media (max-width: 1000px) {
+  .top-bar-greeting { display: none; }
+}
+
+@media (max-width: 940px) {
+  .top-nav-label { display: none; }
+  .top-nav-btn { width: 44px; padding: 0; justify-content: center; }
+}
+
 .top-nav-btn.is-on { color: var(--text-primary); background: var(--surface-tertiary); }
 
 .top-nav-btn:focus-visible {

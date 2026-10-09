@@ -23,7 +23,7 @@ function AssistantButton() {
       aria-label={open ? "Close the AI assistant" : "Open the AI assistant"}
     >
       <ChatCircleDotsIcon size={16} weight={open ? "fill" : "regular"} aria-hidden="true" />
-      AI Assistant
+      <span className="top-nav-label">AI Assistant</span>
     </button>
   );
 }
@@ -42,7 +42,7 @@ function CallButton() {
       aria-label={open ? "Close the call panel" : "Open the call panel"}
     >
       <PhoneIcon size={16} weight={open ? "fill" : "regular"} aria-hidden="true" />
-      Call
+      <span className="top-nav-label">Call</span>
     </button>
   );
 }
@@ -61,7 +61,7 @@ function ContactsButton() {
       aria-label={open ? "Close contacts" : "Open contacts"}
     >
       <UsersIcon size={16} weight={open ? "fill" : "regular"} aria-hidden="true" />
-      Contacts
+      <span className="top-nav-label">Contacts</span>
     </button>
   );
 }
@@ -102,7 +102,7 @@ function PreferencesButton() {
       aria-label={open ? "Close vehicle preferences" : "Open vehicle preferences"}
     >
       <GearSixIcon size={16} weight={open ? "fill" : "regular"} aria-hidden="true" />
-      Vehicle Preferences
+      <span className="top-nav-label">Vehicle Preferences</span>
     </button>
   );
 }
