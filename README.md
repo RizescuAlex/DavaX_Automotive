@@ -48,7 +48,7 @@ Compose reads `env_file` at container creation, so a reload is not enough.
 | Feature | Variables | Notes |
 | --- | --- | --- |
 | Google sign-in | `FIREBASE_PROJECT_ID`, `VITE_FIREBASE_*` | Add your host under Firebase Console → Authentication → Settings → Authorized domains |
-| Assistant | `GEMINI_API_KEY` | Backend-side only, deliberately no `VITE_` twin |
+| Assistant | `OPENAI_API_KEY` | Backend-side only, deliberately no `VITE_` twin |
 | Maps | `VITE_GOOGLE_MAPS_API_KEY` | Map panel is blank without it |
 | Music | `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET` | Playback requires a Spotify **Premium** account |
 | Weather | `VITE_OPENWEATHERMAP_API_KEY` | Badge is hidden without it |

@@ -1,4 +1,4 @@
-"""The in-car assistant's one call to Gemini.
+"""The in-car assistant's one call to OpenAI.
 
 Nothing here executes a tool. The model's function calls are handed back to the
 route, which passes them to the frontend to apply against the Zustand store.
@@ -6,10 +6,13 @@ That is the whole design: headlights, signals, hazards and wipers have no
 backend model, and climate already persists itself when the store changes.
 """
 
-import asyncio
+import json
 import logging
+import time
+from dataclasses import dataclass
 
-from google import genai
+import openai
+from openai import AsyncOpenAI
 
 from app.config import settings
 from app.schemas.assistant import VehicleContext
@@ -30,20 +33,18 @@ class AssistantUnavailableError(RuntimeError):
         self.rate_limited = rate_limited
 
 
-# Two separate budgets, because the SDK retries.
-#
-# The free tier serves on a best-effort basis: the same request answers in
-# three seconds or hangs indefinitely, with quota to spare either way. A stuck
-# call does not recover, so the cure is to give up early and ask again rather
-# than wait — a working call needs well under ten seconds.
-#
-# ATTEMPT_TIMEOUT_S bounds one try, TOTAL_TIMEOUT_S bounds all of them, and the
-# total stays under nginx's 60s proxy timeout so the driver always gets a
-# sentence rather than a gateway error. Retrying is safe: the call is
-# stateless (store=False) and changes nothing server-side.
+# The SDK's own defaults are a 600s timeout and two retries — far past nginx's
+# 60s proxy timeout, so a stalled call would surface as a gateway error rather
+# than a sentence. One try plus one retry at 10s each stays well inside it.
+# Retrying is safe: the call is stateless (store=False) and changes nothing.
 ATTEMPT_TIMEOUT_S = 10.0
-TOTAL_TIMEOUT_S = 25.0
-MAX_ATTEMPTS = 3
+MAX_RETRIES = 1
+
+# A ceiling, not a target. A reply is one sentence and a few tool calls, far
+# below this; the cap only matters if something goes wrong, and on a monitored
+# key a runaway answer is the expensive kind of wrong. Reasoning tokens count
+# toward it, so it leaves room for a reasoning model's thinking too.
+MAX_OUTPUT_TOKENS = 500
 
 
 SYSTEM_PROMPT = """\
@@ -61,6 +62,9 @@ would mind.
 
 Say what changed, not what you are about to do, and never invent a state you
 did not set. If you turn nothing on, do not claim you did.
+
+In a tool call, fill in only the fields the driver asked to change and pass
+null for every other one. Null means "leave it as it is".
 
 Answer questions about speed, fuel and temperature directly from the state
 below. There is no tool for reading them, and no tool call is needed.
@@ -84,7 +88,7 @@ know the exact username, ask them to provide the username.
 
 
 def _describe(context: VehicleContext) -> str:
-    """Render the dashboard snapshot as the tail of the system instruction.
+    """Render the dashboard snapshot, sent as a developer message each call.
 
     Only fields the frontend actually sent are named. A missing value is left
     out entirely rather than described as zero, so the model never reports a
@@ -149,95 +153,172 @@ def _describe(context: VehicleContext) -> str:
     return "\nCurrent state of the car:\n" + "\n".join(lines)
 
 
-def _client() -> genai.Client:
-    if not settings.GEMINI_API_KEY:
+_client_instance: AsyncOpenAI | None = None
+
+
+def _client() -> AsyncOpenAI:
+    """One client for the process, so connections are pooled between requests."""
+    global _client_instance
+    if not settings.OPENAI_API_KEY:
         raise AssistantUnavailableError(
-            "The assistant is not configured. Set GEMINI_API_KEY in the root .env."
+            "The assistant is not configured. Set OPENAI_API_KEY in the root .env."
         )
-    return genai.Client(api_key=settings.GEMINI_API_KEY)
+    if _client_instance is None:
+        _client_instance = AsyncOpenAI(
+            api_key=settings.OPENAI_API_KEY,
+            timeout=ATTEMPT_TIMEOUT_S,
+            max_retries=MAX_RETRIES,
+        )
+    return _client_instance
 
 
-async def ask(message: str, context: VehicleContext) -> tuple[str, list[dict]]:
-    """Send one message and return (reply, actions).
+def _unavailable(exc: openai.OpenAIError) -> AssistantUnavailableError:
+    """Translate an SDK error into what the driver should hear."""
+    if isinstance(exc, openai.RateLimitError):
+        # 429 covers two different things. A rate limit clears in seconds; an
+        # exhausted quota does not, and retrying it only adds to the count the
+        # key is monitored on.
+        if getattr(exc, "code", None) == "insufficient_quota":
+            return AssistantUnavailableError(
+                "The assistant's usage quota has run out."
+            )
+        return AssistantUnavailableError(
+            "Too many requests just now — try again in a moment.",
+            rate_limited=True,
+        )
+    if isinstance(exc, openai.AuthenticationError):
+        # A rejected key, likely revoked. Nothing the driver can do about it.
+        return AssistantUnavailableError("The assistant's API key was rejected.")
+    if isinstance(exc, openai.APITimeoutError):
+        return AssistantUnavailableError("The assistant took too long to answer.")
+    return AssistantUnavailableError("The assistant could not be reached.")
+
+
+@dataclass
+class AssistantAnswer:
+    """What one call produced, and what it cost.
+
+    The route only needs `reply` and `actions`. The rest is for the logs and
+    the eval suite, which compares models on exactly these numbers.
+    """
+
+    reply: str
+    actions: list[dict]
+    model: str = ""
+    latency_ms: int = 0
+    input_tokens: int = 0
+    cached_tokens: int = 0
+    output_tokens: int = 0
+    reasoning_tokens: int = 0
+
+
+def _usage(response) -> dict:
+    usage = response.usage
+    if usage is None:
+        return {}
+    return {
+        "input_tokens": usage.input_tokens,
+        "cached_tokens": getattr(usage.input_tokens_details, "cached_tokens", 0) or 0,
+        "output_tokens": usage.output_tokens,
+        "reasoning_tokens": getattr(usage.output_tokens_details, "reasoning_tokens", 0) or 0,
+    }
+
+
+async def ask(
+    message: str,
+    context: VehicleContext,
+    *,
+    model: str | None = None,
+    reasoning_effort: str | None = None,
+) -> AssistantAnswer:
+    """Send one message and return the reply, the actions and the cost.
+
+    `model` and `reasoning_effort` override the .env settings, so the eval
+    suite can compare models without editing config. The route passes neither.
 
     Async because the route is: the model round trip is the slowest thing the
     backend does, and the sync client would hold the event loop for all of it.
     """
     client = _client()
 
-    loop = asyncio.get_running_loop()
-    deadline = loop.time() + TOTAL_TIMEOUT_S
-    interaction = None
-    last_exc: Exception | None = None
+    effort = reasoning_effort if reasoning_effort is not None else settings.OPENAI_REASONING_EFFORT
+    extra: dict = {}
+    if effort:
+        # Only reasoning models accept this, so it is sent only when set.
+        extra["reasoning"] = {"effort": effort}
 
-    for attempt in range(1, MAX_ATTEMPTS + 1):
-        remaining = deadline - loop.time()
-        if remaining <= 1.0:
-            break
+    started = time.perf_counter()
+    try:
+        response = await client.responses.create(
+            model=model or settings.OPENAI_MODEL,
+            # Identical on every call, so OpenAI can cache it with the tools.
+            # Everything that changes goes in `input` below, after it.
+            instructions=SYSTEM_PROMPT,
+            input=[
+                # The car's state as a developer message, separate from what
+                # the driver said: it is data from the dashboard, not speech.
+                {"role": "developer", "content": _describe(context).strip()},
+                {"role": "user", "content": message},
+            ],
+            tools=ASSISTANT_TOOLS,
+            # Stateless: we send the dashboard snapshot ourselves every time,
+            # so there is no server-side thread worth keeping.
+            store=False,
+            max_output_tokens=MAX_OUTPUT_TOKENS,
+            **extra,
+        )
+    except openai.OpenAIError as exc:
+        logger.error("OpenAI call failed", exc_info=exc)
+        raise _unavailable(exc) from exc
 
-        try:
-            interaction = await asyncio.wait_for(
-                client.aio.interactions.create(
-                    model=settings.GEMINI_MODEL,
-                    system_instruction=SYSTEM_PROMPT + _describe(context),
-                    input=message,
-                    tools=ASSISTANT_TOOLS,
-                    # Stateless: we send the dashboard snapshot ourselves every
-                    # time, so there is no server-side thread worth keeping.
-                    store=False,
-                    timeout=ATTEMPT_TIMEOUT_S,
-                ),
-                timeout=min(ATTEMPT_TIMEOUT_S, remaining),
-            )
-            break
-        except (TimeoutError, asyncio.TimeoutError) as exc:
-            # A stall, not a refusal. Worth another go inside the budget.
-            last_exc = exc
-            logger.warning("Gemini attempt %d timed out; retrying", attempt)
-            continue
-        except Exception as exc:  # noqa: BLE001 - a real error; do not retry it
-            last_exc = exc
-            break
+    latency_ms = int((time.perf_counter() - started) * 1000)
+    usage = _usage(response)
+    # One line per call, so consumption can be totalled from the logs. The key
+    # is monitored and there is no dashboard on our side, so this is the only
+    # record of what the assistant spends.
+    logger.info(
+        "assistant call model=%s ms=%d %s",
+        response.model,
+        latency_ms,
+        " ".join(f"{k.removesuffix('_tokens')}={v}" for k, v in usage.items()),
+    )
 
-    if interaction is None:
-        exc = last_exc or RuntimeError("no attempt was made")
-        logger.error("Gemini call failed", exc_info=exc)
-
-        name = type(exc).__name__
-        detail = str(exc)
-
-        # Matched on name and text rather than by importing the SDK's private
-        # error classes, which live under google.genai._gaos and move about.
-        if "RateLimit" in name or "429" in detail:
-            raise AssistantUnavailableError(
-                "Too many requests just now — try again in a moment.",
-                rate_limited=True,
-            ) from exc
-
-        if "Timeout" in name:
-            raise AssistantUnavailableError(
-                "The assistant took too long to answer."
-            ) from exc
-
-        raise AssistantUnavailableError("The assistant could not be reached.") from exc
-
-
-    reply = (interaction.output_text or "").strip()
+    reply = (response.output_text or "").strip()
 
     actions: list[dict] = []
-    for step in interaction.steps or []:
-        if getattr(step, "type", None) != "function_call":
+    for item in response.output or []:
+        if item.type != "function_call":
             continue
-        if step.name not in TOOL_NAMES:
+        if item.name not in TOOL_NAMES:
             # A name we do not have a dispatcher for. Dropping it here keeps the
             # frontend from having to defend against invented tools.
-            logger.warning("Dropping unknown tool call: %s", step.name)
+            logger.warning("Dropping unknown tool call: %s", item.name)
             continue
-        actions.append({"tool": step.name, "args": step.arguments or {}})
+        try:
+            args = json.loads(item.arguments or "{}")
+        except json.JSONDecodeError:
+            # Strict mode should make this impossible; a cut-off answer at
+            # MAX_OUTPUT_TOKENS is the one way it still could happen.
+            logger.warning("Dropping %s with unparseable arguments", item.name)
+            continue
+        # Strict mode sends every field, null meaning "leave it alone". Drop
+        # those so the frontend sees only what the driver asked to change.
+        args = {k: v for k, v in args.items() if v is not None}
+        if not args:
+            # Every field null: a call that changes nothing. Small models emit
+            # these alongside real calls; passing them on is pure noise.
+            continue
+        actions.append({"tool": item.name, "args": args})
 
     if not reply and actions:
         # It acted but said nothing. Better a plain acknowledgement than silence
         # from a dashboard that just changed something.
         reply = "Done."
 
-    return reply, actions
+    return AssistantAnswer(
+        reply=reply,
+        actions=actions,
+        model=response.model,
+        latency_ms=latency_ms,
+        **usage,
+    )

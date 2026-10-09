@@ -1,17 +1,20 @@
 """Tool declarations for the in-car assistant.
 
-The backend executes none of these. Gemini returns function calls, the route
+The backend executes none of these. The model returns function calls, the route
 passes them through as `actions`, and the frontend applies them to the Zustand
 store. Headlights, signals, hazards and wipers have no backend model at all, so
 there is nothing here to execute against.
 
-Declarations are OpenAI-shaped (`{"type": "function", "name": ...}`), which is
-what `client.interactions.create(tools=...)` expects — not the older Gemini
-`FunctionDeclaration` objects most tutorials still show.
+Declarations are in the Responses API shape (`{"type": "function", "name": ...}`).
 
-Every parameter is optional except the enums: the model sets only what the
-driver actually mentioned. "Make it warmer" is one field, not eight.
+They are written below the way they read best — optional fields simply left
+out of `required` — and `_strict()` at the bottom converts them for OpenAI's
+strict mode, which needs every field required and nullable instead. The model
+sets only what the driver mentioned and sends null for the rest: "make it
+warmer" is one field, not eight.
 """
+
+import copy
 
 # Mirrors CLIMATE_LIMITS in frontend/src/store/index.js. Duplicated rather than
 # shared because the backend never validates these — climate_settings is an
@@ -220,12 +223,44 @@ CALL_USER = {
 # they fit. call_user is the exception because it fits none of them — it is
 # neither a car control nor the screen, and it is the one tool that reaches
 # another person.
+def _strict(tool: dict) -> dict:
+    """Convert one declaration to the form OpenAI's strict mode accepts.
+
+    Strict mode guarantees the arguments match the schema, but only for schemas
+    where every property is required and no others are allowed. Optional fields
+    therefore become required-but-nullable: the model must send each one, and
+    null means "leave it alone". Fields that were already required keep their
+    type, so control_music still cannot be called without an action.
+
+    The nulls never reach the frontend: the service strips them on the way out.
+    """
+    tool = copy.deepcopy(tool)
+    params = tool["parameters"]
+    already_required = set(params["required"])
+
+    for name, prop in params["properties"].items():
+        if name in already_required:
+            continue
+        prop["type"] = [prop["type"], "null"]
+        if "enum" in prop:
+            # An enum lists every allowed value, so null has to be one of them.
+            prop["enum"] = [*prop["enum"], None]
+
+    params["required"] = list(params["properties"])
+    params["additionalProperties"] = False
+    tool["strict"] = True
+    return tool
+
+
 ASSISTANT_TOOLS = [
-    SET_CLIMATE,
-    SET_VEHICLE_CONTROLS,
-    SET_DISPLAY,
-    CONTROL_MUSIC,
-    CALL_USER,
+    _strict(tool)
+    for tool in (
+        SET_CLIMATE,
+        SET_VEHICLE_CONTROLS,
+        SET_DISPLAY,
+        CONTROL_MUSIC,
+        CALL_USER,
+    )
 ]
 
 # Names the dispatcher is allowed to act on. The route filters returned calls
