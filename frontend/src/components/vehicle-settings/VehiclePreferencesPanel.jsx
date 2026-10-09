@@ -100,14 +100,8 @@ function mergeLightingSettings(data) {
 }
 
 /**
- * Vehicle Preferences, as a panel over the map rather than a page of its own.
- *
- * Same family as the assistant panel — header, icon, close — but larger, with
- * the form scrolling inside it and Save pinned to the foot, so the button and
- * its result stay in view however far down the driver has scrolled.
- *
- * It mounts on open and loads fresh each time, so it never shows a record the
- * dock has since changed. Closing without saving discards the edits.
+ * Vehicle Preferences panel. Loads fresh on each open; closing without saving
+ * discards changes.
  */
 export default function VehiclePreferencesPanel() {
   const open = useAppStore((s) => s.preferencesOpen);
@@ -250,7 +244,7 @@ function PreferencesContent({ onClose }) {
     }));
   };
 
-  // Focus in on open, Escape closes, focus back to the opener on close.
+  // Focus in on open, Escape to close, focus back to the opener.
   const panelRef = useRef(null);
   usePanelFocus(panelRef, onClose);
 
@@ -263,9 +257,8 @@ function PreferencesContent({ onClose }) {
 
     try {
       const saved = await saveVehicleSettings(settings);
-      // The cockpit holds its own copy of climate and exterior lighting; hand
-      // it the saved record so it does not keep showing, and later re-save,
-      // what was there before.
+      // Pass the saved record to the store, which keeps its own copy of climate
+      // and lighting.
       applyVehicleSettings(saved ?? settings);
 
       setMessage("Vehicle preferences saved.");
@@ -379,8 +372,7 @@ function PreferencesContent({ onClose }) {
                 </label>
               </div>
 
-              {/* The dock's own settings. They live in the same
-                  climate_settings record, so they belong here too. */}
+              {/* Dock settings, stored in the same climate_settings record */}
               <div className="settings-grid">
                 <label className="settings-field">
                   Air conditioning

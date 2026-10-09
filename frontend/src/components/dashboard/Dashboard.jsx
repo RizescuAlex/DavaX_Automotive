@@ -14,12 +14,7 @@ import UserSettingsPanel from "../user-settings/UserSettingsPanel";
 import ContactsPanel from "../contacts/ContactsPanel";
 import VehiclePreferencesPanel from "../vehicle-settings/VehiclePreferencesPanel";
 
-/**
- * Fixed three-column cockpit. There is no section switching any more: every
- * surface the app has is on screen at once, so the map never has to be
- * re-mounted and the live readings never go out of view. Lighting and signal
- * toggles live in the dock at the foot of the shell.
- */
+/** Cockpit layout: top bar, rail, map with panels over it, dock. */
 export default function Dashboard() {
   const { user } = useAuth();
   const startSimulation = useAppStore((s) => s.startSimulation);
@@ -36,15 +31,13 @@ export default function Dashboard() {
       <CallSession />
 
       <div className="dashboard-body">
-        {/* Left rail — the vehicle and its live readings */}
+        {/* Rail: speed, telltales, car, readings */}
         <aside className="dash-rail">
           <CarVisualization />
           <VehicleGauges />
         </aside>
 
-        {/* Right — the map, permanently open, with the player docked over it.
-            The player sits on the map rather than in the rail because at rail
-            width its track title had nowhere to go and clipped mid-word. */}
+        {/* Map, with the media player and panels over it */}
         <main className="dash-content">
           <MapPanel />
           <div className="dash-media">

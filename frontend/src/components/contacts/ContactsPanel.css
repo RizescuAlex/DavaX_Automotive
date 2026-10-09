@@ -1,5 +1,5 @@
-/* Contacts — the Vehicle Preferences panel shell (.prefs-panel), sized to a
-   list: it grows with the contacts and scrolls once it reaches the map's foot. */
+/* Contacts: the .prefs-panel shell, sized to its list, which scrolls once it
+   reaches the bottom of the map. */
 
 .contacts-panel {
   width: min(420px, calc(100% - var(--space-8)));
@@ -57,7 +57,7 @@
 
 .contacts-status.error { color: var(--color-error); }
 
-/* Only the list scrolls; the add form stays in reach at the top. */
+/* Only the list scrolls. */
 .contacts-list {
   flex: 1;
   min-height: 0;
@@ -151,7 +151,6 @@
 .contact-call:disabled,
 .contact-remove:disabled { opacity: 0.5; cursor: default; }
 
-/* Call is the row's main action: a soft face that goes solid on touch */
 .contact-call {
   color: var(--text-primary);
   background: var(--surface-hover);
@@ -169,7 +168,7 @@
 
 .contact-remove:hover:not(:disabled) { color: var(--color-error); }
 
-/* Armed: waiting for the confirming second tap. */
+/* Waiting for the confirming second tap */
 .contact-remove.confirming {
   color: var(--on-accent);
   background: var(--color-error);

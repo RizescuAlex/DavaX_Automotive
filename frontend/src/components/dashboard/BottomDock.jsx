@@ -8,19 +8,10 @@ import LevelMeter from "./LevelMeter";
 import { FrontDefogIcon, HazardIcon, RearDefogIcon, WiperIcon } from "./CarIcons";
 
 /**
- * Persistent control strip, in four groups: lights and signals, visibility,
- * comfort, temperature. Grouping is what lets a driver find a control by
- * position; the word under each icon is what confirms it without guessing
- * at a glyph. Speed is not repeated here: the rail already leads with it.
- *
- * Every button drives real state rather than standing in for hardware this app
- * cannot reach. Lights, signals and wipers are live simulation and are not
- * remembered between sessions; seat heat, A/C level, the defoggers and the
- * temperature persist to climate_settings.
- *
- * The temperature doubles as the opener for the climate panel, which holds the
- * settings you adjust once — fan and auto — so the strip carries only what you
- * reach for while moving.
+ * Bottom control strip: lights and signals, visibility, comfort, temperature.
+ * Lights, signals and wipers are simulation state and aren't saved; seat heat,
+ * A/C, defoggers and temperature are saved to climate_settings. The temperature
+ * opens the climate pop-up (fan, auto).
  */
 export default function BottomDock() {
   const [now, setNow] = useState(new Date());
@@ -72,7 +63,7 @@ export default function BottomDock() {
       </div>
 
       <div className="dock-section dock-center">
-        {/* Lighting and signals — live vehicle state */}
+        {/* Lights and signals */}
         <div className="dock-group" role="group" aria-label="Lights and signals">
           <button
             type="button"
@@ -120,7 +111,7 @@ export default function BottomDock() {
           </button>
         </div>
 
-        {/* Visibility — wipers are live state, defoggers persist */}
+        {/* Visibility */}
         <div className="dock-group" role="group" aria-label="Visibility">
           <button
             type="button"
@@ -157,7 +148,7 @@ export default function BottomDock() {
           </button>
         </div>
 
-        {/* Comfort — persists to climate_settings */}
+        {/* Comfort */}
         <div className="dock-group" role="group" aria-label="Comfort">
           <SeatHeatButton side="left" />
           <SeatHeatButton side="right" />
@@ -173,7 +164,7 @@ export default function BottomDock() {
           </button>
         </div>
 
-        {/* Temperature, and the way into the rest of climate */}
+        {/* Temperature (opens the climate pop-up) */}
         <div className="dock-climate">
           <button
             type="button"

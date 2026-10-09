@@ -32,10 +32,10 @@ export async function apiFetch(path, options = {}) {
   const customToken = localStorage.getItem("davax_token");
 
   if (customToken) {
-    // Email/password sign-in — use our custom JWT from localStorage
+    // Email/password sign-in: use our custom JWT from localStorage
     headers["Authorization"] = `Bearer ${customToken}`;
   } else if (firebaseUser) {
-    // Google sign-in — use Firebase ID token
+    // Google sign-in: use Firebase ID token
     const token = await firebaseUser.getIdToken();
     headers["Authorization"] = `Bearer ${token}`;
   }

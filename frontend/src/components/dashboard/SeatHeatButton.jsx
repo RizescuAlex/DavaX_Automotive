@@ -4,13 +4,8 @@ import { DOCK_ICON } from "../../config/constants";
 import LevelMeter from "./LevelMeter";
 
 /**
- * Seat heating for one seat.
- *
- * Two things have to be readable without stopping to think: which seat this
- * is, and how hot it is set. The pictogram answers the first by filling the
- * cushion this button controls; the meter answers the second by count, in
- * the heat colour once the seat is on, so the level is legible without
- * reading a numeral.
+ * Seat heating for one seat: the icon shows which seat, the meter shows the
+ * level (0–3).
  */
 export default function SeatHeatButton({ side }) {
   const level = useAppStore((s) => (side === "left" ? s.seatHeatLeft : s.seatHeatRight));

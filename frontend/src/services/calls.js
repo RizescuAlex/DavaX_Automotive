@@ -2,7 +2,7 @@ import { apiFetch } from "../config/api";
 import { useAppStore } from "../store";
 import { startCallRingtone } from "./callSounds";
 
-/** "@Alex.Pop " -> "alex.pop": what the backend stores and matches on. */
+/** "@Alex.Pop " -> "alex.pop", the form the backend stores. */
 export function normalizeUsername(value) {
   return value.trim().replace(/^@/, "").toLowerCase();
 }
@@ -15,12 +15,8 @@ export function createCall(calleeUsername) {
 }
 
 /**
- * Place a call and hand it to the call dialog.
- *
- * The Call panel, the Contacts panel and the assistant all start calls, and
- * all three must do the same three things in the same order, so it lives
- * here once. The backend only connects people who are in each other's
- * contacts, and says so in the error if not.
+ * Place a call and open the call dialog. Used by the Call panel, Contacts and
+ * the assistant. The backend rejects callees who aren't in the user's contacts.
  */
 export async function placeCall(username) {
   const call = await createCall(username);

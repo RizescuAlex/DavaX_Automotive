@@ -5,15 +5,8 @@ import { useAppStore, CLIMATE_LIMITS } from "../../store";
 const FAN_STEPS = Array.from({ length: CLIMATE_LIMITS.FAN_MAX }, (_, i) => i + 1);
 
 /**
- * The detailed half of climate, opened from the temperature in the dock.
- *
- * The dock carries what a driver reaches for mid-journey — temperature, seat
- * heat, A/C level, defrost. What gets set once and left alone lives here, so
- * the bar stays readable at a glance instead of becoming a wall of icons.
- *
- * Adjusting the fan by hand drops out of auto, the way a real HVAC panel does,
- * so no control is ever disabled — a disabled control in a dark cockpit is
- * hard to tell from a broken one.
+ * Climate pop-up, opened from the dock temperature: fan speed and auto mode.
+ * Adjusting the fan leaves auto mode, so no control is ever disabled.
  */
 export default function ClimatePanel({ onClose }) {
   const targetTemp = useAppStore((s) => s.targetTemp);
@@ -26,9 +19,8 @@ export default function ClimatePanel({ onClose }) {
 
   const panelRef = useRef(null);
 
-  // Close on Escape or on a click outside, the two things anyone expects of a
-  // popover. Pointerdown rather than click so it closes before the underlying
-  // control reacts.
+  // Close on Escape or a click outside. pointerdown so it closes before the
+  // control underneath reacts.
   useEffect(() => {
     const onKey = (e) => { if (e.key === "Escape") onClose(); };
     const onDown = (e) => {

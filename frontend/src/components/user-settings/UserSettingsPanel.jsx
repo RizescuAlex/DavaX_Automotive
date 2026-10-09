@@ -8,7 +8,7 @@ import { usePanelFocus } from "../../hooks/usePanelFocus";
 import "../vehicle-settings/VehiclePreferencesPanel.css";
 import "./UserSettingsPanel.css";
 
-/** The onboarding wizard's routing questions, asked again here. */
+/** The onboarding wizard's routing questions. */
 const PRIORITIES = [
   ["fastest_arrival", "Fastest arrival"],
   ["lowest_cost", "Lowest cost"],
@@ -24,16 +24,9 @@ const FUEL_TYPES = [
 ];
 
 /**
- * User Settings, opened from the person icon in the top bar — a panel over
- * the map like the assistant and Vehicle Preferences.
- *
- * Profile comes from /users/me and route preferences from /preferences/me,
- * the answers the onboarding wizard collected. A driver who skipped onboarding
- * has no preferences record (the endpoint 404s), so that section says so
- * instead of offering a form that could not save.
- *
- * Sign out sits in the footer, on the opposite side from Save, so the two are
- * never a mis-tap apart.
+ * User Settings. Profile from /users/me, route preferences from
+ * /preferences/me. Users who skipped onboarding have no preferences record
+ * (404), so that section shows a note instead of a form.
  */
 export default function UserSettingsPanel() {
   const open = useAppStore((s) => s.userSettingsOpen);
@@ -51,7 +44,7 @@ function UserSettingsContent({ onClose }) {
   const setBackendUser = useAppStore((s) => s.setBackendUser);
   const setCustomAuth = useAppStore((s) => s.setCustomAuth);
 
-  // Google sign-ins carry backendUser; email/password sign-ins carry customUser.
+  // Google sign-ins have backendUser; email/password sign-ins have customUser.
   const profile = backendUser ?? customUser ?? {};
   const savedName = profile.display_name ?? profile.displayName ?? "";
   const savedUsername = profile.username ?? "";
@@ -70,7 +63,7 @@ function UserSettingsContent({ onClose }) {
     let cancelled = false;
 
     async function load() {
-      // No session in preview mode, and a 401 would bounce to /login.
+      // No session in preview mode; a 401 would redirect to /login.
       if (DESIGN_PREVIEW) {
         setPreferencesNote("Route preferences load once you are signed in.");
         setLoading(false);
@@ -101,7 +94,7 @@ function UserSettingsContent({ onClose }) {
     };
   }, []);
 
-  // Focus in on open, Escape closes, focus back to the opener on close.
+  // Focus in on open, Escape to close, focus back to the opener.
   const panelRef = useRef(null);
   usePanelFocus(panelRef, onClose);
 
@@ -115,9 +108,8 @@ function UserSettingsContent({ onClose }) {
     setError("");
 
     try {
-      // One PUT for both profile fields, sending only what changed. The
-      // backend lowercases and validates the username and answers 409 if
-      // someone else has it; that message goes straight to the status line.
+      // One PUT with only the changed fields. A taken username returns 409,
+      // shown as is.
       const name = displayName.trim();
       const handle = username.trim().replace(/^@/, "").toLowerCase();
       const profileChanges = {};
@@ -129,7 +121,7 @@ function UserSettingsContent({ onClose }) {
           method: "PUT",
           body: JSON.stringify(profileChanges),
         });
-        // The top bar reads these, so update whichever sign-in this driver used.
+        // Update whichever user object the top bar reads.
         const fresh = { display_name: updated.display_name, username: updated.username };
         if (backendUser) setBackendUser({ ...backendUser, ...fresh });
         if (customUser) setCustomAuth(customToken, { ...customUser, ...fresh });

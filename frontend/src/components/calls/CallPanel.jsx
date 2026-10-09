@@ -5,13 +5,7 @@ import { usePanelFocus } from "../../hooks/usePanelFocus";
 import CallLauncher from "./CallLauncher";
 import "../vehicle-settings/VehiclePreferencesPanel.css";
 
-/**
- * Starting a call, as a panel over the map opened from the top bar's Call
- * button — the same family as the assistant and preferences panels.
- *
- * Once the call is placed the panel closes: the call dialog takes over from
- * there, and an open launcher behind it would only invite a second call.
- */
+/** Call panel. Closes once the call is placed; the call dialog takes over. */
 export default function CallPanel() {
   const open = useAppStore((s) => s.callOpen);
   const setCallOpen = useAppStore((s) => s.setCallOpen);
@@ -21,7 +15,7 @@ export default function CallPanel() {
 }
 
 function CallContent({ close }) {
-  // Focus in on open, Escape closes, focus back to the opener on close.
+  // Focus in on open, Escape to close, focus back to the opener.
   const panelRef = useRef(null);
   usePanelFocus(panelRef, close);
 

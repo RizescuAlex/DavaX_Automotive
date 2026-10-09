@@ -1,12 +1,6 @@
 /**
- * Automotive glyphs the Phosphor set does not carry.
- *
- * Drawn to match the symbols moulded onto real dashboard buttons, because a
- * driver already knows those shapes — a generic "wind" or "droplet" icon would
- * make them read the tooltip instead. Stroke-only and currentColor, so they
- * inherit button state and theme like the Phosphor icons beside them, at
- * the same 1.5 stroke as Phosphor's regular weight (16 units on its 256
- * grid, scaled to this 24 one).
+ * Car control glyphs Phosphor doesn't have, drawn like the symbols on real
+ * dashboard buttons. Stroke 1.5 to match Phosphor's regular weight.
  */
 
 const base = {
@@ -19,19 +13,8 @@ const base = {
 };
 
 /**
- * The hazard symbol: one triangle nested inside another.
- *
- * Not a warning icon, which puts an exclamation mark inside a single
- * triangle — that is a generic warning sign. The moulded button in a car is
- * two bare outlined triangles, and that is the shape a driver's eye is looking
- * for.
- *
- * The inner triangle is the outer one scaled to 0.42 about their shared
- * centroid, which keeps the gap equal on all three sides — picking the
- * coordinates by eye left the two bases closer together than the stroke was
- * wide, so they merged into one thick line. That leaves 3.2 units between the
- * centrelines, about 1.3px of daylight once both strokes are drawn at 18px.
- *
+ * Hazard symbol: two nested triangles. The inner one is the outer scaled to
+ * 0.42 about the centroid so the gap is even on all sides.
  */
 export function HazardIcon({ size = 18 }) {
   return (
@@ -42,7 +25,7 @@ export function HazardIcon({ size = 18 }) {
   );
 }
 
-/** Three wavy arrows rising inside a raked windscreen. */
+/** Front defogger: wavy arrows in a windscreen. */
 export function FrontDefogIcon({ size = 18 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
@@ -54,7 +37,7 @@ export function FrontDefogIcon({ size = 18 }) {
   );
 }
 
-/** The same waves inside the squarer outline of a rear screen. */
+/** Rear defogger: wavy arrows in a rear window. */
 export function RearDefogIcon({ size = 18 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
@@ -67,8 +50,7 @@ export function RearDefogIcon({ size = 18 }) {
 }
 
 /**
- * Front fog lamp: a lamp facing left, beams dipping toward the road, cut by
- * the wavy line that stands for fog. The warning-light shape, not a bulb.
+ * Front fog lamp: lamp facing left, beams angled down, crossed by a wavy line.
  */
 export function FrontFogIcon({ size = 18 }) {
   return (
@@ -82,7 +64,7 @@ export function FrontFogIcon({ size = 18 }) {
   );
 }
 
-/** Rear fog lamp: the lamp faces right and its beams run level. */
+/** Rear fog lamp: lamp facing right, level beams. */
 export function RearFogIcon({ size = 18 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
@@ -95,7 +77,7 @@ export function RearFogIcon({ size = 18 }) {
   );
 }
 
-/** A wiper arm sweeping a windscreen, with the spray it clears. */
+/** Wipers: an arm across a windscreen. */
 export function WiperIcon({ size = 18 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
@@ -110,10 +92,7 @@ export function WiperIcon({ size = 18 }) {
   );
 }
 
-/**
- * Which seat a heater button belongs to: two cushions seen from above, the
- * controlled one filled. Cheaper to read at a glance than an L/R letter.
- */
+/** Two seats seen from above, the controlled one filled. */
 export function SeatSideIcon({ side = "left", size = 16 }) {
   const isLeft = side === "left";
   return (

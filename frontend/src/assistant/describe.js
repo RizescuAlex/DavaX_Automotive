@@ -1,20 +1,12 @@
 /**
- * Turns the assistant's actions into the sentence the driver hears.
- *
- * The model does not write this. An interaction that ends in a function call
- * comes back with an empty output_text — true on every model tried — so there
- * is no spoken turn to use. Building the sentence here is not a workaround but
- * the better design: it is instant, costs no tokens, reads consistently, and
- * cannot claim a change that did not happen, because it is derived from the
- * actions that were actually applied.
- *
- * The model's own reply is still used for anything without actions: questions
- * about fuel or speed, and refusals like "I can't open the boot."
+ * Builds the spoken reply from the applied actions. When the model calls a tool
+ * its output_text comes back empty, so there is no reply to use; the model's
+ * own text is used only when there are no actions.
  */
 
 const LEVELS = ["off", "low", "medium", "high"];
 
-/** 23 -> "23", 22.5 -> "22.5". Avoids reading "23.0 degrees" aloud. */
+/** 23 -> "23", 22.5 -> "22.5" */
 function temp(value) {
   return Number.isInteger(value) ? String(value) : value.toFixed(1);
 }
@@ -83,8 +75,7 @@ function describeControls(args) {
     parts.push(args.wipers ? "wipers on" : "wipers off");
   }
 
-  // Said in the order the dispatcher applies them, so the sentence matches
-  // what actually ended up on the dashboard when the model contradicts itself.
+  // Same order as the dispatcher applies them.
   if (args.left_signal != null) {
     parts.push(args.left_signal ? "signalling left" : "left signal off");
   }
@@ -132,7 +123,7 @@ const DESCRIBERS = {
   call_user: describeCall,
 };
 
-/** "a", "a and b", "a, b and c" — spoken punctuation, not a list. */
+/** "a", "a and b", "a, b and c" */
 function join(parts) {
   if (parts.length <= 1) return parts[0] ?? "";
   if (parts.length === 2) return `${parts[0]} and ${parts[1]}`;
@@ -141,7 +132,7 @@ function join(parts) {
 
 /**
  * @param {Array<{tool: string, args: object}>} actions
- * @returns {string} one sentence, or "" when there is nothing to describe
+ * @returns {string} one sentence, or "" if there is nothing to describe
  */
 export function describeActions(actions) {
   const parts = [];
@@ -158,11 +149,9 @@ export function describeActions(actions) {
 }
 
 /**
- * What the driver actually sees: our sentence when anything was done, the
- * model's own words when it only spoke.
- *
- * @param {string} reply    the backend's reply text
- * @param {Array}  actions  the actions that were applied
+ * Our sentence when actions were applied, otherwise the model's reply.
+ * @param {string} reply
+ * @param {Array} actions
  */
 export function replyFor(reply, actions) {
   const described = describeActions(actions);
@@ -171,7 +160,6 @@ export function replyFor(reply, actions) {
   const spoken = (reply ?? "").trim();
   if (spoken) return spoken;
 
-  // Neither words nor actions. Rare, but an empty bubble reads as a hang, and
-  // silence after a question is the worst thing a dashboard can do.
+  // Neither text nor actions: say something rather than show an empty reply.
   return "Sorry, I did not catch that.";
 }

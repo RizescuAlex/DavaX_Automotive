@@ -213,9 +213,8 @@ export default function LoginPage() {
   const { isAuthenticated, user } = useAuth();
   const { setCustomAuth, setBackendUser } = useAppStore();
 
-  // Redirect once authentication actually completes. This is the only place we
-  // navigate away from login: isAuthenticated only turns true after the backend
-  // profile has landed, so onboarding_completed is known by the time we read it.
+  // isAuthenticated turns true only once the backend profile has loaded, so
+  // onboarding_completed is known here.
   useEffect(() => {
     if (isAuthenticated) {
       if (user?.onboarding_completed === false) {
@@ -238,9 +237,9 @@ export default function LoginPage() {
         onboarding_completed: data.onboarding_completed,
       });
     } else {
-      // Google: POST /auth/login is what creates the row on first sign-in, so its
-      // response is the authoritative profile. Storing it flips isAuthenticated,
-      // and the effect above handles the redirect.
+      // Google: the /auth/login response is the user profile (the row is
+      // created on first sign-in). Storing it sets isAuthenticated, and the
+      // effect above redirects.
       setBackendUser(data);
     }
   };

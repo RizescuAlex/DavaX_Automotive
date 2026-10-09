@@ -21,13 +21,7 @@ function GaugeCard({ label, value, unit, percentage, color }) {
   );
 }
 
-/**
- * The rail's live readings.
- *
- * Speed is deliberately absent: it already appears under the car and again in
- * the dock. Climate moved to the dock's temperature control, where it is
- * reachable without giving a whole column over to it.
- */
+/** Fuel and engine temperature for the rail. */
 export default function VehicleGauges() {
   const fuelLevel = useAppStore((s) => s.fuelLevel);
   const engineTemp = useAppStore((s) => s.engineTemp);

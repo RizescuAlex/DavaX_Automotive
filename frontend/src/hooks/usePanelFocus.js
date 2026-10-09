@@ -3,23 +3,15 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 const FIELDS = "input:not([type=hidden]):not(:disabled), select:not(:disabled), textarea:not(:disabled)";
 
 /**
- * Keyboard behaviour shared by the panels over the map.
- *
- * - Opening moves focus into the panel: its first field if it has one when it
- *   opens, otherwise the panel itself (which needs tabIndex={-1}), so a screen
- *   reader announces the panel and Tab continues inside it.
- * - Escape closes it.
- * - Closing hands focus back to whatever had it before — normally the top-bar
- *   button that opened the panel — instead of dropping it to the top of the
- *   page, unless the driver has already moved focus somewhere else.
- *
- * The opener is captured in a layout effect: every layout effect in the tree
- * runs before any passive one, so it still sees the opener even when a child
- * focuses its own input from a useEffect on mount (CallLauncher does).
- *
- * @param {React.RefObject<HTMLElement>} panelRef  the panel's root element
+ * Keyboard behaviour for the panels over the map: focus moves into the panel on
+ * open (its first field, or the panel itself, which then needs tabIndex={-1}),
+ * Escape closes it, and focus returns to the opener on close unless it has
+ * moved elsewhere. The opener is captured in a layout effect because layout
+ * effects run before any passive effect, including a child that focuses its own
+ * input on mount (CallLauncher).
+ * @param {React.RefObject<HTMLElement>} panelRef
  * @param {() => void} onClose
- * @param {boolean} [open=true]  for panels that stay mounted while closed
+ * @param {boolean} [open=true] for panels that stay mounted while closed
  */
 export function usePanelFocus(panelRef, onClose, open = true) {
   const openerRef = useRef(null);

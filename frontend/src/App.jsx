@@ -7,10 +7,7 @@ import OnboardingWizard from "./components/onboarding/OnboardingWizard";
 import VehicleApiTest from "./components/VehicleApiTest";
 import { useAppStore } from "./store";
 
-/**
- * Vehicle Preferences used to be a page. It is a panel on the dashboard now,
- * so the old address opens the panel there instead of 404ing to a blank map.
- */
+/** Vehicle Preferences used to be a page; the old URL now opens the panel. */
 function OpenPreferences() {
   const setPreferencesOpen = useAppStore((s) => s.setPreferencesOpen);
   useEffect(() => {

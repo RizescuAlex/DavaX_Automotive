@@ -1,15 +1,6 @@
-/*
-   Vehicle Preferences, as a panel over the map.
-
-   Built like the assistant panel — header with icon, title and close; a body
-   that scrolls; the panel's own edge and shadow — but larger, because it
-   carries the whole form. It hangs at the same height as the assistant so the
-   centred search bar above stays usable, and stops short of Google's
-   attribution strip at the foot of the map.
-
-   The --settings-* names are the form's own, pointed at the cockpit's design
-   tokens (index.css), so it follows the day/night toggle.
-*/
+/* Panel shell over the map, shared by Vehicle Preferences, Contacts, Call and
+   User Settings. Starts below the search bar and stops above Google's
+   attribution strip. The --settings-* names map the form onto the theme tokens. */
 .prefs-panel {
   --settings-section-bg: var(--surface-tertiary);
   --settings-text: var(--text-primary);
@@ -78,7 +69,7 @@
   outline-offset: 2px;
 }
 
-/* Only the form scrolls; the header and the save bar stay put. */
+/* Only the body scrolls; header and footer stay in place. */
 .prefs-body {
   flex: 1;
   min-height: 0;
@@ -228,8 +219,7 @@
   margin: 0;
 }
 
-/* Ambient lighting — styled as a cockpit surface, in the same tokens as the
-   dock and the climate panel */
+/* Ambient lighting */
 
 .ambient {
   display: grid;
@@ -277,8 +267,8 @@
   fill: var(--surface-hover);
 }
 
-/* The light: a soft wash in the zone's colour, scaled by its brightness.
-   Screen blending lets overlapping zones mix the way real light does. */
+/* Each zone's light, scaled by its brightness. Screen blending mixes
+   overlapping zones. */
 .ambient-glow {
   position: absolute;
   width: 46%;
@@ -292,8 +282,7 @@
   transition: opacity var(--transition-slow), background var(--transition-slow);
 }
 
-/* Screen blending vanishes on a pale ground; in daylight the wash sits on
-   top as a tint instead. */
+/* Screen blending disappears on a light background, so day mode uses multiply. */
 :root[data-theme="light"] .ambient-glow {
   mix-blend-mode: multiply;
   opacity: calc(var(--zone-strength) * 0.55);
@@ -313,8 +302,7 @@
     box-shadow var(--transition-fast), background var(--transition-fast);
 }
 
-/* The light spots stay small on the cabin drawing, but each answers a 44px
-   tap around it */
+/* Small dots with a 44px tap area */
 .ambient-spot::before {
   content: "";
   position: absolute;
@@ -359,8 +347,7 @@
   border-radius: var(--radius-full);
 }
 
-/* Controls — the climate panel's header pattern: icon, title, on/off pill.
-   They sit straight on the section, which already sets them apart. */
+/* Controls: header with icon, title and on/off toggle */
 .ambient-controls {
   display: flex;
   flex-direction: column;
@@ -404,7 +391,6 @@
 
 .ambient-toggle:hover { color: var(--text-primary); }
 
-/* On: the dock's solid face */
 .ambient-toggle.on {
   color: var(--surface-base);
   background: var(--text-primary);
@@ -443,8 +429,7 @@
   gap: var(--space-2);
 }
 
-/* 36px swatches with a 44px tap area; the 8px gap keeps neighbours' areas
-   from overlapping */
+/* 36px swatches with a 44px tap area; the 8px gap keeps tap areas apart */
 .ambient-swatch {
   position: relative;
   width: 36px;
@@ -480,7 +465,7 @@
   box-shadow: 0 0 0 2px var(--accent-primary);
 }
 
-/* The custom swatch is a colour wheel until a custom colour is chosen */
+/* Colour wheel until a custom colour is chosen */
 .ambient-swatch-custom {
   background: conic-gradient(#ff5f5f, #ffd166, #7fe08a, #5ee0d0, #88bdf2, #b58cff, #ff7ac6, #ff5f5f);
 }

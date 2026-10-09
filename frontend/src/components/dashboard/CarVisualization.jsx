@@ -4,15 +4,8 @@ import carIso from "../../assets/car-iso.svg";
 import { FrontFogIcon, RearFogIcon } from "./CarIcons";
 
 /**
- * Vehicle status.
- *
- * The illustration is a fixed 3/4 view, so it cannot show left and right
- * indicators the way the old overhead drawing did. The lamps under the speed
- * carry that state instead, like the telltales beside a speedometer.
- *
- * The stage is backed by the street scene (see `.car-viz-stage` in index.css),
- * so the contact shadow below is what keeps the car from floating above the
- * asphalt rather than sitting on it.
+ * Speed, telltales and the car on its street scene. The car is a fixed 3/4
+ * view, so turn signals are shown by the telltales.
  */
 export default function CarVisualization() {
   const headlightsOn = useAppStore((s) => s.headlightsOn);
@@ -26,9 +19,8 @@ export default function CarVisualization() {
     (s) => s.exteriorLights.headlights.automatic && s.headlightsOverride === null
   );
 
-  // Automatic simulation has its own state and takes display priority while a
-  // maneuver is active. Once it clears, the manual controls and hazards show
-  // exactly as before.
+  // An automatic (route) signal takes priority over the manual ones while
+  // active.
   const leftBlinking = automaticTurnSignal
     ? automaticTurnSignal === "left"
     : leftSignal || hazardsOn;
@@ -36,14 +28,13 @@ export default function CarVisualization() {
     ? automaticTurnSignal === "right"
     : rightSignal || hazardsOn;
 
-  // Headlights throw a pool as strong as their brightness setting; with them
-  // off, daytime running lights still leave a faint one.
+  // Headlight pool scales with brightness; daytime running lights give a faint
+  // one.
   const drlOnly = !headlightsOn && headlights.daytime_running;
   const glowStrength = headlightsOn ? headlights.brightness / 100 : drlOnly ? 0.3 : 0;
 
   return (
     <div className="car-viz">
-      {/* Speed first: it is what a glance at the rail is for */}
       <div className="car-readout">
         <span className="car-speed-num">{Math.round(speed)}</span>
         <span className="car-speed-label">km/h</span>

@@ -1,18 +1,5 @@
 <svg width="1600" height="1200" viewBox="0 0 1600 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
-<!--
-  Daylight counterpart to street-bg.svg.
-
-  Same geometry, filters and luminance ORDER as the night scene — asphalt
-  darkest, lane marking brightest — lifted into the day palette's warm
-  neutrals:
-    verge / mid / far   #e6e6e3  #dcdcd8  #d2d2ce
-    asphalt             #8d8e8a  (a shade darker than the planes around it,
-                                  so the pearl-white car keeps its edge)
-    lane marking        #ffffff  (road paint; the accent stays on the map)
-
-  The road's inner shadow is softened from 0.47 to 0.28 alpha: the same
-  shadow that reads as depth on dark asphalt reads as grime on light.
--->
+<!-- Day version of street-bg.svg: same geometry, lighter palette, softer road shadow (0.28 instead of 0.47). -->
 <g clip-path="url(#street-clip)">
   <g transform="translate(0, -200)">
     <!-- Ground planes, light to dark -->
@@ -27,7 +14,7 @@
     <!-- Lane marking along the far edge -->
     <path d="M-10.6094 54L-24.8652 -24L1669.13 666L1689.39 832L-10.6094 54Z" fill="#ffffff" opacity="0.72"/>
 
-    <!-- Distance haze — light and airy rather than a darkening toward the top -->
+    <!-- Haze -->
     <rect x="-100" y="-600" width="1800" height="2200" fill="url(#haze)"/>
     <rect x="-100" y="-600" width="1800" height="2200" filter="url(#grain)" opacity="0.10" style="mix-blend-mode:overlay"/>
   </g>

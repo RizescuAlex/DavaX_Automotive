@@ -14,5 +14,5 @@ export const MAP_CONFIG = {
   FALLBACK_CENTER: { lat: 44.4268, lng: 26.1025 },
 };
 
-/** Glyph size inside a dock button — large enough to read at a glance. */
+/** Dock icon size in px. */
 export const DOCK_ICON = 22;

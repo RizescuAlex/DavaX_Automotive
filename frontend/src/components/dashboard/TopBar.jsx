@@ -3,13 +3,6 @@ import { ChatCircleDotsIcon, CloudIcon, CloudRainIcon, GearSixIcon, MoonIcon, Ph
 import { APP_NAME } from "../../config/constants";
 import { useAppStore } from "../../store";
 
-/**
- * Opens the assistant.
- *
- * It lives up here beside Vehicle Preferences rather than floating over the
- * map, where as a round button in the bottom-right corner it sat on top of
- * Google's zoom controls and swallowed the clicks meant for them.
- */
 function AssistantButton() {
   const open = useAppStore((s) => s.assistantOpen);
   const toggleAssistant = useAppStore((s) => s.toggleAssistant);
@@ -28,7 +21,6 @@ function AssistantButton() {
   );
 }
 
-/** Opens the Call panel, where a call to another driver starts. */
 function CallButton() {
   const open = useAppStore((s) => s.callOpen);
   const toggleCall = useAppStore((s) => s.toggleCall);
@@ -47,7 +39,6 @@ function CallButton() {
   );
 }
 
-/** Opens Contacts, where drivers are added and called by username. */
 function ContactsButton() {
   const open = useAppStore((s) => s.contactsOpen);
   const toggleContacts = useAppStore((s) => s.toggleContacts);
@@ -66,10 +57,7 @@ function ContactsButton() {
   );
 }
 
-/**
- * The avatar, doubling as the way into User Settings. A button rather than a
- * picture, so it is reachable by keyboard and says what it does.
- */
+/** The avatar is also the User Settings button. */
 function UserSettingsButton({ photoURL }) {
   const open = useAppStore((s) => s.userSettingsOpen);
   const toggleUserSettings = useAppStore((s) => s.toggleUserSettings);
@@ -88,7 +76,6 @@ function UserSettingsButton({ photoURL }) {
   );
 }
 
-/** Opens Vehicle Preferences over the map, the way the assistant opens. */
 function PreferencesButton() {
   const open = useAppStore((s) => s.preferencesOpen);
   const togglePreferences = useAppStore((s) => s.togglePreferences);
@@ -107,12 +94,7 @@ function PreferencesButton() {
   );
 }
 
-/**
- * Day/night switch.
- *
- * Labelled by the mode it switches TO, since that is the question the driver
- * is actually asking — the icon shows the destination, not the current state.
- */
+/** Day/night switch, labelled with the mode it switches to. */
 function ThemeToggle() {
   const theme = useAppStore((s) => s.theme);
   const toggleTheme = useAppStore((s) => s.toggleTheme);
@@ -161,10 +143,10 @@ function WeatherBadge() {
             });
           }
         } catch {
-          /* silent fail — weather is cosmetic */
+          /* weather is optional */
         }
       },
-      () => { /* geolocation denied — skip weather */ }
+      () => { /* no location: skip weather */ }
     );
   }, []);
 
@@ -204,7 +186,7 @@ export default function TopBar({ user }) {
         <WeatherBadge />
         <ThemeToggle />
         <div className="top-bar-user">
-          {/* Sign out lives in the User Settings panel this opens */}
+          {/* Sign out is in User Settings */}
           <UserSettingsButton photoURL={user?.photoURL || user?.avatar_url} />
         </div>
       </div>

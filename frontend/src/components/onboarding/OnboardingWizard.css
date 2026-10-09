@@ -144,7 +144,7 @@
   height: 0;
 }
 
-/* Switch: off is a muted knob on a dim track; on is the dock's solid face */
+/* Switch: dim track when off, solid text-colour track when on */
 .toggle-slider {
   position: relative;
   width: 44px;

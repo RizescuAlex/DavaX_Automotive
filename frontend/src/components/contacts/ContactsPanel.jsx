@@ -8,16 +8,11 @@ import { usePanelFocus } from "../../hooks/usePanelFocus";
 import "../vehicle-settings/VehiclePreferencesPanel.css";
 import "./ContactsPanel.css";
 
-/** How long a Remove tap waits for its confirming second tap. */
 const CONFIRM_WINDOW_MS = 3000;
 
 /**
- * Contacts, opened from the top bar — a panel over the map like the others.
- *
- * The backend only lets a driver call people in their contacts, so this is
- * where a call usually starts: add someone by username once, then call them
- * with one tap. Removing takes a second tap to confirm, because a mis-tap on a
- * moving car should not quietly cost the driver a contact.
+ * Contacts panel. Calls can only go to contacts. Remove needs a second tap
+ * within CONFIRM_WINDOW_MS.
  */
 export default function ContactsPanel() {
   const open = useAppStore((s) => s.contactsOpen);
@@ -32,7 +27,7 @@ function ContactsContent({ onClose }) {
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState("");
   const [adding, setAdding] = useState(false);
-  // Which row is mid-action, so only its buttons show as busy.
+  // Row with a pending action, so only its buttons show as busy.
   const [busyId, setBusyId] = useState(null);
   const [confirmingId, setConfirmingId] = useState(null);
   const [message, setMessage] = useState("");
@@ -42,11 +37,11 @@ function ContactsContent({ onClose }) {
   const inputRef = useRef(null);
   const confirmTimer = useRef(null);
 
-  // Focus in on open, Escape closes, focus back to the opener on close.
+  // Focus in on open, Escape to close, focus back to the opener.
   usePanelFocus(panelRef, onClose);
 
   const load = useCallback(async () => {
-    // No session in preview mode, and a 401 would bounce to /login.
+    // No session in preview mode; a 401 would redirect to /login.
     if (DESIGN_PREVIEW) {
       setLoading(false);
       return;
@@ -94,7 +89,7 @@ function ContactsContent({ onClose }) {
     setBusyId(contact.id);
     try {
       await placeCall(contact.username);
-      // The call dialog takes over from here.
+      // The call dialog takes over.
       onClose();
     } catch (err) {
       say(err.message, true);
@@ -103,7 +98,6 @@ function ContactsContent({ onClose }) {
   };
 
   const handleRemove = async (contact) => {
-    // First tap arms the button; the second, within the window, removes.
     if (confirmingId !== contact.id) {
       setConfirmingId(contact.id);
       clearTimeout(confirmTimer.current);

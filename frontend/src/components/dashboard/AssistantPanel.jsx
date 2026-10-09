@@ -13,21 +13,11 @@ import { useAppStore } from "../../store";
 import { usePanelFocus } from "../../hooks/usePanelFocus";
 
 /**
- * The assistant, dropping from the top-right of the map under the top bar.
- *
- * An overlay rather than a column, so the rail's width stays with the car and
- * its gauges. It hangs from the top rather than the bottom because the
- * bottom-right corner belongs to Google's map controls, and the panel covered
- * them; it clears the centred search bar by starting below it.
- *
- * The round trip is: snapshot the store, send it with the message, apply the
- * actions that come back, then say what was done. The context is read before
- * the actions are applied, so the model sees the dashboard as it was when the
- * driver spoke rather than a state mid-change.
+ * Assistant panel. Sends the message with a snapshot of the store (taken before
+ * any actions run), applies the returned actions, then shows or speaks what was
+ * done.
  */
 export default function AssistantPanel() {
-  // Open state lives in the store: the button that opens this sits in the top
-  // bar, not here.
   const open = useAppStore((s) => s.assistantOpen);
   const setAssistantOpen = useAppStore((s) => s.setAssistantOpen);
 
@@ -41,7 +31,6 @@ export default function AssistantPanel() {
   const inputRef = useRef(null);
   const listeningRef = useRef(null);
 
-  // Follow the conversation down as it grows.
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
@@ -58,41 +47,37 @@ export default function AssistantPanel() {
     setAssistantOpen(false);
   };
 
-  // Escape closes, and focus goes back to the opener on close. (The input
-  // above takes focus on open, so the hook leaves that alone.)
+  // Escape to close, focus back to the opener. The input focuses itself on
+  // open.
   usePanelFocus(panelRef, close, open);
 
   const say = (role, text) => setMessages((prev) => [...prev, { role, text }]);
 
   /**
-   * @param {string}  message
-   * @param {boolean} spoken  true when the driver used the microphone, which
-   *                          is the only case where the reply is read back —
-   *                          somebody typing does not expect to be talked at.
+   * @param {string} message
+   * @param {boolean} spoken true when the microphone was used; only then is the
+   *   reply read aloud
    */
   const send = useCallback(async (message, spoken) => {
     setBusy(true);
     say("user", message);
 
     try {
-      // getState rather than a subscription: this is a one-off read at send
-      // time, and subscribing would re-render the panel on every simulated
-      // speed tick.
+      // getState instead of a subscription, to avoid re-rendering on every
+      // simulation tick.
       const context = buildContext(useAppStore.getState());
       const { reply, actions } = await sendAssistantMessage(message, context);
 
       const failures = await applyActions(actions);
 
-      // The sentence is built from the actions, not the model — an
-      // interaction that ends in a tool call comes back with no text at all.
+      // Tool calls come back without text, so the reply is built from the
+      // actions.
       const spokenReply = replyFor(reply, actions);
       say("assistant", spokenReply);
       if (spoken) speak(spokenReply);
 
       if (failures.length > 0) {
-        // A failed call says why — most often the person is not in the
-        // driver's contacts — since "did not go through" alone gives the
-        // driver nothing to act on.
+        // Show why a call failed (usually: not in the user's contacts).
         const failedCall = failures.find((failure) => failure.tool === "call_user");
         const trouble = failedCall
           ? `The call did not go through: ${failedCall.error.message}`
@@ -122,14 +107,13 @@ export default function AssistantPanel() {
   const talk = async () => {
     if (busy) return;
 
-    // A second press stops it, so the button is never a one-way trip.
+    // A second press stops listening.
     if (listening) {
       listeningRef.current?.cancel();
       return;
     }
 
-    // Anything still being read aloud would be picked straight back up by the
-    // microphone, so silence it first.
+    // Stop speaking first so the mic doesn't pick it up.
     stopSpeaking();
     setListening(true);
 

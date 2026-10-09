@@ -1,24 +1,12 @@
-/* ═══════════════════════════════════════════════════════════
-   DavaX Automotive — Design System
-   Direction "Calm minimal": a near-black screen that disappears at night,
-   layers told apart by tone rather than borders, and one blue accent kept
-   for what the driver must find at a glance (route, position, active).
-   ═══════════════════════════════════════════════════════════ */
+/* DavaX Automotive design system. :root holds the night theme (the default);
+   [data-theme="light"] overrides it. */
 
 /* ── Design Tokens ── */
-/*
-   Neutrals are a true near-black with the faintest cool bias, not slate:
-   the blue lives only in the accent, so it means something when it shows.
-
-   Measured worst case across every surface (base through hover):
-     text-primary  13.3:1    text-muted     4.7:1
-     text-secondary 9.1:1    accent-primary 7.4:1
-     on-accent on accent 9.7:1
-     success 8.2, warning 9.3, error 6.2, heat 8.6
-   --border-strong is 1.6:1 and is only ever a border, never text.
-*/
+/* Contrast, worst case across all surfaces: text-primary 13.3:1, text-secondary
+   9.1:1, text-muted 4.7:1, accent-primary 7.4:1, on-accent 9.7:1, semantic
+   colours 6.2:1 or more. --border-strong (1.6:1) is for borders only. */
 :root {
-  /* Surfaces — the back of the screen is the darkest; each step lifts */
+  /* Surfaces, darkest at the back */
   --surface-base: #0b0c0e;
   --surface-primary: #121316;
   --surface-secondary: #17181b;
@@ -27,7 +15,7 @@
   --surface-hover: #26272b;
   --surface-sunken: #0b0c0e;
 
-  /* Borders — kept faint; tone does the separating */
+  /* Borders */
   --border-subtle: #1f2024;
   --border-default: #2c2d32;
   --border-strong: #44464d;
@@ -57,30 +45,25 @@
   --color-error: #f28b82;
   --color-error-light: rgba(242, 139, 130, 0.14);
 
-  /* Shadows — only overlays on the map cast one; on near-black they need
-     real depth to register at all */
+  /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.45);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
   --shadow-xl: 0 12px 34px rgba(0, 0, 0, 0.55);
 
-  /* Seat heating. Warm rather than the accent blue, because "hot" reading as
-     cold is the one mistake this control cannot afford. Not --color-warning:
-     heat is a setting, not a fault. */
+  /* Seat heating. Separate from --color-warning: heat is a setting, not a
+     fault. */
   --color-heat: #ffb38a;
 
-  /* Vehicle stage — the shading that sits the car on the road. Tokenised
-     because a shadow tuned for night asphalt reads as dirt in daylight. */
+  /* Shading for the car on the street scene */
   --stage-vignette: rgba(11, 12, 14, 0.62);
   --stage-inset: rgba(0, 0, 0, 0.5);
   --stage-contact: rgba(0, 0, 0, 0.7);
   --stage-drop: rgba(0, 0, 0, 0.55);
-  /* The pool of headlight on the road: lamp light, not the route's blue */
+  /* Headlight pool on the road */
   --stage-headlight: rgba(242, 242, 236, 0.22);
 
-  /* Typography — Overpass, drawn from Highway Gothic, the lettering on US
-     road signs: made to be read at a glance from a moving car. Overpass Mono
-     where digits must hold their width as they change (clock, temperature,
+  /* Typography. The mono face is for figures that change (clock, temperature,
      readings). */
   --font-sans: "Overpass", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "Overpass Mono", ui-monospace, "Cascadia Mono", monospace;
@@ -92,7 +75,7 @@
   --font-size-xl: 1.25rem;
   --font-size-2xl: 1.5rem;
   --font-size-3xl: 1.875rem;
-  /* The speed: the one figure read at a glance from the driving position */
+  /* Speed readout */
   --font-size-display: 5.5rem;
   --font-weight-light: 300;
   --font-weight-regular: 400;
@@ -119,42 +102,28 @@
   --radius-xl: 16px;
   --radius-full: 9999px;
 
-  /* Layout — rail, map, dock */
+  /* Layout: rail, map, dock */
   --rail-width: 300px;
   --dock-height: 84px;
-  /* Dock controls: sized for a hand on a moving car, not a mouse, with
-     room for a word under the icon */
+  /* Dock buttons: touch-sized, with room for a label */
   --dock-btn-size: 60px;
   --topbar-height: 52px;
-  /* Shared by the map search bar and the notice that hangs under it */
+  /* Shared by the map search bar and the notice below it */
   --map-search-width: 300px;
 
   /* Transitions */
   --transition-fast: 120ms ease;
   --transition-base: 200ms ease;
   --transition-slow: 300ms ease;
-  /* Panels arriving: short, and only a few pixels of travel, from the side
-     they come from. On a screen used while driving, motion that pulls the
-     eye is a cost, not a flourish. */
+  /* Panel entrance */
   --motion-arrive: 140ms cubic-bezier(0.2, 0, 0, 1);
 }
 
-/*
-   Day theme: the same calm in daylight. A warm-neutral paper ground with
-   white for anything lifted, and the accent deepened to #1764c7 because the
-   night blue sits far too light on white to read as text.
-
-   Measured worst case across every surface:
-     text-primary   15.0:1    text-muted     5.0:1
-     text-secondary  8.8:1    accent-primary 4.6:1
-     white on accent 5.7:1    success/warning/error/heat all 4.7:1 or above
-   --border-strong is 1.9:1 and, as at night, is only ever a border.
-
-   Night stays the default in :root, so the cockpit is dark unless the
-   driver asks otherwise.
-*/
+/* Day theme. Contrast, worst case across all surfaces: text-primary 15.0:1,
+   text-secondary 8.8:1, text-muted 5.0:1, accent-primary 4.6:1, white on accent
+   5.7:1, semantic colours 4.7:1 or more. --border-strong is for borders only. */
 :root[data-theme="light"] {
-  /* Surfaces — lifted elements go white, the ground settles to paper */
+  /* Surfaces */
   --surface-base: #f3f3f1;
   --surface-primary: #ffffff;
   --surface-secondary: #f7f7f5;
@@ -192,8 +161,7 @@
   --color-error: #b3261e;
   --color-error-light: rgba(179, 38, 30, 0.1);
 
-  /* Shadows — far lighter than at night; on a pale ground a heavy shadow
-     reads as dirt rather than elevation */
+  /* Shadows */
   --shadow-sm: 0 1px 2px rgba(17, 18, 20, 0.06);
   --shadow-md: 0 2px 6px rgba(17, 18, 20, 0.08);
   --shadow-lg: 0 8px 24px rgba(17, 18, 20, 0.1);
@@ -201,8 +169,7 @@
 
   --color-heat: #a1420f;
 
-  /* Stage shading, lightened: enough to seat the car on the road, not so
-     much that the pale asphalt looks soiled. */
+  /* Stage shading */
   --stage-vignette: rgba(110, 110, 105, 0.24);
   --stage-inset: rgba(80, 80, 76, 0.14);
   --stage-contact: rgba(40, 40, 38, 0.32);
@@ -295,8 +262,8 @@ a:hover {
   transform: scale(0.98);
 }
 
-/* Primary is a solid face in the text colour, like an "on" control in the
-   dock: blue stays reserved for the route and what is selected. */
+/* Primary buttons use the text colour; the accent is kept for the route and
+   selection. */
 .btn-primary {
   background: var(--text-primary);
   color: var(--surface-base);
@@ -344,7 +311,6 @@ a:hover {
   animation: arrive-from-below var(--motion-arrive);
 }
 
-/* The wordmark as in the top bar: name in the text colour, the dot in blue */
 .login-card .logo {
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
@@ -447,7 +413,7 @@ a:hover {
   color: var(--text-secondary);
 }
 
-/* The panels' inset field: no edge until it has focus */
+/* Inset field; the border shows only on focus */
 .form-input {
   width: 100%;
   padding: var(--space-2) var(--space-3);
@@ -468,8 +434,7 @@ a:hover {
 
 .form-input:focus { border-color: var(--accent-primary); }
 
-/* .form-group carries no margin, so without this the fields sat flush
-   against each other. The submit sits a step further off the last one. */
+/* .form-group has no margin, so the form sets the spacing. */
 .auth-form { display: flex; flex-direction: column; gap: var(--space-4); }
 .auth-submit { margin-top: var(--space-2); }
 
@@ -490,7 +455,6 @@ a:hover {
   color: var(--text-muted);
 }
 
-/* A link in the text colour, underlined so it reads as one without blue */
 .auth-toggle-btn {
   background: none;
   border: none;
@@ -500,7 +464,7 @@ a:hover {
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
-  /* A 44px tap area around a one-line link, without moving the line */
+  /* 44px tap area without changing the line */
   display: inline-block;
   padding: var(--space-3) var(--space-1);
   margin: calc(var(--space-3) * -1) 0;
@@ -534,9 +498,7 @@ a:hover {
   animation: spin 0.6s linear infinite;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   Cockpit shell — rail · nav · content · dock
-   ═══════════════════════════════════════════════════════════ */
+/* Cockpit shell: top bar, rail, map, dock */
 
 /* ── Shell grid ── */
 .dashboard {
@@ -636,8 +598,7 @@ a:hover {
   object-fit: cover;
 }
 
-/* The avatar is also the User Settings button, so it takes a full touch
-   target rather than the picture's 32px */
+/* The avatar doubles as the User Settings button */
 .avatar-btn {
   width: 44px;
   height: 44px;
@@ -660,8 +621,7 @@ a:hover {
   box-shadow: 0 0 0 3px var(--accent-primary-light);
 }
 
-/* Top-bar panel switches: plain text tabs. The open panel's tab lifts to a
-   raised tone; nothing is outlined. */
+/* Top-bar panel tabs */
 .top-nav-btn {
   display: inline-flex;
   align-items: center;
@@ -684,8 +644,8 @@ a:hover {
 .top-nav-btn,
 .top-bar-greeting { white-space: nowrap; }
 
-/* Narrow screens: the greeting goes first, then the tabs drop to icons.
-   Each tab keeps its aria-label, so its name is still announced. */
+/* Narrow screens: hide the greeting, then the tab labels (the aria-labels
+   stay). */
 @media (max-width: 1000px) {
   .top-bar-greeting { display: none; }
 }
@@ -721,9 +681,7 @@ a:hover {
   background: var(--surface-base);
 }
 
-/* Media player, docked over the bottom-left of the map. An overlay is the
-   right shape here — unlike the rail, the map has room to spare and nothing
-   underneath that the player hides. */
+/* Media player, over the bottom-left of the map */
 .dash-media {
   position: absolute;
   z-index: 6;
@@ -733,9 +691,8 @@ a:hover {
 }
 
 /* ── Gauges ── */
-/* Two readings side by side at the foot of the rail. minmax(0, ...) rather
-   than a bare 1fr: a plain 1fr track refuses to shrink below its content's
-   min-content width and pushes a scrollbar into the rail instead. */
+/* minmax(0, 1fr): a bare 1fr track won't shrink below its content and overflows
+   the rail. */
 .vehicle-gauges {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -819,8 +776,7 @@ a:hover {
   font-weight: var(--font-weight-medium);
 }
 
-/* Flat: an icon over a word, with no face or outline. The word is what makes
-   an idle control read as a control rather than a loose glyph. */
+/* Icon over a label, no background until hovered or on */
 .dock-btn {
   width: var(--dock-btn-size);
   height: var(--dock-btn-size);
@@ -897,10 +853,8 @@ a:hover {
   animation: spin 0.6s linear infinite;
 }
 
-/* Hangs just under the search bar (top + its 44px height + a gap) and no wider
-   than it. At the foot of the map it overlapped the media card and the route
-   summary; capped to the search width it also stays clear of the route
-   options panel, which ends where the search bar begins. */
+/* Below the search bar (12px + 44px + 8px) and no wider than it, so it clears
+   the route panel. */
 .map-geo-notice {
   position: absolute;
   top: calc(var(--space-3) + 44px + var(--space-2));
@@ -921,14 +875,13 @@ a:hover {
   z-index: 5;
 }
 
-/* Only the glyph carries the warning colour; the sentence stays readable */
 .map-geo-notice-icon {
   flex-shrink: 0;
   margin-top: 2px;
   color: var(--color-warning);
 }
 
-/* Centred over the map; the geolocation notice hangs just below it. */
+/* Centred over the map */
 .map-search {
   position: absolute;
   top: var(--space-3);
@@ -947,7 +900,7 @@ a:hover {
   box-shadow: var(--shadow-lg);
 }
 
-/* The input itself has no outline, so the bar carries the focus ring */
+/* The input has no outline, so the bar shows focus */
 .map-search:focus-within {
   outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
@@ -993,10 +946,7 @@ a:hover {
   color: var(--text-primary);
 }
 
-/* ── Route planner ──
-   Overlays the map draws once a destination is routed: the options panel
-   (top-left), the "finding route" status in the same spot, and the summary
-   pill at the foot. */
+/* Route planner overlays: options panel, routing status, summary pill */
 .route-options {
   position: absolute;
   top: 76px;
@@ -1036,12 +986,11 @@ a:hover {
   cursor: pointer;
 }
 
-/* The chosen route lifts a tone and its time takes the route colour, the
-   same blue as its line on the map */
+/* Selected route: raised background, time in the route colour */
 .route-option[aria-pressed="true"] { background: var(--surface-tertiary); }
 .route-option[aria-pressed="true"] .route-option-summary strong { color: var(--accent-primary); }
 
-/* Locked once the trip is confirmed or under way */
+/* Disabled once the trip is confirmed or running */
 .route-option:disabled {
   cursor: default;
   opacity: 0.8;
@@ -1087,7 +1036,7 @@ a:hover {
   font-size: 0.82rem;
 }
 
-/* Suggested rows carry their own top rule, so the heading sits closer */
+/* Suggested rows have their own top border */
 .route-stops.suggested .route-stops-title { margin-bottom: 6px; }
 
 .route-stop {
@@ -1162,8 +1111,7 @@ a:hover {
   box-shadow: var(--shadow-lg);
 }
 
-/* Bottom-right, clear of Google's zoom controls (64px) and level with the
-   media card on the left. Centred, it sat on top of that card. */
+/* Bottom-right, clear of Google's zoom controls */
 .route-summary {
   position: absolute;
   bottom: var(--space-4);
@@ -1188,8 +1136,6 @@ a:hover {
 
 .route-summary-icon { color: var(--text-muted); }
 
-/* Text on the accent fill uses --on-accent: plain white sat at about 1.9:1
-   on the night accent. */
 .route-drive-btn {
   margin-left: var(--space-4);
   padding: 10px 18px;
@@ -1202,7 +1148,7 @@ a:hover {
   cursor: pointer;
 }
 
-/* Disabled only while the trip is being confirmed */
+/* Disabled while the trip is being confirmed */
 .route-drive-btn:disabled {
   cursor: wait;
   opacity: 0.7;
@@ -1223,11 +1169,8 @@ a:hover {
   cursor: pointer;
 }
 
-/* ── Media player ──
-   Floats over the map, so it needs elevation and an opaque ground — map
-   detail showing through would make the title unreadable. The second row
-   holds position, then volume: the top row keeps the title its width, and
-   two more buttons up there would squeeze it down to a few letters. */
+/* Media player. Opaque so map labels don't show through; progress and volume
+   wrap to a second row. */
 .spotify-widget {
   display: flex;
   flex-wrap: wrap;
@@ -1346,8 +1289,7 @@ a:hover {
   text-align: center;
 }
 
-/* The bar: a thin track filled to --progress, with a thumb that only shows
-   when the driver reaches for it. */
+/* Seek bar: track filled to --progress, thumb shown on hover and focus */
 .spotify-seek {
   flex: 1;
   min-width: 0;
@@ -1455,12 +1397,9 @@ a:hover {
   text-align: center;
 }
 
-/* ── Narrow screens ──
-   The dock's full-size controls need about 1160px. Below that it gives way in
-   order of what a driver can spare: the date and connection status first,
-   then button size, then the left section entirely. Each
-   step is sized so the strip never grows wider than the window — if it does,
-   the whole cockpit grid stretches with it and slides off the left edge. */
+/* Narrow screens: hide the date and status, then shrink the dock buttons, then
+   hide the left section. The dock must never be wider than the window, or the
+   whole grid overflows. */
 @media (max-width: 1320px) {
   .dock-date,
   .dock-status { display: none; }
@@ -1474,9 +1413,8 @@ a:hover {
 
 @media (max-width: 1100px) {
   :root { --rail-width: 248px; }
-  /* Narrower map: the media card and the route summary both give way so
-     they still fit side by side along the foot of the map, and the route
-     panel starts below the location notice instead of beside it. */
+  /* Narrower map: shrink the media card and route summary so they fit side by
+     side, and start the route panel below the location notice. */
   .dash-media { width: min(280px, calc(100% - var(--space-8))); }
   .route-summary { gap: var(--space-3); padding-left: var(--space-4); }
   .route-summary-icon { display: none; }
@@ -1484,7 +1422,7 @@ a:hover {
   .route-options,
   .route-status { top: 128px; }
   .route-options { max-height: calc(100% - 242px); }
-  /* Keep play/pause; skipping tracks gives way so the title stays legible */
+  /* Hide track skipping so the title has room */
   .spotify-actions button[aria-label$="track"] { display: none; }
 }
 
@@ -1514,8 +1452,7 @@ a:hover {
     width: 160px;
     flex-shrink: 0;
   }
-  /* Full width at the foot of the map rather than a floating card, which at
-     this width would cover most of it. */
+  /* Full-width bar along the bottom of the map */
   .dash-media {
     left: var(--space-3);
     right: var(--space-3);
@@ -1525,7 +1462,7 @@ a:hover {
   .dock-left .dock-status { display: none; }
 }
 
-/* ── Vehicle illustration (imported 3/4 view) ── */
+/* Vehicle illustration */
 .car-viz {
   flex: 1;
   min-height: 0;
@@ -1536,9 +1473,8 @@ a:hover {
   overflow: hidden;
 }
 
-/* The car stands on the street scene rather than on flat panel fill. The
-   artwork is 4:3 and the rail is not, so it is cropped around the centre,
-   biased downward to hold the asphalt — not the verge — under the wheels. */
+/* Street scene behind the car. The art is 4:3, so it is cropped, biased down to
+   keep the road under the wheels. */
 .car-viz-stage {
   position: relative;
   flex: 1;
@@ -1561,8 +1497,7 @@ a:hover {
   background-image: url("./assets/street-bg-light.svg");
 }
 
-/* Darkens the crop toward the frame so the scene fades into the card edge
-   instead of ending on a hard rectangle. */
+/* Vignette toward the edges */
 .car-viz-stage::after {
   content: "";
   position: absolute;
@@ -1584,7 +1519,7 @@ a:hover {
   filter: drop-shadow(0 10px 14px var(--stage-drop));
 }
 
-/* Contact shadow — without it the car reads as pasted over the asphalt */
+/* Contact shadow under the car */
 .car-shadow {
   position: absolute;
   z-index: 1;
@@ -1601,8 +1536,7 @@ a:hover {
   );
 }
 
-/* Pool of light under the nose. Its opacity is set inline from the
-   headlight brightness preference, or dimly for daytime running lights. */
+/* Headlight pool; opacity is set inline from the brightness setting */
 .car-glow {
   position: absolute;
   z-index: 1;
@@ -1628,8 +1562,7 @@ a:hover {
   gap: var(--space-2);
 }
 
-/* Light weight at display size: large enough to read from the seat, thin
-   enough not to shout. Tabular figures keep it from jittering as it changes. */
+/* Tabular figures so the speed doesn't jitter */
 .car-speed-num {
   font-family: var(--font-sans);
   font-size: var(--font-size-display);
@@ -1648,7 +1581,7 @@ a:hover {
   color: var(--text-muted);
 }
 
-/* Telltales: unlit they are faint glyphs, lit they take their colour */
+/* Telltales: faint when off, coloured when on */
 .car-lamps {
   display: flex;
   gap: var(--space-1);
@@ -1682,8 +1615,8 @@ a:hover {
   line-height: 1;
 }
 
-/* Fog lamps are telltales that only appear while lit. Green for the front
-   and amber for the rear, the colours the real warning lights use. */
+/* Fog telltales only show while lit: green front, amber rear, as on real
+   warning lights. */
 .car-lamp.fog {
   background: var(--color-success-light);
   color: var(--color-success);
@@ -1707,12 +1640,7 @@ a:hover {
   }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   Climate pop-up (opened from the dock's temperature)
-   Every hit target is 40px or more, which is also why the fan
-   steps are buttons rather than a slider — a 4px-wide thumb is
-   not a driving control.
-   ═══════════════════════════════════════════════════════════ */
+/* Climate pop-up, opened from the dock temperature */
 .climate-head {
   display: flex;
   align-items: center;
@@ -1750,7 +1678,6 @@ a:hover {
 
 .climate-auto:hover { color: var(--text-primary); }
 
-/* On: the dock's solid face */
 .climate-auto.on {
   color: var(--surface-base);
   background: var(--text-primary);
@@ -1824,8 +1751,7 @@ a:hover {
   min-width: 0;
 }
 
-/* Bars step up in height as well as colour, so fan level survives being read
-   by someone who cannot separate the two blues. */
+/* Bar heights step up too, so the level doesn't rely on colour alone */
 .climate-fan-bar {
   flex: 1;
   min-width: 0;
@@ -1863,13 +1789,7 @@ a:hover {
   background: var(--surface-hover);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   Dock controls
-   Grouped rather than an undifferentiated row of icons: lights
-   and signals, then comfort, then temperature. The separators
-   are what let a driver find a control by position instead of
-   reading every glyph.
-   ═══════════════════════════════════════════════════════════ */
+/* Dock controls, grouped: lights and signals, visibility, comfort, temperature */
 .dock-group {
   display: flex;
   align-items: center;
@@ -1881,8 +1801,7 @@ a:hover {
   gap: var(--space-6);
 }
 
-/* On inverts to a solid face in the text colour: unmistakable at a glance,
-   and it leaves the blue for the map. */
+/* On: solid face in the text colour */
 .dock-btn.on {
   background: var(--text-primary);
   color: var(--surface-base);
@@ -1890,9 +1809,7 @@ a:hover {
 
 .dock-btn.on .dock-label { color: inherit; }
 
-/* Hazards go red rather than the accent or the amber warning colour: it is
-   the one control here that means "something is wrong", and red is the colour
-   moulded into the button on a real dashboard. */
+/* Hazards use the error colour */
 .dock-btn.alert {
   background: var(--color-error-light);
   color: var(--color-error);
@@ -1929,7 +1846,6 @@ a:hover {
 
 .dock-temp:hover { background: var(--surface-hover); }
 
-/* Open: the dock's solid "on" face */
 .dock-temp.open {
   background: var(--text-primary);
   color: var(--surface-base);
@@ -1943,8 +1859,7 @@ a:hover {
 }
 
 /* ── Climate panel ── */
-/* Right edges aligned with the temperature control: the dock puts it near
-   the right of the screen, where a centred pop-up ran off the edge. */
+/* Right-aligned to the temperature control so it stays on screen */
 .climate-panel {
   position: absolute;
   z-index: 20;
@@ -1993,10 +1908,8 @@ a:hover {
   background: var(--color-warning-light);
 }
 
-/* ── Level meter (seat heat, A/C) ──
-   Sits in the label row under the icon. Segments take the button's text
-   colour; unlit ones stay faintly visible so the control always shows it
-   has steps. */
+/* Level meter for seat heat and A/C: segments use the button's colour; unlit
+   ones stay faint. */
 .level-meter {
   display: flex;
   gap: 3px;
@@ -2019,8 +1932,7 @@ a:hover {
 .dock-btn.ac { position: relative; }
 
 
-/* Wipers sweep while they are running — a static highlight would not say
-   whether they are on or merely selected. */
+/* The wiper arm moves while the wipers run */
 .wiper-arm {
   transform-origin: 6.5px 18px;
   transform-box: fill-box;
@@ -2039,22 +1951,14 @@ a:hover {
   50% { transform: rotate(38deg); }
 }
 
-/* ── Assistant ──
-   Hangs from the top-right of the map. It is opened from the top bar, not from
-   a floating button: as a round control in the bottom-right corner it sat on
-   top of Google's zoom buttons and ate the clicks meant for them.
-
-   The top offset clears the search bar — 44px tall at var(--space-3) — so the
-   two never collide, whatever the window width. Anchoring by the centred
-   search's horizontal position would only hold on a wide screen. */
+/* Assistant panel, top-right of the map below the search bar */
 .assistant-panel {
   position: absolute;
   z-index: 6;
   right: var(--space-4);
   top: calc(var(--space-3) * 2 + 44px);
   width: min(360px, calc(100% - var(--space-8)));
-  /* Capped rather than fixed: the log grows with the conversation but must
-     stop short of Google's attribution strip along the foot of the map. */
+  /* Capped to stop above Google's attribution strip */
   max-height: min(420px, calc(100% - var(--space-3) * 2 - 44px - var(--space-8)));
   display: flex;
   flex-direction: column;
@@ -2127,8 +2031,7 @@ a:hover {
   max-width: 85%;
 }
 
-/* What you said sits in a soft bubble; the car's reply is plain text on the
-   panel, so the conversation reads without a wall of coloured blocks. */
+/* User messages in a bubble, replies as plain text */
 .assistant-line-user {
   align-self: flex-end;
   background: var(--surface-hover);
@@ -2172,7 +2075,6 @@ a:hover {
   border-color: var(--accent-primary);
 }
 
-/* Send: the panel's primary action, the dock's solid face */
 .assistant-input button {
   display: grid;
   place-items: center;
@@ -2187,8 +2089,7 @@ a:hover {
 .assistant-input button:disabled { opacity: 0.35; cursor: default; }
 .assistant-input button:not(:disabled):hover { background: var(--text-secondary); }
 
-/* Push-to-talk. Hidden entirely where the Web Speech API is missing, so the
-   row collapses to input + send rather than showing a dead control. */
+/* Push-to-talk; hidden where the Web Speech API is unavailable */
 .assistant-input .assistant-mic {
   display: grid;
   place-items: center;
@@ -2204,7 +2105,6 @@ a:hover {
 .assistant-input .assistant-mic:disabled { opacity: 0.35; cursor: default; }
 .assistant-input .assistant-mic:not(:disabled):hover { color: var(--text-primary); background: var(--border-default); }
 
-/* Listening is a live state, so it takes the accent */
 .assistant-input .assistant-mic.on {
   color: var(--accent-primary);
   background: var(--accent-primary-light);
@@ -2212,13 +2112,10 @@ a:hover {
 }
 
 /* ── Compact in-car call UI ── */
-/* The call dialog is fixed to the viewport by its own backdrop, so the
-   wrapper needs no position of its own. Starting a call happens in the Call
-   panel below. */
+/* The call dialog is position: fixed, so this wrapper needs no box of its own. */
 .call-session { display: contents; }
 
-/* ── Call panel ──
-   The Vehicle Preferences shell (.prefs-panel), sized to its one form. */
+/* Call panel (uses the .prefs-panel shell) */
 .call-panel {
   width: min(400px, calc(100% - var(--space-8)));
   bottom: auto;
@@ -2336,9 +2233,7 @@ a:hover {
   50% { opacity: 0.55; }
 }
 
-/* With reduced motion asked for, panels appear in place and the states that
-   pulse (hazards, the listening mic) hold steady; their colour still says
-   they are on. The turn telltales and wipers have their own rules above. */
+/* Reduced motion: no panel entrances, no pulsing */
 @media (prefers-reduced-motion: reduce) {
   .login-card,
   .assistant-panel,
