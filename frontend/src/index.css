@@ -75,6 +75,8 @@
   --stage-inset: rgba(0, 0, 0, 0.5);
   --stage-contact: rgba(0, 0, 0, 0.7);
   --stage-drop: rgba(0, 0, 0, 0.55);
+  /* The pool of headlight on the road: lamp light, not the route's blue */
+  --stage-headlight: rgba(242, 242, 236, 0.22);
 
   /* Typography — Geist for everything; Geist Mono where digits must hold
      their width as they change (clock, temperature, readings) */
@@ -199,6 +201,7 @@
   --stage-inset: rgba(80, 80, 76, 0.14);
   --stage-contact: rgba(40, 40, 38, 0.32);
   --stage-drop: rgba(40, 40, 38, 0.26);
+  --stage-headlight: rgba(255, 255, 250, 0.55);
 }
 
 /* ── Reset & Base ── */
@@ -1592,7 +1595,7 @@ a:hover {
   border-radius: 50%;
   background: radial-gradient(
     ellipse at center,
-    var(--accent-primary-glow) 0%,
+    var(--stage-headlight) 0%,
     transparent 68%
   );
   opacity: 0;
