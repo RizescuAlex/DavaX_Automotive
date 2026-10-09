@@ -1,13 +1,9 @@
 import { useAppStore } from "../../store";
-import { Fuel, Thermometer } from "lucide-react";
 
-function GaugeCard({ icon: Icon, label, value, unit, percentage, color }) {
+function GaugeCard({ label, value, unit, percentage, color }) {
   return (
     <div className="gauge-card">
-      <div className="gauge-card-header">
-        <Icon size={16} className="gauge-icon" />
-        <span className="gauge-label">{label}</span>
-      </div>
+      <span className="gauge-label">{label}</span>
       <div className="gauge-value">
         <span className="gauge-number">{value}</span>
         <span className="gauge-unit">{unit}</span>
@@ -49,16 +45,14 @@ export default function VehicleGauges() {
   return (
     <div className="vehicle-gauges">
       <GaugeCard
-        icon={Fuel}
-        label="Fuel Level"
+        label="Fuel"
         value={Math.round(fuelLevel)}
         unit="%"
         percentage={fuelLevel}
         color={fuelColor}
       />
       <GaugeCard
-        icon={Thermometer}
-        label="Engine Temp"
+        label="Engine"
         value={Math.round(engineTemp)}
         unit="°C"
         percentage={(engineTemp / 130) * 100}

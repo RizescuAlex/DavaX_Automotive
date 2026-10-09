@@ -88,6 +88,8 @@
   --font-size-xl: 1.25rem;
   --font-size-2xl: 1.5rem;
   --font-size-3xl: 1.875rem;
+  /* The speed: the one figure read at a glance from the driving position */
+  --font-size-display: 5.5rem;
   --font-weight-light: 300;
   --font-weight-regular: 400;
   --font-weight-medium: 500;
@@ -115,9 +117,10 @@
 
   /* Layout — rail, map, dock */
   --rail-width: 300px;
-  --dock-height: 76px;
-  /* Dock controls: sized for a hand on a moving car, not a mouse */
-  --dock-btn-size: 52px;
+  --dock-height: 84px;
+  /* Dock controls: sized for a hand on a moving car, not a mouse, with
+     room for a word under the icon */
+  --dock-btn-size: 60px;
   --topbar-height: 44px;
   /* Shared by the map search bar and the notice that hangs under it */
   --map-search-width: 300px;
@@ -585,8 +588,6 @@ a:hover {
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-1) var(--space-3);
-  background: var(--surface-tertiary);
-  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-full);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
@@ -614,7 +615,7 @@ a:hover {
 .top-bar-user .avatar {
   background: var(--surface-tertiary);
   color: var(--text-secondary);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid transparent;
 }
 
 .avatar-img {
@@ -644,6 +645,34 @@ a:hover {
   box-shadow: 0 0 0 3px var(--accent-primary-light);
 }
 
+/* Top-bar panel switches: plain text tabs. The open panel's tab lifts to a
+   raised tone; nothing is outlined. */
+.top-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 34px;
+  padding: 0 var(--space-3);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-muted);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.top-nav-btn:hover { color: var(--text-primary); background: var(--surface-hover); }
+
+.top-nav-btn.is-on { color: var(--text-primary); background: var(--surface-tertiary); }
+
+.top-nav-btn:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
 .btn-sm {
   height: 32px;
   font-size: var(--font-size-sm);
@@ -657,10 +686,9 @@ a:hover {
   overflow: hidden;
   flex-direction: column;
   min-height: 0;
-  padding: var(--space-4);
-  gap: var(--space-3);
-  background: var(--surface-primary);
-  border-right: 1px solid var(--border-subtle);
+  padding: var(--space-5) var(--space-4) var(--space-4);
+  gap: var(--space-4);
+  background: var(--surface-base);
 }
 
 /* ── Content area ── */
@@ -689,7 +717,7 @@ a:hover {
 .vehicle-gauges {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-3);
+  gap: var(--space-5);
   flex-shrink: 0;
 }
 
@@ -697,17 +725,6 @@ a:hover {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  background: var(--surface-elevated);
-}
-
-.gauge-card-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-2);
 }
 
 .gauge-label {
@@ -717,8 +734,6 @@ a:hover {
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
-
-.gauge-icon { color: var(--accent-primary); }
 
 .gauge-value {
   display: flex;
@@ -773,23 +788,6 @@ a:hover {
 
 .dock-right { justify-content: flex-end; }
 
-.dock-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  color: var(--text-primary);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-}
-
-.dock-badge small {
-  color: var(--text-muted);
-  font-family: var(--font-sans);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-regular);
-}
-
 .dock-status {
   display: inline-flex;
   align-items: center;
@@ -799,17 +797,19 @@ a:hover {
   font-weight: var(--font-weight-medium);
 }
 
-/* Idle buttons carry a filled face and the brighter secondary text colour,
-   so an off control still reads as a control rather than a loose glyph. */
+/* Flat: an icon over a word, with no face or outline. The word is what makes
+   an idle control read as a control rather than a loose glyph. */
 .dock-btn {
   width: var(--dock-btn-size);
   height: var(--dock-btn-size);
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--border-subtle);
+  gap: var(--space-1);
+  border: 1px solid transparent;
   border-radius: var(--radius-lg);
-  background: var(--surface-primary);
+  background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
   transition: background var(--transition-fast), color var(--transition-fast);
@@ -828,6 +828,13 @@ a:hover {
 .dock-date {
   color: var(--text-muted);
   font-size: var(--font-size-xs);
+}
+
+.dock-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  color: var(--text-muted);
 }
 
 .dock-time {
@@ -1401,20 +1408,18 @@ a:hover {
 /* ── Narrow screens ──
    The dock's full-size controls need about 1160px. Below that it gives way in
    order of what a driver can spare: the date and connection status first,
-   then button size, then the speed badge (the rail shows speed too). Each
+   then button size, then the left section entirely. Each
    step is sized so the strip never grows wider than the window — if it does,
    the whole cockpit grid stretches with it and slides off the left edge. */
 @media (max-width: 1320px) {
   .dock-date,
   .dock-status { display: none; }
-  .dock-group { padding-right: var(--space-2); }
-  .dock-center { gap: var(--space-2); }
+  .dock-center { gap: var(--space-5); }
 }
 
 @media (max-width: 1200px) {
-  :root { --dock-btn-size: 46px; }
-  .dock-group { gap: var(--space-1); }
-  .dock-seat { width: 52px; }
+  :root { --dock-btn-size: 54px; }
+  .dock-center { gap: var(--space-4); }
 }
 
 @media (max-width: 1100px) {
@@ -1422,10 +1427,9 @@ a:hover {
 }
 
 @media (max-width: 1000px) {
-  :root { --dock-btn-size: 42px; }
+  :root { --dock-btn-size: 50px; }
   .dock-left { display: none; }
-  .dock-seat { width: 46px; }
-  .dock-btn.ac { width: 46px; }
+  .dock-center { gap: var(--space-3); }
   .dock-temp { min-width: 70px; }
 }
 
@@ -1465,9 +1469,7 @@ a:hover {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
+  gap: var(--space-3);
   width: 100%;
   overflow: hidden;
 }
@@ -1484,7 +1486,6 @@ a:hover {
   justify-content: center;
   overflow: hidden;
   padding: var(--space-3);
-  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   background-color: var(--surface-sunken);
   background-image: url("./assets/street-bg.svg");
@@ -1562,16 +1563,19 @@ a:hover {
 .car-readout {
   display: flex;
   align-items: baseline;
-  justify-content: center;
   gap: var(--space-2);
 }
 
+/* Light weight at display size: large enough to read from the seat, thin
+   enough not to shout. Tabular figures keep it from jittering as it changes. */
 .car-speed-num {
-  font-family: var(--font-mono);
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-display);
+  font-weight: var(--font-weight-light);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
   color: var(--text-primary);
-  line-height: 1;
+  line-height: 0.9;
 }
 
 .car-speed-label {
@@ -1582,29 +1586,27 @@ a:hover {
   color: var(--text-muted);
 }
 
+/* Telltales: unlit they are faint glyphs, lit they take their colour */
 .car-lamps {
   display: flex;
-  justify-content: center;
-  gap: var(--space-2);
+  gap: var(--space-1);
 }
 
 .car-lamp {
   position: relative;
-  width: 38px;
-  height: 30px;
+  width: 34px;
+  height: 28px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  background: var(--surface-sunken);
+  background: transparent;
   color: var(--text-muted);
   transition: background var(--transition-fast), color var(--transition-fast);
 }
 
 .car-lamp.on {
   background: var(--accent-primary-light);
-  border-color: var(--accent-primary);
   color: var(--accent-primary);
 }
 
@@ -1622,19 +1624,16 @@ a:hover {
    and amber for the rear, the colours the real warning lights use. */
 .car-lamp.fog {
   background: var(--color-success-light);
-  border-color: var(--color-success);
   color: var(--color-success);
 }
 
 .car-lamp.fog.rear {
   background: var(--color-warning-light);
-  border-color: var(--color-warning);
   color: var(--color-warning);
 }
 
 .car-lamp.blink {
   background: var(--color-warning-light);
-  border-color: var(--color-warning);
   color: var(--color-warning);
   animation: signal-blink 1000ms steps(1, end) infinite;
 }
@@ -1859,22 +1858,20 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   flex-shrink: 0;
   color: var(--text-muted);
   background: transparent;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-full);
+  border: 0;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: color var(--transition-fast), border-color var(--transition-fast),
-    background-color var(--transition-fast);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
 }
 
 .theme-toggle:hover {
-  color: var(--accent-primary);
-  border-color: var(--accent-primary);
-  background: var(--accent-primary-light);
+  color: var(--text-primary);
+  background: var(--surface-hover);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1887,21 +1884,22 @@ a:hover {
 .dock-group {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  padding-right: var(--space-3);
-  border-right: 1px solid var(--border-subtle);
+  gap: var(--space-1);
 }
 
 .dock-center {
   justify-content: center;
-  gap: var(--space-3);
+  gap: var(--space-6);
 }
 
+/* On inverts to a solid face in the text colour: unmistakable at a glance,
+   and it leaves the blue for the map. */
 .dock-btn.on {
-  background: var(--accent-primary-light);
-  color: var(--accent-primary);
-  border-color: var(--accent-primary);
+  background: var(--text-primary);
+  color: var(--surface-base);
 }
+
+.dock-btn.on .dock-label { color: inherit; }
 
 /* Hazards go red rather than the accent or the amber warning colour: it is
    the one control here that means "something is wrong", and red is the colour
@@ -1909,24 +1907,10 @@ a:hover {
 .dock-btn.alert {
   background: var(--color-error-light);
   color: var(--color-error);
-  border-color: var(--color-error);
   animation: signal-blink 700ms steps(1, end) infinite;
 }
 
-/* A small letter in the corner of a dock button — "A" while the headlights
-   are on automatic */
-.dock-btn.has-badge { position: relative; }
-
-.dock-level {
-  position: absolute;
-  right: 6px;
-  bottom: 4px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: var(--font-weight-bold);
-  line-height: 1;
-  color: var(--accent-primary);
-}
+.dock-btn.alert .dock-label { color: inherit; }
 
 /* ── Temperature ── */
 .dock-climate {
@@ -1995,16 +1979,15 @@ a:hover {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  width: 60px;
+  width: var(--dock-btn-size);
   height: var(--dock-btn-size);
   padding: 0;
   color: var(--text-secondary);
-  background: var(--surface-primary);
-  border: 1px solid var(--border-subtle);
+  background: transparent;
+  border: 1px solid transparent;
   border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast),
-    border-color var(--transition-fast);
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
 
 .dock-seat:hover { background: var(--surface-hover); color: var(--text-primary); }
@@ -2017,7 +2000,6 @@ a:hover {
 .dock-seat.on {
   color: var(--color-heat);
   background: var(--color-warning-light);
-  border-color: var(--color-heat);
 }
 
 .dock-seat-flames {
@@ -2040,12 +2022,7 @@ a:hover {
 }
 
 /* ── A/C intensity ── */
-.dock-btn.ac {
-  position: relative;
-  width: 56px;
-  flex-direction: column;
-  gap: 4px;
-}
+.dock-btn.ac { position: relative; }
 
 .dock-ac-bars {
   display: flex;

@@ -17,7 +17,7 @@ function AssistantButton() {
   return (
     <button
       type="button"
-      className={`btn btn-secondary btn-sm ${open ? "is-on" : ""}`}
+      className={`top-nav-btn ${open ? "is-on" : ""}`}
       onClick={toggleAssistant}
       aria-pressed={open}
       aria-label={open ? "Close the AI assistant" : "Open the AI assistant"}
@@ -36,7 +36,7 @@ function CallButton() {
   return (
     <button
       type="button"
-      className={`btn btn-secondary btn-sm ${open ? "is-on" : ""}`}
+      className={`top-nav-btn ${open ? "is-on" : ""}`}
       onClick={toggleCall}
       aria-pressed={open}
       aria-label={open ? "Close the call panel" : "Open the call panel"}
@@ -55,7 +55,7 @@ function ContactsButton() {
   return (
     <button
       type="button"
-      className={`btn btn-secondary btn-sm ${open ? "is-on" : ""}`}
+      className={`top-nav-btn ${open ? "is-on" : ""}`}
       onClick={toggleContacts}
       aria-pressed={open}
       aria-label={open ? "Close contacts" : "Open contacts"}
@@ -96,7 +96,7 @@ function PreferencesButton() {
   return (
     <button
       type="button"
-      className={`btn btn-secondary btn-sm ${open ? "is-on" : ""}`}
+      className={`top-nav-btn ${open ? "is-on" : ""}`}
       onClick={togglePreferences}
       aria-pressed={open}
       aria-label={open ? "Close vehicle preferences" : "Open vehicle preferences"}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import {
-  Wifi, Lightbulb, CornerUpLeft, CornerUpRight, Car,
+  Wifi, Lightbulb, CornerUpLeft, CornerUpRight,
   Minus, Plus, Snowflake,
 } from "lucide-react";
 import { useAppStore, CLIMATE_LIMITS } from "../../store";
@@ -12,7 +12,8 @@ import { FrontDefogIcon, HazardIcon, RearDefogIcon, WiperIcon } from "./CarIcons
 /**
  * Persistent control strip, in four groups: lights and signals, visibility,
  * comfort, temperature. Grouping is what lets a driver find a control by
- * position rather than by reading every glyph.
+ * position; the word under each icon is what confirms it without guessing
+ * at a glyph. Speed is not repeated here: the rail already leads with it.
  *
  * Every button drives real state rather than standing in for hardware this app
  * cannot reach. Lights, signals and wipers are live simulation and are not
@@ -27,7 +28,6 @@ export default function BottomDock() {
   const [now, setNow] = useState(new Date());
   const [climateOpen, setClimateOpen] = useState(false);
 
-  const speed = useAppStore((s) => s.speed);
   const headlightsOn = useAppStore((s) => s.headlightsOn);
   const headlightsAuto = useAppStore(
     (s) => s.exteriorLights.headlights.automatic && s.headlightsOverride === null
@@ -67,10 +67,6 @@ export default function BottomDock() {
   return (
     <footer className="dock">
       <div className="dock-section dock-left">
-        <span className="dock-badge">
-          <Car size={16} aria-hidden="true" />
-          {Math.round(speed)} <small>km/h</small>
-        </span>
         <span className="dock-status">
           <Wifi size={13} aria-hidden="true" />
           Connected
@@ -82,14 +78,14 @@ export default function BottomDock() {
         <div className="dock-group" role="group" aria-label="Lights and signals">
           <button
             type="button"
-            className={`dock-btn has-badge ${headlightsOn ? "on" : ""}`}
+            className={`dock-btn ${headlightsOn ? "on" : ""}`}
             aria-pressed={headlightsOn}
             aria-label={`Headlights${headlightsAuto ? ", automatic" : ""}`}
             title={headlightsAuto ? "Headlights (automatic)" : "Headlights"}
             onClick={toggleHeadlights}
           >
             <Lightbulb size={DOCK_ICON} />
-            {headlightsAuto && <span className="dock-level" aria-hidden="true">A</span>}
+            <span className="dock-label" aria-hidden="true">{headlightsAuto ? "Auto" : "Lights"}</span>
           </button>
           <button
             type="button"
@@ -100,6 +96,7 @@ export default function BottomDock() {
             onClick={toggleHazards}
           >
             <HazardIcon size={DOCK_ICON} />
+            <span className="dock-label" aria-hidden="true">Hazard</span>
           </button>
           <button
             type="button"
@@ -110,6 +107,7 @@ export default function BottomDock() {
             onClick={toggleLeftSignal}
           >
             <CornerUpLeft size={DOCK_ICON} />
+            <span className="dock-label" aria-hidden="true">Left</span>
           </button>
           <button
             type="button"
@@ -120,6 +118,7 @@ export default function BottomDock() {
             onClick={toggleRightSignal}
           >
             <CornerUpRight size={DOCK_ICON} />
+            <span className="dock-label" aria-hidden="true">Right</span>
           </button>
         </div>
 
@@ -134,6 +133,7 @@ export default function BottomDock() {
             onClick={toggleWipers}
           >
             <WiperIcon size={DOCK_ICON} />
+            <span className="dock-label" aria-hidden="true">Wipers</span>
           </button>
           <button
             type="button"
@@ -144,6 +144,7 @@ export default function BottomDock() {
             onClick={toggleFrontDefrost}
           >
             <FrontDefogIcon size={DOCK_ICON} />
+            <span className="dock-label" aria-hidden="true">Front</span>
           </button>
           <button
             type="button"
@@ -154,6 +155,7 @@ export default function BottomDock() {
             onClick={toggleRearDefrost}
           >
             <RearDefogIcon size={DOCK_ICON} />
+            <span className="dock-label" aria-hidden="true">Rear</span>
           </button>
         </div>
 

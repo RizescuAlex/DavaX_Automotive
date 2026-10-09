@@ -7,8 +7,8 @@ import { FrontFogIcon, RearFogIcon } from "./CarIcons";
  * Vehicle status.
  *
  * The illustration is a fixed 3/4 view, so it cannot show left and right
- * indicators the way the old overhead drawing did. The lamps below it carry
- * that state instead, which also keeps the live readouts legible at rail width.
+ * indicators the way the old overhead drawing did. The lamps under the speed
+ * carry that state instead, like the telltales beside a speedometer.
  *
  * The stage is backed by the street scene (see `.car-viz-stage` in index.css),
  * so the contact shadow below is what keeps the car from floating above the
@@ -43,16 +43,7 @@ export default function CarVisualization() {
 
   return (
     <div className="car-viz">
-      <div className="car-viz-stage">
-        <div
-          className="car-glow"
-          style={{ opacity: glowStrength }}
-          aria-hidden="true"
-        />
-        <div className="car-shadow" aria-hidden="true" />
-        <img src={carIso} alt="Your vehicle" className="car-photo" />
-      </div>
-
+      {/* Speed first: it is what a glance at the rail is for */}
       <div className="car-readout">
         <span className="car-speed-num">{Math.round(speed)}</span>
         <span className="car-speed-label">km/h</span>
@@ -92,6 +83,16 @@ export default function CarVisualization() {
         >
           <CornerUpRight size={16} aria-hidden="true" />
         </span>
+      </div>
+
+      <div className="car-viz-stage">
+        <div
+          className="car-glow"
+          style={{ opacity: glowStrength }}
+          aria-hidden="true"
+        />
+        <div className="car-shadow" aria-hidden="true" />
+        <img src={carIso} alt="Your vehicle" className="car-photo" />
       </div>
     </div>
   );
