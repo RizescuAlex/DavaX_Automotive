@@ -13,7 +13,7 @@ const FUEL_TYPES = [
   { id: "electric", label: "Electric (EV)" },
 ];
 
-export default function OnboardingWizard() {
+export default function OnboardingWizard({ onComplete }) {
   const navigate = useNavigate();
   const { setBackendUser, backendUser } = useAppStore();
   const { customUser, setCustomAuth, customToken } = useAppStore();
@@ -82,7 +82,11 @@ export default function OnboardingWizard() {
         setCustomAuth(customToken, { ...customUser, onboarding_completed: true });
       }
 
-      navigate(ROUTES.DASHBOARD, { replace: true });
+      if (onComplete) {
+        onComplete();
+      } else {
+        navigate(ROUTES.DASHBOARD, { replace: true });
+      }
     } catch (err) {
       console.error("Onboarding failed:", err);
       setError(err.message || "Failed to save preferences. Please try again.");

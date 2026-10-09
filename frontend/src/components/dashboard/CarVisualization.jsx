@@ -18,6 +18,7 @@ export default function CarVisualization() {
   const headlightsOn = useAppStore((s) => s.headlightsOn);
   const leftSignal = useAppStore((s) => s.leftSignal);
   const rightSignal = useAppStore((s) => s.rightSignal);
+  const automaticTurnSignal = useAppStore((s) => s.automaticTurnSignal);
   const hazardsOn = useAppStore((s) => s.hazardsOn);
   const speed = useAppStore((s) => s.speed);
   const { headlights, rear_lights: rearLights } = useAppStore((s) => s.exteriorLights);
@@ -25,10 +26,15 @@ export default function CarVisualization() {
     (s) => s.exteriorLights.headlights.automatic && s.headlightsOverride === null
   );
 
-  // Hazards drive both indicators, so each lamp blinks on its own signal or on
-  // hazards.
-  const leftBlinking = leftSignal || hazardsOn;
-  const rightBlinking = rightSignal || hazardsOn;
+  // Automatic simulation has its own state and takes display priority while a
+  // maneuver is active. Once it clears, the manual controls and hazards show
+  // exactly as before.
+  const leftBlinking = automaticTurnSignal
+    ? automaticTurnSignal === "left"
+    : leftSignal || hazardsOn;
+  const rightBlinking = automaticTurnSignal
+    ? automaticTurnSignal === "right"
+    : rightSignal || hazardsOn;
 
   // Headlights throw a pool as strong as their brightness setting; with them
   // off, daytime running lights still leave a faint one.
@@ -55,7 +61,9 @@ export default function CarVisualization() {
       <div className="car-lamps">
         <span
           className={`car-lamp ${leftBlinking ? "blink" : ""}`}
-          title="Left signal"
+          role="img"
+          aria-label={leftBlinking ? "Left turn signal active" : "Left turn signal inactive"}
+          title={leftBlinking ? "Left turn signal active" : "Left signal"}
         >
           <CornerUpLeft size={16} aria-hidden="true" />
         </span>
@@ -78,7 +86,9 @@ export default function CarVisualization() {
         )}
         <span
           className={`car-lamp ${rightBlinking ? "blink" : ""}`}
-          title="Right signal"
+          role="img"
+          aria-label={rightBlinking ? "Right turn signal active" : "Right turn signal inactive"}
+          title={rightBlinking ? "Right turn signal active" : "Right signal"}
         >
           <CornerUpRight size={16} aria-hidden="true" />
         </span>

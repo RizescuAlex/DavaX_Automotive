@@ -105,8 +105,8 @@ export default function BottomDock() {
             type="button"
             className={`dock-btn ${leftSignal ? "on" : ""}`}
             aria-pressed={leftSignal}
-            aria-label="Left signal"
-            title="Left signal"
+            aria-label="Manual left signal"
+            title="Manual left signal"
             onClick={toggleLeftSignal}
           >
             <CornerUpLeft size={DOCK_ICON} />
@@ -115,8 +115,8 @@ export default function BottomDock() {
             type="button"
             className={`dock-btn ${rightSignal ? "on" : ""}`}
             aria-pressed={rightSignal}
-            aria-label="Right signal"
-            title="Right signal"
+            aria-label="Manual right signal"
+            title="Manual right signal"
             onClick={toggleRightSignal}
           >
             <CornerUpRight size={DOCK_ICON} />

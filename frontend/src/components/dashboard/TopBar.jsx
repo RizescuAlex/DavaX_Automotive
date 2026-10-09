@@ -183,14 +183,14 @@ function WeatherBadge() {
   );
 }
 
-export default function TopBar({ user }) {
+export default function TopBar({ user, onLogout, onAvatarClick }) {
   const displayName = user?.displayName || user?.display_name || user?.email?.split("@")[0] || "Driver";
 
   return (
     <header className="top-bar">
       <div className="top-bar-left">
         <div className="top-bar-logo">
-          {APP_NAME}<span>.</span>
+	          {APP_NAME}<span>.</span>
         </div>
         <div className="top-bar-greeting">
           {getGreeting()}, <strong>{displayName}</strong>

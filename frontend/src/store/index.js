@@ -484,6 +484,7 @@ export const useAppStore = create((set, get) => ({
   headlightsOn: isDark(),
   leftSignal: false,
   rightSignal: false,
+  automaticTurnSignal: null,
   hazardsOn: false,
   wipersOn: false,
   _simInterval: null,
@@ -499,6 +500,10 @@ export const useAppStore = create((set, get) => ({
       ? { headlightsOn: on, headlightsOverride: on }
       : { headlightsOn: on }),
   setWipers: (on) => set({ wipersOn: on }),
+  setAutomaticTurnSignal: (direction) => {
+    const next = direction === "left" || direction === "right" ? direction : null;
+    if (get().automaticTurnSignal !== next) set({ automaticTurnSignal: next });
+  },
 
   // Left, right and hazards are one mutually exclusive group. Hazards drive
   // both indicators at once, so they cancel a single signal and are cancelled

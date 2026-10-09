@@ -1,10 +1,14 @@
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { Autocomplete } from "@react-google-maps/api";
 import { Search, X } from "lucide-react";
 
-export default function MapSearch({ onPlaceSelect }) {
+export default function MapSearch({ onPlaceSelect, resetKey = 0 }) {
   const [query, setQuery] = useState("");
   const autocompleteRef = useRef(null);
+
+  useEffect(() => {
+    setQuery("");
+  }, [resetKey]);
 
   const onLoad = useCallback((autocomplete) => {
     autocompleteRef.current = autocomplete;
@@ -29,7 +33,7 @@ export default function MapSearch({ onPlaceSelect }) {
         onLoad={onLoad}
         onPlaceChanged={onPlaceChanged}
         options={{
-          fields: ["geometry", "formatted_address", "name"],
+          fields: ["geometry", "formatted_address", "name", "place_id"],
         }}
       >
         <input

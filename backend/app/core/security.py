@@ -95,7 +95,7 @@ async def get_current_token(
 
     # ── Fall back to Firebase token ───────────────────────────────────────────
     try:
-        decoded = firebase_auth.verify_id_token(raw_token)
+        decoded = firebase_auth.verify_id_token(raw_token, clock_skew_seconds=60)
         return {
             "uid": decoded["uid"],
             "email": decoded.get("email"),

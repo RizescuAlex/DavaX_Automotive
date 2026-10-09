@@ -58,7 +58,14 @@ async def firebase_login(
     """
     from firebase_admin import auth
 
-    decoded = auth.verify_id_token(body.id_token)
+    try:
+        decoded = auth.verify_id_token(body.id_token, clock_skew_seconds=60)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Invalid authentication token: {e}"
+        )
+        
     firebase_uid = decoded["uid"]
     email = decoded.get("email")
     display_name = decoded.get("name")
@@ -69,7 +76,18 @@ async def firebase_login(
     is_new = False
 
     if user is None:
+        # Check if email already exists from email/password auth
+        if email:
+            email_check = await db.execute(select(User).where(User.email == email))
+            existing_user = email_check.scalar_one_or_none()
+            if existing_user is not None:
+                raise ConflictError(
+                    "An account with this email already exists. "
+                    "Please log in using your email and password."
+                )
+
         username = await make_unique_username(db, email.split("@", 1)[0])
+
         user = User(
             firebase_uid=firebase_uid,
             email=email,
