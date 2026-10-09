@@ -1,84 +1,85 @@
 /* ═══════════════════════════════════════════════════════════
    DavaX Automotive — Design System
-   Inspired by Bolt UI: light, clean, white-first aesthetic
+   Direction "Calm minimal": a near-black screen that disappears at night,
+   layers told apart by tone rather than borders, and one blue accent kept
+   for what the driver must find at a glance (route, position, active).
    ═══════════════════════════════════════════════════════════ */
 
 /* ── Design Tokens ── */
 /*
-   Palette: "Stormy morning"
-     #384959  deep slate   — app chrome and panels
-     #6A89A7  muted slate  — borders and dividers
-     #88BDF2  sky blue     — accent / active state
-     #BDDDFC  pale ice     — primary text
+   Neutrals are a true near-black with the faintest cool bias, not slate:
+   the blue lives only in the accent, so it means something when it shows.
 
-   Text colours are derived from the palette rather than taken from it
-   directly, so every text/background pair clears WCAG AA (4.5:1). Measured
-   against --surface-primary #384959: pale ice 6.5:1, muted ice 4.9:1,
-   sky blue 4.6:1. #6A89A7 sits at 2.7:1, so it is used only for borders
-   and never for text.
+   Measured worst case across every surface (base through hover):
+     text-primary  13.3:1    text-muted     4.7:1
+     text-secondary 9.1:1    accent-primary 7.4:1
+     on-accent on accent 9.7:1
+     success 8.2, warning 9.3, error 6.2, heat 8.6
+   --border-strong is 1.6:1 and is only ever a border, never text.
 */
 :root {
-  /* Surfaces — darkest at the back, lifting toward the viewer */
-  --surface-base: #2b3744;
-  --surface-primary: #384959;
-  --surface-secondary: #3f5264;
-  --surface-tertiary: #42566b;
-  --surface-elevated: #42566b;
-  --surface-hover: #4e6480;
-  --surface-sunken: #222c36;
+  /* Surfaces — the back of the screen is the darkest; each step lifts */
+  --surface-base: #0b0c0e;
+  --surface-primary: #121316;
+  --surface-secondary: #17181b;
+  --surface-tertiary: #1d1e22;
+  --surface-elevated: #1d1e22;
+  --surface-hover: #26272b;
+  --surface-sunken: #0b0c0e;
 
-  /* Borders */
-  --border-subtle: #44596d;
-  --border-default: #526c85;
-  --border-strong: #6a89a7;
+  /* Borders — kept faint; tone does the separating */
+  --border-subtle: #1f2024;
+  --border-default: #2c2d32;
+  --border-strong: #44464d;
 
   /* Accent */
-  --accent-primary: #88bdf2;
-  --accent-primary-hover: #a5cdf6;
-  --accent-primary-active: #6fa9e4;
-  --accent-primary-light: rgba(136, 189, 242, 0.16);
-  --accent-primary-glow: rgba(136, 189, 242, 0.34);
-  --accent-secondary: #bdddfc;
-  --accent-secondary-hover: #d6ebfe;
+  --accent-primary: #8ab8ff;
+  --accent-primary-hover: #a8caff;
+  --accent-primary-active: #6fa3f0;
+  --accent-primary-light: rgba(138, 184, 255, 0.14);
+  --accent-primary-glow: rgba(138, 184, 255, 0.3);
+  --accent-secondary: #c4dbff;
+  --accent-secondary-hover: #dce9ff;
   /* Text that sits on top of an accent fill */
-  --on-accent: #16212b;
+  --on-accent: #0b0c0e;
 
   /* Text */
-  --text-primary: #e8f2fc;
-  --text-secondary: #bdddfc;
-  --text-muted: #a8c0d6;
-  --text-inverse: #16212b;
+  --text-primary: #f2f2f0;
+  --text-secondary: #c9cacd;
+  --text-muted: #8e9097;
+  --text-inverse: #0b0c0e;
 
   /* Semantic */
   --color-success: #6fd3a3;
-  --color-success-light: rgba(111, 211, 163, 0.16);
+  --color-success-light: rgba(111, 211, 163, 0.14);
   --color-warning: #f2c57c;
-  --color-warning-light: rgba(242, 197, 124, 0.16);
+  --color-warning-light: rgba(242, 197, 124, 0.14);
   --color-error: #f28b82;
-  --color-error-light: rgba(242, 139, 130, 0.16);
+  --color-error-light: rgba(242, 139, 130, 0.14);
 
-  /* Shadows — deeper than the light theme, since dark UI needs more
-     separation to read as layered rather than flat */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.36);
-  --shadow-lg: 0 6px 18px rgba(0, 0, 0, 0.44);
-  --shadow-xl: 0 12px 34px rgba(0, 0, 0, 0.52);
+  /* Shadows — only overlays on the map cast one; on near-black they need
+     real depth to register at all */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 12px 34px rgba(0, 0, 0, 0.55);
 
-  /* Vehicle stage — the shading that sits the car on the road. Tokenised
-     because a shadow tuned for night asphalt reads as dirt in daylight. */
   /* Seat heating. Warm rather than the accent blue, because "hot" reading as
      cold is the one mistake this control cannot afford. Not --color-warning:
      heat is a setting, not a fault. */
-  --color-heat: #f2a15c;
+  --color-heat: #ffb38a;
 
-  --stage-vignette: rgba(22, 32, 42, 0.62);
-  --stage-inset: rgba(0, 0, 0, 0.45);
-  --stage-contact: rgba(10, 15, 20, 0.7);
-  --stage-drop: rgba(9, 14, 19, 0.55);
+  /* Vehicle stage — the shading that sits the car on the road. Tokenised
+     because a shadow tuned for night asphalt reads as dirt in daylight. */
+  --stage-vignette: rgba(11, 12, 14, 0.62);
+  --stage-inset: rgba(0, 0, 0, 0.5);
+  --stage-contact: rgba(0, 0, 0, 0.7);
+  --stage-drop: rgba(0, 0, 0, 0.55);
 
-  /* Typography */
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+  /* Typography — Geist for everything; Geist Mono where digits must hold
+     their width as they change (clock, temperature, readings) */
+  --font-sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "Cascadia Mono", monospace;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.8125rem;
   --font-size-base: 0.875rem;
@@ -128,78 +129,73 @@
 }
 
 /*
-   Day theme: "Stormy morning" in daylight.
+   Day theme: the same calm in daylight. A warm-neutral paper ground with
+   white for anything lifted, and the accent deepened to #1764c7 because the
+   night blue sits far too light on white to read as text.
 
-   Same family as the night palette — cool slate-blues over a white-first
-   ground — rather than a second unrelated look. The accent darkens from
-   #88bdf2 to #1f6fb2 because the night accent sits at 1.9:1 on white and
-   would fail as text or as a button fill.
-
-   Measured, worst case across all four surfaces (white, secondary #f4f7fb,
-   base #e8eef5, sunken #dce5ef):
-     text-primary   12.8:1    text-muted     4.8:1
-     text-secondary  7.4:1    accent-primary 4.9:1
-     white on accent 5.3:1    success/warning/error all above 5.9:1
-   --border-strong is 2.2:1 and, as in the night theme, is only ever a
-   border — never text.
+   Measured worst case across every surface:
+     text-primary   15.0:1    text-muted     5.0:1
+     text-secondary  8.8:1    accent-primary 4.6:1
+     white on accent 5.7:1    success/warning/error/heat all 4.7:1 or above
+   --border-strong is 1.9:1 and, as at night, is only ever a border.
 
    Night stays the default in :root, so the cockpit is dark unless the
    driver asks otherwise.
 */
 :root[data-theme="light"] {
-  /* Surfaces — lightest at the front, settling back toward the ground */
-  --surface-base: #e8eef5;
+  /* Surfaces — lifted elements go white, the ground settles to paper */
+  --surface-base: #f3f3f1;
   --surface-primary: #ffffff;
-  --surface-secondary: #f4f7fb;
-  --surface-tertiary: #eaf0f7;
+  --surface-secondary: #f7f7f5;
+  --surface-tertiary: #ececea;
   --surface-elevated: #ffffff;
-  --surface-hover: #e1eaf4;
-  --surface-sunken: #dce5ef;
+  --surface-hover: #e6e6e3;
+  --surface-sunken: #f3f3f1;
 
   /* Borders */
-  --border-subtle: #dfe7f0;
-  --border-default: #c4d3e3;
-  --border-strong: #9cb2c8;
+  --border-subtle: #e4e4e0;
+  --border-default: #cfcfca;
+  --border-strong: #a9aaa5;
 
   /* Accent */
-  --accent-primary: #1f6fb2;
-  --accent-primary-hover: #195c95;
-  --accent-primary-active: #14496f;
-  --accent-primary-light: rgba(31, 111, 178, 0.12);
-  --accent-primary-glow: rgba(31, 111, 178, 0.25);
-  --accent-secondary: #2c5f88;
-  --accent-secondary-hover: #244e6f;
+  --accent-primary: #1764c7;
+  --accent-primary-hover: #1253a8;
+  --accent-primary-active: #0e4285;
+  --accent-primary-light: rgba(23, 100, 199, 0.1);
+  --accent-primary-glow: rgba(23, 100, 199, 0.22);
+  --accent-secondary: #2d4f80;
+  --accent-secondary-hover: #23406a;
   --on-accent: #ffffff;
 
   /* Text */
-  --text-primary: #16212b;
-  --text-secondary: #33485a;
-  --text-muted: #516475;
+  --text-primary: #111214;
+  --text-secondary: #3a3c41;
+  --text-muted: #5e6066;
   --text-inverse: #ffffff;
 
   /* Semantic */
   --color-success: #17714a;
   --color-success-light: rgba(23, 113, 74, 0.12);
   --color-warning: #8a5a00;
-  --color-warning-light: rgba(138, 90, 0, 0.14);
+  --color-warning-light: rgba(138, 90, 0, 0.12);
   --color-error: #b3261e;
   --color-error-light: rgba(179, 38, 30, 0.1);
 
-  /* Shadows — far lighter than the night theme; on a pale ground a heavy
-     shadow reads as dirt rather than elevation */
-  --shadow-sm: 0 1px 2px rgba(22, 33, 43, 0.06);
-  --shadow-md: 0 2px 6px rgba(22, 33, 43, 0.08);
-  --shadow-lg: 0 6px 18px rgba(22, 33, 43, 0.1);
-  --shadow-xl: 0 12px 34px rgba(22, 33, 43, 0.14);
+  /* Shadows — far lighter than at night; on a pale ground a heavy shadow
+     reads as dirt rather than elevation */
+  --shadow-sm: 0 1px 2px rgba(17, 18, 20, 0.06);
+  --shadow-md: 0 2px 6px rgba(17, 18, 20, 0.08);
+  --shadow-lg: 0 8px 24px rgba(17, 18, 20, 0.1);
+  --shadow-xl: 0 12px 34px rgba(17, 18, 20, 0.14);
+
+  --color-heat: #a1420f;
 
   /* Stage shading, lightened: enough to seat the car on the road, not so
      much that the pale asphalt looks soiled. */
-  --color-heat: #b35a12;
-
-  --stage-vignette: rgba(120, 140, 160, 0.26);
-  --stage-inset: rgba(90, 110, 130, 0.16);
-  --stage-contact: rgba(60, 80, 100, 0.34);
-  --stage-drop: rgba(60, 80, 100, 0.28);
+  --stage-vignette: rgba(110, 110, 105, 0.24);
+  --stage-inset: rgba(80, 80, 76, 0.14);
+  --stage-contact: rgba(40, 40, 38, 0.32);
+  --stage-drop: rgba(40, 40, 38, 0.26);
 }
 
 /* ── Reset & Base ── */
@@ -550,7 +546,6 @@ a:hover {
   align-items: center;
   justify-content: space-between;
   height: var(--topbar-height);
-  min-height: 56px;
   padding: 0 var(--space-4);
   background: var(--surface-sunken);
   border-bottom: 1px solid var(--border-subtle);
@@ -1036,7 +1031,7 @@ a:hover {
 }
 
 .route-option-tag.eco { color: var(--accent-primary); }
-.route-option-tag.risk { color: #e8590c; }
+.route-option-tag.risk { color: var(--color-warning); }
 
 .route-stops {
   padding: var(--space-3) 18px;
@@ -2346,14 +2341,14 @@ a:hover {
   border: 1px solid var(--border-default);
   border-radius: var(--radius-xl);
   color: var(--text-primary);
-  background: rgba(20, 30, 40, 0.96);
+  background: var(--surface-secondary);
   box-shadow: var(--shadow-xl), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
   pointer-events: auto;
   animation: call-card-in 180ms ease-out;
 }
 
 .call-modal-info { display: flex; align-items: center; gap: var(--space-3); min-width: 0; flex: 1; }
-.call-modal-icon { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; border: 1px solid rgba(136, 189, 242, 0.35); border-radius: var(--radius-full); color: var(--accent-primary); background: rgba(136, 189, 242, 0.14); }
+.call-modal-icon { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; border: 1px solid var(--accent-primary-glow); border-radius: var(--radius-full); color: var(--accent-primary); background: var(--accent-primary-light); }
 .call-modal-copy { display: flex; min-width: 0; flex-direction: column; gap: 2px; }
 .call-modal-label { color: var(--accent-primary); font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); letter-spacing: 0.04em; text-transform: uppercase; }
 .call-modal-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--font-size-lg); }
