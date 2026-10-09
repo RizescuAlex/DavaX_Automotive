@@ -886,14 +886,24 @@ a:hover {
   transform: translateX(-50%);
   width: max-content;
   max-width: min(var(--map-search-width), calc(100% - var(--space-8)));
-  padding: var(--space-2) var(--space-4);
-  background: var(--color-warning-light);
-  border: 1px solid var(--color-warning);
-  color: var(--color-warning);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
   font-size: var(--font-size-sm);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
+  line-height: 1.4;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
   z-index: 5;
+}
+
+/* Only the glyph carries the warning colour; the sentence stays readable */
+.map-geo-notice-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--color-warning);
 }
 
 /* Centred over the map; the geolocation notice hangs just below it. */
@@ -910,8 +920,7 @@ a:hover {
   max-width: var(--map-search-width);
   height: 44px;
   padding: 0 var(--space-3);
-  background: var(--surface-primary);
-  border: 1px solid var(--border-default);
+  background: var(--surface-secondary);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
 }
@@ -966,17 +975,15 @@ a:hover {
   width: min(320px, calc(100% - 40px));
   max-height: calc(100% - 190px);
   overflow-y: auto;
-  background: var(--surface-primary);
+  background: var(--surface-secondary);
   color: var(--text-primary);
-  border: 1px solid var(--border-default);
   border-radius: var(--radius-xl);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
-  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-lg);
 }
 
 .route-options-head {
   padding: var(--space-4) 18px var(--space-3);
-  border-bottom: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .route-options-title { font-size: 1rem; }
@@ -995,15 +1002,14 @@ a:hover {
   color: var(--text-primary);
   background: transparent;
   border: 0;
-  border-left: 4px solid transparent;
-  border-bottom: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--border-subtle);
   cursor: pointer;
 }
 
-.route-option[aria-pressed="true"] {
-  background: var(--surface-sunken);
-  border-left-color: var(--accent-primary);
-}
+/* The chosen route lifts a tone and its time takes the route colour, the
+   same blue as its line on the map */
+.route-option[aria-pressed="true"] { background: var(--surface-tertiary); }
+.route-option[aria-pressed="true"] .route-option-summary strong { color: var(--accent-primary); }
 
 /* Locked once the trip is confirmed or under way */
 .route-option:disabled {
@@ -1042,7 +1048,7 @@ a:hover {
 
 .route-stops {
   padding: var(--space-3) 18px;
-  border-top: 1px solid var(--border-default);
+  border-top: 1px solid var(--border-subtle);
 }
 
 .route-stops-title {
@@ -1064,7 +1070,7 @@ a:hover {
 
 .route-stops.suggested .route-stop {
   padding: var(--space-2) 0;
-  border-top: 1px solid var(--border-default);
+  border-top: 1px solid var(--border-subtle);
 }
 
 .route-stop-info {
@@ -1072,7 +1078,12 @@ a:hover {
   font-size: 0.78rem;
 }
 
-.route-stops:not(.suggested) .route-stop-info { color: var(--text-secondary); }
+.route-stops:not(.suggested) .route-stop-info {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+}
 
 .route-stop-name {
   display: block;
@@ -1100,10 +1111,13 @@ a:hover {
 }
 
 .route-stop-add {
-  border: 1px solid var(--accent-primary);
-  border-radius: 14px;
-  padding: 5px 9px;
+  border: 0;
+  border-radius: var(--radius-full);
+  padding: 6px var(--space-3);
   font-size: 0.72rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  background: var(--surface-hover);
 }
 
 .route-status {
@@ -1113,29 +1127,27 @@ a:hover {
   z-index: 10;
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-lg);
-  background: var(--surface-primary);
+  background: var(--surface-secondary);
   color: var(--text-primary);
-  border: 1px solid var(--border-default);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-lg);
 }
 
+/* Bottom-right, clear of Google's zoom controls (64px) and level with the
+   media card on the left. Centred, it sat on top of that card. */
 .route-summary {
   position: absolute;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: var(--space-4);
+  right: var(--space-16);
   z-index: 10;
   display: flex;
   align-items: center;
   gap: var(--space-6);
-  padding: 14px 28px;
-  border-radius: 30px;
-  background: var(--surface-primary);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-6);
+  border-radius: var(--radius-xl);
+  background: var(--surface-secondary);
   color: var(--text-primary);
   font-weight: var(--font-weight-semibold);
-  border: 1px solid var(--border-default);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-lg);
 }
 
 .route-summary-item {
@@ -1144,16 +1156,18 @@ a:hover {
   gap: var(--space-2);
 }
 
-.route-summary-icon { font-size: 1.2rem; }
+.route-summary-icon { color: var(--text-muted); }
 
 /* Text on the accent fill uses --on-accent: plain white sat at about 1.9:1
    on the night accent. */
 .route-drive-btn {
   margin-left: var(--space-4);
-  padding: var(--space-2) var(--space-4);
-  border-radius: 20px;
+  padding: 10px 18px;
+  border-radius: var(--radius-lg);
   background: var(--accent-primary);
   color: var(--on-accent);
+  font: inherit;
+  font-weight: var(--font-weight-semibold);
   border: none;
   cursor: pointer;
 }
@@ -1173,9 +1187,9 @@ a:hover {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: var(--surface-sunken);
+  background: var(--surface-hover);
   color: var(--text-secondary);
-  border: 1px solid var(--border-default);
+  border: 0;
   cursor: pointer;
 }
 
@@ -1190,10 +1204,9 @@ a:hover {
   align-items: center;
   gap: var(--space-3);
   row-gap: var(--space-2);
-  padding: var(--space-3);
-  background: var(--surface-primary);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  background: var(--surface-secondary);
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
   color: var(--text-secondary);
 }
@@ -1250,11 +1263,18 @@ a:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid transparent;
   border-radius: var(--radius-full);
-  background: var(--surface-tertiary);
+  background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
+}
+
+.spotify-connect-btn {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+  font: inherit;
+  font-weight: var(--font-weight-medium);
 }
 
 .spotify-actions button:hover,
@@ -1263,6 +1283,8 @@ a:hover {
 .spotify-actions button { width: 34px; height: 34px; }
 
 .spotify-connect-btn { padding: 10px 16px; font-size: var(--font-size-sm); white-space: nowrap; }
+
+.spotify-actions button:hover { background: var(--surface-hover); }
 
 .spotify-error {
   padding-top: var(--space-1);
@@ -1312,21 +1334,21 @@ a:hover {
   border-radius: var(--radius-full);
   background: linear-gradient(
     to right,
-    var(--accent-primary) var(--progress),
-    var(--border-default) var(--progress)
+    var(--text-primary) var(--progress),
+    var(--surface-hover) var(--progress)
   );
 }
 
 .spotify-seek::-moz-range-track {
   height: 4px;
   border-radius: var(--radius-full);
-  background: var(--border-default);
+  background: var(--surface-hover);
 }
 
 .spotify-seek::-moz-range-progress {
   height: 4px;
   border-radius: var(--radius-full);
-  background: var(--accent-primary);
+  background: var(--text-primary);
 }
 
 .spotify-seek::-webkit-slider-thumb {
@@ -1368,9 +1390,7 @@ a:hover {
   flex-shrink: 0;
   align-items: center;
   gap: var(--space-1);
-  margin-left: var(--space-2);
-  padding-left: var(--space-3);
-  border-left: 1px solid var(--border-subtle);
+  margin-left: var(--space-3);
 }
 
 .spotify-volume button {
@@ -1381,8 +1401,8 @@ a:hover {
   height: 28px;
   padding: 0;
   color: var(--text-secondary);
-  background: var(--surface-tertiary);
-  border: 1px solid var(--border-subtle);
+  background: var(--surface-hover);
+  border: 1px solid transparent;
   border-radius: var(--radius-full);
   cursor: pointer;
 }
@@ -1424,6 +1444,16 @@ a:hover {
 
 @media (max-width: 1100px) {
   :root { --rail-width: 248px; }
+  /* Narrower map: the media card and the route summary both give way so
+     they still fit side by side along the foot of the map, and the route
+     panel starts below the location notice instead of beside it. */
+  .dash-media { width: min(280px, calc(100% - var(--space-8))); }
+  .route-summary { gap: var(--space-3); padding-left: var(--space-4); }
+  .route-summary-icon { display: none; }
+  .route-drive-btn { margin-left: var(--space-1); padding: var(--space-2) var(--space-3); }
+  .route-options,
+  .route-status { top: 128px; }
+  .route-options { max-height: calc(100% - 242px); }
 }
 
 @media (max-width: 1000px) {

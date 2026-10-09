@@ -4,7 +4,7 @@ import {
   useJsApiLoader,
   Marker,
 } from "@react-google-maps/api";
-import { X } from "lucide-react";
+import { Clock, Fuel, Route, TriangleAlert, X } from "lucide-react";
 import { MAP_CONFIG } from "../../config/constants";
 import MapSearch from "./MapSearch";
 import { apiFetch } from "../../config/api";
@@ -824,7 +824,8 @@ export default function MapPanel() {
               {plannedStops.map((stop) => (
                 <div key={stop.place_id} className="route-stop">
                   <span className="route-stop-info">
-                    ⛽ {stop.name}
+                    <Fuel size={14} aria-hidden="true" />
+                    {stop.name}
                   </span>
                   <button
                     type="button"
@@ -882,12 +883,12 @@ export default function MapPanel() {
       {routeData && (
         <div className="route-summary">
           <div className="route-summary-item">
-            <span className="route-summary-icon">🚗</span>
+            <Clock size={18} className="route-summary-icon" aria-hidden="true" />
             {routeData.duration}
           </div>
 
           <div className="route-summary-item">
-            <span className="route-summary-icon">📏</span>
+            <Route size={18} className="route-summary-icon" aria-hidden="true" />
             {routeData.distance}
           </div>
 
@@ -927,9 +928,12 @@ export default function MapPanel() {
       )}
 
       {(navigationError || geoError) && (
-        <div className="map-geo-notice">
-          {navigationError ||
-            "Location unavailable. Using the fallback location."}
+        <div className="map-geo-notice" role="status">
+          <TriangleAlert size={15} className="map-geo-notice-icon" aria-hidden="true" />
+          <span>
+            {navigationError ||
+              "Location unavailable. Using the fallback location."}
+          </span>
         </div>
       )}
     </div>
