@@ -118,6 +118,8 @@
   /* Dock controls: sized for a hand on a moving car, not a mouse */
   --dock-btn-size: 52px;
   --topbar-height: 44px;
+  /* Shared by the map search bar and the notice that hangs under it */
+  --map-search-width: 300px;
 
   /* Transitions */
   --transition-fast: 120ms ease;
@@ -871,11 +873,17 @@ a:hover {
   animation: spin 0.6s linear infinite;
 }
 
+/* Hangs just under the search bar (top + its 44px height + a gap) and no wider
+   than it. At the foot of the map it overlapped the media card and the route
+   summary; capped to the search width it also stays clear of the route
+   options panel, which ends where the search bar begins. */
 .map-geo-notice {
   position: absolute;
-  bottom: var(--space-4);
+  top: calc(var(--space-3) + 44px + var(--space-2));
   left: 50%;
   transform: translateX(-50%);
+  width: max-content;
+  max-width: min(var(--map-search-width), calc(100% - var(--space-8)));
   padding: var(--space-2) var(--space-4);
   background: var(--color-warning-light);
   border: 1px solid var(--color-warning);
@@ -886,7 +894,7 @@ a:hover {
   z-index: 5;
 }
 
-/* Centred over the map, matching the geolocation notice at the foot. */
+/* Centred over the map; the geolocation notice hangs just below it. */
 .map-search {
   position: absolute;
   top: var(--space-3);
@@ -897,7 +905,7 @@ a:hover {
   display: flex;
   align-items: center;
   width: 100%;
-  max-width: 300px;
+  max-width: var(--map-search-width);
   height: 44px;
   padding: 0 var(--space-3);
   background: var(--surface-primary);
