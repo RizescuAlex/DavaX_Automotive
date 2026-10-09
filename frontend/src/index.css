@@ -267,9 +267,20 @@ a:hover {
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all var(--transition-base);
-  height: 40px;
+  height: 44px;
   white-space: nowrap;
 }
+
+.btn svg { flex-shrink: 0; }
+
+.btn:disabled { opacity: 0.55; cursor: default; }
+
+.btn:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.btn-block { width: 100%; }
 
 .btn:active {
   transform: scale(0.98);
@@ -292,9 +303,8 @@ a:hover {
 .btn-secondary:hover { background: var(--border-default); }
 
 .btn-google {
-  background: var(--surface-primary);
+  background: var(--surface-hover);
   color: var(--text-primary);
-  border: 1px solid var(--border-default);
   font-weight: var(--font-weight-medium);
   height: 48px;
   padding: var(--space-3) var(--space-6);
@@ -302,11 +312,7 @@ a:hover {
   border-radius: var(--radius-lg);
 }
 
-.btn-google:hover {
-  background: var(--surface-secondary);
-  border-color: var(--border-strong);
-  box-shadow: var(--shadow-md);
-}
+.btn-google:hover { background: var(--border-default); }
 
 /* ── Login Page ── */
 .login-page {
@@ -314,13 +320,12 @@ a:hover {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: var(--surface-secondary);
+  background: var(--surface-base);
   padding: var(--space-4);
 }
 
 .login-card {
-  background: var(--surface-primary);
-  border: 1px solid var(--border-subtle);
+  background: var(--surface-secondary);
   border-radius: var(--radius-xl);
   padding: var(--space-10);
   width: 100%;
@@ -330,16 +335,17 @@ a:hover {
   animation: fadeInUp 0.5s ease forwards;
 }
 
+/* The wordmark as in the top bar: name in the text colour, the dot in blue */
 .login-card .logo {
-  font-size: var(--font-size-2xl);
+  font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
-  color: var(--accent-primary);
+  color: var(--text-primary);
   margin-bottom: var(--space-2);
-  letter-spacing: -0.5px;
+  letter-spacing: -0.02em;
 }
 
 .login-card .logo span {
-  color: var(--text-primary);
+  color: var(--accent-primary);
 }
 
 .login-card .subtitle {
@@ -370,8 +376,8 @@ a:hover {
 /* ── Login ── */
 .auth-tabs {
   display: flex;
-  gap: var(--space-2);
-  background: var(--surface-secondary);
+  gap: var(--space-1);
+  background: var(--surface-primary);
   border-radius: var(--radius-lg);
   padding: var(--space-1);
   margin-bottom: var(--space-6);
@@ -383,6 +389,7 @@ a:hover {
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
+  min-height: 40px;
   padding: var(--space-2) var(--space-3);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
@@ -395,10 +402,16 @@ a:hover {
   transition: all var(--transition-base);
 }
 
+.auth-tab svg { flex-shrink: 0; }
+
 .auth-tab.active {
-  background: var(--surface-primary);
+  background: var(--surface-hover);
   color: var(--text-primary);
-  box-shadow: var(--shadow-sm);
+}
+
+.auth-tab:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
 }
 
 .auth-tab:hover:not(.active) {
@@ -426,6 +439,7 @@ a:hover {
   color: var(--text-secondary);
 }
 
+/* The panels' inset field: no edge until it has focus */
 .form-input {
   width: 100%;
   padding: var(--space-2) var(--space-3);
@@ -433,10 +447,10 @@ a:hover {
   font-size: var(--font-size-base);
   color: var(--text-primary);
   background: var(--surface-primary);
-  border: 1px solid var(--border-default);
+  border: 1px solid transparent;
   border-radius: var(--radius-md);
-  height: 40px;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  height: 44px;
+  transition: border-color var(--transition-fast);
   outline: none;
 }
 
@@ -444,10 +458,12 @@ a:hover {
   color: var(--text-muted);
 }
 
-.form-input:focus {
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px var(--accent-primary-light);
-}
+.form-input:focus { border-color: var(--accent-primary); }
+
+/* .form-group carries no margin, so without this the fields sat flush
+   against each other. The submit sits a step further off the last one. */
+.auth-form { display: flex; flex-direction: column; gap: var(--space-4); }
+.auth-submit { margin-top: var(--space-2); }
 
 /* ── Auth Error ── */
 .auth-error {
@@ -466,21 +482,20 @@ a:hover {
   color: var(--text-muted);
 }
 
+/* A link in the text colour, underlined so it reads as one without blue */
 .auth-toggle-btn {
   background: none;
   border: none;
-  color: var(--accent-primary);
+  color: var(--text-primary);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
   cursor: pointer;
   padding: 0;
-  transition: color var(--transition-fast);
 }
 
-.auth-toggle-btn:hover {
-  color: var(--accent-primary-hover);
-  text-decoration: underline;
-}
+.auth-toggle-btn:hover { color: var(--text-secondary); }
 
 /* ── Auth Footnote ── */
 .auth-footnote {

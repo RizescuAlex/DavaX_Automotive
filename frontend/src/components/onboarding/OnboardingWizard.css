@@ -3,19 +3,18 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: var(--surface-secondary);
+  background: var(--surface-base);
   padding: var(--space-4);
   font-family: var(--font-sans);
 }
 
 .onboarding-card {
   width: 100%;
-  max-width: 500px;
-  background: var(--surface-primary);
+  max-width: 520px;
+  background: var(--surface-secondary);
   border-radius: var(--radius-xl);
-  padding: var(--space-6);
+  padding: var(--space-8);
   box-shadow: var(--shadow-xl);
-  border: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
@@ -40,14 +39,14 @@
 
 .progress-bar {
   height: 4px;
-  background: var(--surface-tertiary);
+  background: var(--surface-hover);
   border-radius: var(--radius-full);
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  background: var(--accent-primary);
+  background: var(--text-primary);
   transition: width 0.4s ease;
 }
 
@@ -87,18 +86,23 @@
   -webkit-appearance: none;
   width: 100%;
   height: 6px;
-  background: var(--surface-tertiary);
+  background: var(--surface-hover);
   border-radius: var(--radius-full);
   outline: none;
+}
+
+.slider-group input[type="range"]:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 4px;
 }
 
 .slider-group input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  background: var(--accent-primary);
+  background: var(--text-primary);
   cursor: pointer;
   transition: transform 0.1s;
 }
@@ -109,8 +113,8 @@
 
 .toggle-group {
   background: var(--surface-tertiary);
-  padding: var(--space-3);
-  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
 }
 
 .toggle-label {
@@ -140,34 +144,41 @@
   height: 0;
 }
 
+/* Switch: off is a muted knob on a dim track; on is the dock's solid face */
 .toggle-slider {
   position: relative;
-  width: 40px;
-  height: 20px;
-  background-color: var(--border-subtle);
-  border-radius: 20px;
-  transition: .4s;
+  width: 44px;
+  height: 24px;
+  background-color: var(--surface-hover);
+  border-radius: var(--radius-full);
+  transition: background-color var(--transition-base);
   flex-shrink: 0;
 }
 
 .toggle-slider:before {
   position: absolute;
   content: "";
-  height: 14px;
-  width: 14px;
+  height: 18px;
+  width: 18px;
   left: 3px;
   bottom: 3px;
-  background-color: white;
+  background-color: var(--text-muted);
   border-radius: 50%;
-  transition: .4s;
+  transition: transform var(--transition-base), background-color var(--transition-base);
 }
 
 .toggle-input:checked + .toggle-slider {
-  background-color: var(--accent-primary);
+  background-color: var(--text-primary);
 }
 
 .toggle-input:checked + .toggle-slider:before {
+  background-color: var(--surface-base);
   transform: translateX(20px);
+}
+
+.toggle-input:focus-visible + .toggle-slider {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
 }
 
 .fuel-grid {
@@ -177,25 +188,29 @@
 }
 
 .fuel-card {
+  min-height: 52px;
   padding: var(--space-4);
   background: var(--surface-tertiary);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
+  border: 0;
+  border-radius: var(--radius-lg);
   color: var(--text-primary);
-  font-weight: 500;
+  font: inherit;
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
   text-align: center;
 }
 
-.fuel-card:hover {
-  border-color: var(--accent-primary);
-}
+.fuel-card:hover { background: var(--surface-hover); }
 
 .fuel-card.selected {
-  background: var(--accent-primary-alpha);
-  border-color: var(--accent-primary);
-  color: var(--accent-primary);
+  background: var(--text-primary);
+  color: var(--surface-base);
+}
+
+.fuel-card:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
 }
 
 .vehicle-input-group {
@@ -213,12 +228,17 @@
 .vehicle-input-group input {
   width: 100%;
   box-sizing: border-box;
-  padding: var(--space-3);
-  border: 1px solid var(--border-subtle);
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid transparent;
   border-radius: var(--radius-md);
-  background: var(--surface-tertiary);
+  background: var(--surface-primary);
   color: var(--text-primary);
+  font: inherit;
+  outline: none;
 }
+
+.vehicle-input-group input:focus { border-color: var(--accent-primary); }
 
 .onboarding-footer {
   display: flex;

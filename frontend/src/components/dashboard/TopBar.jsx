@@ -183,7 +183,7 @@ function WeatherBadge() {
   );
 }
 
-export default function TopBar({ user, onLogout, onAvatarClick }) {
+export default function TopBar({ user }) {
   const displayName = user?.displayName || user?.display_name || user?.email?.split("@")[0] || "Driver";
 
   return (
