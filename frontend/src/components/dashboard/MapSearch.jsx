@@ -40,6 +40,7 @@ export default function MapSearch({ onPlaceSelect, resetKey = 0 }) {
           id="map-search-input"
           type="text"
           className="map-search-input"
+          aria-label="Search for a destination"
           placeholder="Search a destination…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}

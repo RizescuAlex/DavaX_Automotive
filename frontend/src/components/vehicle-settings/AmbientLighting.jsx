@@ -161,7 +161,7 @@ export default function AmbientLighting({ interior, selected, onSelect, onChange
           />
         </label>
 
-        <button type="button" className="btn btn-secondary btn-sm ambient-apply" onClick={onApplyToAll}>
+        <button type="button" className="btn btn-secondary ambient-apply" onClick={onApplyToAll}>
           Use this colour and brightness everywhere
         </button>
       </div>

@@ -4,6 +4,7 @@ import { DESIGN_PREVIEW } from "../../config/devPreview";
 import { placeCall } from "../../services/calls";
 import { addContact, listContacts, removeContact } from "../../services/contacts";
 import { useAppStore } from "../../store";
+import { usePanelFocus } from "../../hooks/usePanelFocus";
 import "../vehicle-settings/VehiclePreferencesPanel.css";
 import "./ContactsPanel.css";
 
@@ -37,8 +38,12 @@ function ContactsContent({ onClose }) {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
+  const panelRef = useRef(null);
   const inputRef = useRef(null);
   const confirmTimer = useRef(null);
+
+  // Focus in on open, Escape closes, focus back to the opener on close.
+  usePanelFocus(panelRef, onClose);
 
   const load = useCallback(async () => {
     // No session in preview mode, and a 401 would bounce to /login.
@@ -61,15 +66,6 @@ function ContactsContent({ onClose }) {
     inputRef.current?.focus();
     return () => clearTimeout(confirmTimer.current);
   }, [load]);
-
-  // Escape closes, as it does the other panels.
-  useEffect(() => {
-    const onKey = (event) => {
-      if (event.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
 
   const say = (text, isError = false) => {
     setMessage(isError ? "" : text);
@@ -130,7 +126,7 @@ function ContactsContent({ onClose }) {
   };
 
   return (
-    <section className="prefs-panel contacts-panel" aria-label="Contacts">
+    <section ref={panelRef} tabIndex={-1} className="prefs-panel contacts-panel" aria-label="Contacts">
       <header className="prefs-head">
         <Users size={16} className="prefs-head-icon" aria-hidden="true" />
         <h2 className="prefs-head-title">Contacts</h2>

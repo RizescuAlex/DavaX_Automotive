@@ -24,7 +24,7 @@
   text-align: center;
 }
 
-.onboarding-header h2 {
+.onboarding-header h1 {
   font-size: var(--font-size-2xl);
   font-weight: 700;
   color: var(--text-primary);

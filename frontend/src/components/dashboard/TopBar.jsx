@@ -189,9 +189,9 @@ export default function TopBar({ user }) {
   return (
     <header className="top-bar">
       <div className="top-bar-left">
-        <div className="top-bar-logo">
+        <h1 className="top-bar-logo">
 	          {APP_NAME}<span>.</span>
-        </div>
+        </h1>
         <div className="top-bar-greeting">
           {getGreeting()}, <strong>{displayName}</strong>
         </div>

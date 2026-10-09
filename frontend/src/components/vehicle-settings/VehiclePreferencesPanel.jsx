@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Settings, X } from "lucide-react";
 import { getVehicleSettings, saveVehicleSettings } from "../../api/vehicle";
 import { useAppStore, CLIMATE_LIMITS, EXTERIOR_LIGHT_DEFAULTS } from "../../store";
+import { usePanelFocus } from "../../hooks/usePanelFocus";
 import AmbientLighting, { LIGHT_ZONES } from "./AmbientLighting";
 import "./VehiclePreferencesPanel.css";
 
@@ -249,14 +250,9 @@ function PreferencesContent({ onClose }) {
     }));
   };
 
-  // Escape closes, as it does the climate popover.
-  useEffect(() => {
-    const onKey = (event) => {
-      if (event.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  // Focus in on open, Escape closes, focus back to the opener on close.
+  const panelRef = useRef(null);
+  usePanelFocus(panelRef, onClose);
 
   const handleSave = async (event) => {
     event.preventDefault();
@@ -281,7 +277,7 @@ function PreferencesContent({ onClose }) {
   };
 
   return (
-    <section className="prefs-panel" aria-label="Vehicle Preferences">
+    <section ref={panelRef} tabIndex={-1} className="prefs-panel" aria-label="Vehicle Preferences">
       <header className="prefs-head">
         <Settings size={16} className="prefs-head-icon" aria-hidden="true" />
         <h2 className="prefs-head-title">Vehicle Preferences</h2>

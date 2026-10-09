@@ -121,7 +121,7 @@
   /* Dock controls: sized for a hand on a moving car, not a mouse, with
      room for a word under the icon */
   --dock-btn-size: 60px;
-  --topbar-height: 44px;
+  --topbar-height: 52px;
   /* Shared by the map search bar and the notice that hangs under it */
   --map-search-width: 300px;
 
@@ -389,7 +389,7 @@ a:hover {
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  min-height: 40px;
+  min-height: 44px;
   padding: var(--space-2) var(--space-3);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
@@ -492,7 +492,10 @@ a:hover {
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
-  padding: 0;
+  /* A 44px tap area around a one-line link, without moving the line */
+  display: inline-block;
+  padding: var(--space-3) var(--space-1);
+  margin: calc(var(--space-3) * -1) 0;
 }
 
 .auth-toggle-btn:hover { color: var(--text-secondary); }
@@ -625,8 +628,11 @@ a:hover {
   object-fit: cover;
 }
 
-/* The avatar is also the User Settings button */
+/* The avatar is also the User Settings button, so it takes a full touch
+   target rather than the picture's 32px */
 .avatar-btn {
+  width: 44px;
+  height: 44px;
   padding: 0;
   font: inherit;
   cursor: pointer;
@@ -652,7 +658,7 @@ a:hover {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  height: 34px;
+  height: 44px;
   padding: 0 var(--space-3);
   font: inherit;
   font-size: var(--font-size-sm);
@@ -672,13 +678,6 @@ a:hover {
 .top-nav-btn:focus-visible {
   outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
-}
-
-.btn-sm {
-  height: 32px;
-  font-size: var(--font-size-sm);
-  padding: var(--space-1) var(--space-3);
-  gap: var(--space-1);
 }
 
 /* ── Left rail ── */
@@ -926,6 +925,12 @@ a:hover {
   box-shadow: var(--shadow-lg);
 }
 
+/* The input itself has no outline, so the bar carries the focus ring */
+.map-search:focus-within {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
 .map-search-icon {
   color: var(--text-muted);
   flex-shrink: 0;
@@ -933,9 +938,11 @@ a:hover {
 
 .map-search-input {
   flex: 1;
+  width: 100%;
+  height: 44px;
   border: none;
   outline: none;
-  padding: var(--space-2) var(--space-3);
+  padding: 0 var(--space-3);
   font-family: var(--font-sans);
   font-size: var(--font-size-base);
   color: var(--text-primary);
@@ -1281,9 +1288,9 @@ a:hover {
 .spotify-actions button:hover,
 .spotify-connect-btn:hover { color: #1db954; border-color: #1db954; }
 
-.spotify-actions button { width: 34px; height: 34px; }
+.spotify-actions button { width: 44px; height: 44px; }
 
-.spotify-connect-btn { padding: 10px 16px; font-size: var(--font-size-sm); white-space: nowrap; }
+.spotify-connect-btn { min-height: 44px; padding: 0 var(--space-4); font-size: var(--font-size-sm); white-space: nowrap; }
 
 .spotify-actions button:hover { background: var(--surface-hover); }
 
@@ -1703,8 +1710,9 @@ a:hover {
 }
 
 .climate-auto {
-  padding: var(--space-1) var(--space-2);
-  min-height: 26px;
+  padding: var(--space-1) var(--space-3);
+  min-width: 56px;
+  min-height: 44px;
   font-family: var(--font-sans);
   font-size: 10px;
   font-weight: var(--font-weight-semibold);
@@ -1743,7 +1751,7 @@ a:hover {
 
 .climate-step:hover { color: var(--text-primary); background: var(--border-default); }
 
-.climate-step-sm { width: 40px; height: 40px; }
+
 
 .climate-cabin {
   margin: calc(var(--space-2) * -1) 0 0;
@@ -1817,8 +1825,8 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  width: 44px;
+  height: 44px;
   flex-shrink: 0;
   color: var(--text-muted);
   background: transparent;
@@ -2050,6 +2058,9 @@ a:hover {
   overflow: hidden;
 }
 
+.assistant-panel:focus,
+.prefs-panel:focus { outline: none; }
+
 .assistant-head {
   display: flex;
   align-items: center;
@@ -2072,8 +2083,8 @@ a:hover {
 .assistant-close {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border: 0;
   border-radius: var(--radius-md);
   background: none;

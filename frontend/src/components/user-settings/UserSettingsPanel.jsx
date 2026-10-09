@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LogOut, User, X } from "lucide-react";
 import { useAuth } from "../../auth/useAuth";
 import { apiFetch } from "../../config/api";
 import { DESIGN_PREVIEW } from "../../config/devPreview";
 import { useAppStore } from "../../store";
+import { usePanelFocus } from "../../hooks/usePanelFocus";
 import "../vehicle-settings/VehiclePreferencesPanel.css";
 import "./UserSettingsPanel.css";
 
@@ -100,14 +101,9 @@ function UserSettingsContent({ onClose }) {
     };
   }, []);
 
-  // Escape closes, as it does the other panels.
-  useEffect(() => {
-    const onKey = (event) => {
-      if (event.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  // Focus in on open, Escape closes, focus back to the opener on close.
+  const panelRef = useRef(null);
+  usePanelFocus(panelRef, onClose);
 
   const setPreference = (field, value) =>
     setPreferences((previous) => ({ ...previous, [field]: value }));
@@ -158,7 +154,7 @@ function UserSettingsContent({ onClose }) {
   };
 
   return (
-    <section className="prefs-panel user-panel" aria-label="User Settings">
+    <section ref={panelRef} tabIndex={-1} className="prefs-panel user-panel" aria-label="User Settings">
       <header className="prefs-head">
         <User size={16} className="prefs-head-icon" aria-hidden="true" />
         <h2 className="prefs-head-title">User Settings</h2>

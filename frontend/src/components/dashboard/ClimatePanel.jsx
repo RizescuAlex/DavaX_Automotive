@@ -72,7 +72,7 @@ export default function ClimatePanel({ onClose }) {
         <div className="climate-fan-row">
           <button
             type="button"
-            className="climate-step climate-step-sm"
+            className="climate-step"
             aria-label="Decrease fan speed"
             onClick={() => adjustFanSpeed(-1)}
           >
@@ -91,7 +91,7 @@ export default function ClimatePanel({ onClose }) {
 
           <button
             type="button"
-            className="climate-step climate-step-sm"
+            className="climate-step"
             aria-label="Increase fan speed"
             onClick={() => adjustFanSpeed(1)}
           >

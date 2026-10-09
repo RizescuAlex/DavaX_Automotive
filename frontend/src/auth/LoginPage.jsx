@@ -246,12 +246,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="login-page">
+    <main className="login-page">
       <div className="login-card">
         {/* Header */}
-        <div className="logo">
+        <h1 className="logo">
           {APP_NAME}<span>.</span>
-        </div>
+        </h1>
         <p className="subtitle">AI-Powered Automotive Assistant</p>
 
         {/* Tabs */}
@@ -285,6 +285,6 @@ export default function LoginPage() {
         {activeTab === "google" && <GoogleTab onSuccess={handleSuccess} />}
         {activeTab === "email" && <EmailTab onSuccess={handleSuccess} />}
       </div>
-    </div>
+    </main>
   );
 }

@@ -1,5 +1,7 @@
+import { useRef } from "react";
 import { Phone, X } from "lucide-react";
 import { useAppStore } from "../../store";
+import { usePanelFocus } from "../../hooks/usePanelFocus";
 import CallLauncher from "./CallLauncher";
 import "../vehicle-settings/VehiclePreferencesPanel.css";
 
@@ -15,11 +17,16 @@ export default function CallPanel() {
   const setCallOpen = useAppStore((s) => s.setCallOpen);
 
   if (!open) return null;
+  return <CallContent close={() => setCallOpen(false)} />;
+}
 
-  const close = () => setCallOpen(false);
+function CallContent({ close }) {
+  // Focus in on open, Escape closes, focus back to the opener on close.
+  const panelRef = useRef(null);
+  usePanelFocus(panelRef, close);
 
   return (
-    <section className="prefs-panel call-panel" aria-label="Call">
+    <section ref={panelRef} tabIndex={-1} className="prefs-panel call-panel" aria-label="Call">
       <header className="prefs-head">
         <Phone size={16} className="prefs-head-icon" aria-hidden="true" />
         <h2 className="prefs-head-title">Call</h2>

@@ -10,6 +10,7 @@ import {
   stopSpeaking,
 } from "../../assistant/voice";
 import { useAppStore } from "../../store";
+import { usePanelFocus } from "../../hooks/usePanelFocus";
 
 /**
  * The assistant, dropping from the top-right of the map under the top bar.
@@ -35,6 +36,7 @@ export default function AssistantPanel() {
   const [busy, setBusy] = useState(false);
   const [listening, setListening] = useState(false);
 
+  const panelRef = useRef(null);
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
   const listeningRef = useRef(null);
@@ -55,6 +57,10 @@ export default function AssistantPanel() {
     setListening(false);
     setAssistantOpen(false);
   };
+
+  // Escape closes, and focus goes back to the opener on close. (The input
+  // above takes focus on open, so the hook leaves that alone.)
+  usePanelFocus(panelRef, close, open);
 
   const say = (role, text) => setMessages((prev) => [...prev, { role, text }]);
 
@@ -143,7 +149,7 @@ export default function AssistantPanel() {
   if (!open) return null;
 
   return (
-    <section className="assistant-panel" aria-label="Assistant">
+    <section ref={panelRef} tabIndex={-1} className="assistant-panel" aria-label="Assistant">
       <header className="assistant-head">
         <Bot size={16} className="assistant-head-icon" />
         <h2 className="assistant-head-title">AI Assistant</h2>

@@ -59,8 +59,8 @@
 .prefs-close {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   color: var(--text-muted);
   background: none;
   border: 0;
@@ -313,6 +313,15 @@
     box-shadow var(--transition-fast), background var(--transition-fast);
 }
 
+/* The light spots stay small on the cabin drawing, but each answers a 44px
+   tap around it */
+.ambient-spot::before {
+  content: "";
+  position: absolute;
+  inset: -13px; /* from inside the 2px border: 18 + 26 = 44 */
+  border-radius: 50%;
+}
+
 .ambient-spot:hover {
   transform: translate(-50%, -50%) scale(1.15);
   border-color: var(--text-secondary);
@@ -377,8 +386,8 @@
 }
 
 .ambient-toggle {
-  min-width: 52px;
-  min-height: 28px;
+  min-width: 56px;
+  min-height: 44px;
   padding: var(--space-1) var(--space-3);
   font-family: var(--font-sans);
   font-size: 11px;
@@ -434,16 +443,25 @@
   gap: var(--space-2);
 }
 
+/* 36px swatches with a 44px tap area; the 8px gap keeps neighbours' areas
+   from overlapping */
 .ambient-swatch {
   position: relative;
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   padding: 0;
   background: var(--swatch);
   border: 2px solid var(--border-default);
   border-radius: 50%;
   cursor: pointer;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.ambient-swatch::before {
+  content: "";
+  position: absolute;
+  inset: -6px; /* from inside the 2px border: 32 + 12 = 44 */
+  border-radius: 50%;
 }
 
 .ambient-swatch:hover {
@@ -482,6 +500,7 @@
 
 .ambient-apply {
   align-self: flex-start;
+  height: 44px;
 }
 
 .mirror-card h3 {
