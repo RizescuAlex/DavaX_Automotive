@@ -4,6 +4,7 @@ import {
   useJsApiLoader,
   Marker,
 } from "@react-google-maps/api";
+import { destinationIcon, fuelStopIcon, weatherIcon } from "./mapMarkers";
 import { ClockIcon, GasPumpIcon, PathIcon, WarningIcon, XIcon } from "@phosphor-icons/react";
 import { MAP_CONFIG } from "../../config/constants";
 import MapSearch from "./MapSearch";
@@ -736,7 +737,9 @@ export default function MapPanel() {
           />
         )}
 
-        {destLocation && <Marker position={destLocation} />}
+        {destLocation && (
+          <Marker position={destLocation} icon={destinationIcon(token)} zIndex={6} />
+        )}
 
         {tripData?.weather_warnings
           ?.filter(
@@ -750,13 +753,13 @@ export default function MapPanel() {
             key={`weather-${index}`}
             position={{ lat: warning.lat, lng: warning.lng }}
             title={warning.message}
-            label={{ text: "!", color: "#ffffff", fontWeight: "700" }}
+            icon={weatherIcon(token)}
             zIndex={5}
           />
           ))}
 
         {[
-          ...plannedStops,
+          ...plannedStops.map((stop) => ({ ...stop, planned: true })),
           ...(tripData?.suggested_stops ?? []).filter(
             (suggestion) => !plannedStops.some((stop) => stop.place_id === suggestion.place_id)
           ),
@@ -765,7 +768,7 @@ export default function MapPanel() {
             key={`stop-${stop.place_id}`}
             position={{ lat: stop.lat, lng: stop.lng }}
             title={`${stop.name} · ${stop.arrival_fuel_pct}% fuel on arrival`}
-            label={{ text: "⛽", fontSize: "16px" }}
+            icon={fuelStopIcon(token, stop.planned)}
             zIndex={4}
           />
         ))}
