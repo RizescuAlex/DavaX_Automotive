@@ -1979,47 +1979,31 @@ a:hover {
   background: var(--color-warning-light);
 }
 
-.dock-seat-flames {
+/* ── Level meter (seat heat, A/C) ──
+   Sits in the label row under the icon. Segments take the button's text
+   colour; unlit ones stay faintly visible so the control always shows it
+   has steps. */
+.level-meter {
   display: flex;
-  align-items: center;
-  gap: 2px;
+  gap: 3px;
   height: 12px;
+  align-items: center;
 }
 
-/* Unlit flames stay visible so the control always shows it has three steps,
-   rather than appearing to be a plain toggle until you press it. */
-.dock-seat-flames svg {
-  opacity: 0.28;
-  transition: opacity var(--transition-fast), color var(--transition-fast);
-}
-
-.dock-seat-flames svg.lit {
-  opacity: 1;
-  color: var(--color-heat);
-}
-
-/* ── A/C intensity ── */
-.dock-btn.ac { position: relative; }
-
-.dock-ac-bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 2px;
-  height: 10px;
-}
-
-.dock-ac-bars span {
-  width: 6px;
-  border-radius: 1px;
+.level-meter span {
+  width: 9px;
+  height: 4px;
+  border-radius: var(--radius-full);
   background: currentColor;
   opacity: 0.25;
   transition: opacity var(--transition-fast);
 }
 
-.dock-ac-bars span:nth-child(1) { height: 5px; }
-.dock-ac-bars span:nth-child(2) { height: 7px; }
-.dock-ac-bars span:nth-child(3) { height: 10px; }
-.dock-ac-bars span.lit { opacity: 1; }
+.level-meter span.lit { opacity: 1; }
+
+/* ── A/C intensity ── */
+.dock-btn.ac { position: relative; }
+
 
 /* Wipers sweep while they are running — a static highlight would not say
    whether they are on or merely selected. */

@@ -4,6 +4,7 @@ import { useAppStore, CLIMATE_LIMITS } from "../../store";
 import { DOCK_ICON } from "../../config/constants";
 import ClimatePanel from "./ClimatePanel";
 import SeatHeatButton from "./SeatHeatButton";
+import LevelMeter from "./LevelMeter";
 import { FrontDefogIcon, HazardIcon, RearDefogIcon, WiperIcon } from "./CarIcons";
 
 /**
@@ -168,11 +169,7 @@ export default function BottomDock() {
             onClick={cycleAcLevel}
           >
             <SnowflakeIcon size={DOCK_ICON} weight={acLevel > 0 ? "fill" : "regular"} />
-            <span className="dock-ac-bars" aria-hidden="true">
-              {[1, 2, 3].map((step) => (
-                <span key={step} className={step <= acLevel ? "lit" : ""} />
-              ))}
-            </span>
+            <LevelMeter level={acLevel} max={CLIMATE_LIMITS.AC_MAX} />
           </button>
         </div>
 
