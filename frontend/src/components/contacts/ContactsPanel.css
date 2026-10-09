@@ -17,11 +17,11 @@
 .contacts-add input {
   flex: 1;
   min-width: 0;
-  height: 40px;
+  height: 44px;
   padding: 0 var(--space-3);
   color: var(--text-primary);
-  background: var(--surface-sunken);
-  border: 1px solid var(--border-default);
+  background: var(--surface-primary);
+  border: 1px solid transparent;
   border-radius: var(--radius-md);
   outline: none;
   font: inherit;
@@ -33,10 +33,10 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  height: 40px;
+  height: 44px;
   padding: 0 var(--space-4);
-  color: var(--on-accent);
-  background: var(--accent-primary);
+  color: var(--surface-base);
+  background: var(--text-primary);
   border: 0;
   border-radius: var(--radius-md);
   cursor: pointer;
@@ -45,7 +45,7 @@
   white-space: nowrap;
 }
 
-.contacts-add-btn:hover:not(:disabled) { background: var(--accent-primary-hover); }
+.contacts-add-btn:hover:not(:disabled) { background: var(--text-secondary); }
 .contacts-add-btn:disabled { opacity: 0.55; cursor: default; }
 
 .contacts-status {
@@ -86,7 +86,7 @@
   padding: var(--space-2) var(--space-4);
 }
 
-.contact-row:hover { background: var(--surface-secondary); }
+.contact-row:hover { background: var(--surface-tertiary); }
 
 .contact-avatar {
   display: grid;
@@ -96,8 +96,7 @@
   height: 40px;
   overflow: hidden;
   color: var(--text-secondary);
-  background: var(--surface-tertiary);
-  border: 1px solid var(--border-subtle);
+  background: var(--surface-hover);
   border-radius: var(--radius-full);
   font-weight: var(--font-weight-semibold);
 }
@@ -136,10 +135,10 @@
   justify-content: center;
   gap: var(--space-1);
   flex-shrink: 0;
-  height: 40px;
-  min-width: 40px;
-  padding: 0 var(--space-2);
-  border: 1px solid var(--border-subtle);
+  height: 44px;
+  min-width: 44px;
+  padding: 0 var(--space-3);
+  border: 0;
   border-radius: var(--radius-full);
   cursor: pointer;
   font: inherit;
@@ -152,16 +151,15 @@
 .contact-call:disabled,
 .contact-remove:disabled { opacity: 0.5; cursor: default; }
 
-/* Call is the row's main action, so it carries the accent. */
+/* Call is the row's main action: a soft face that goes solid on touch */
 .contact-call {
-  color: var(--accent-primary);
-  background: var(--accent-primary-light);
-  border-color: var(--accent-primary);
+  color: var(--text-primary);
+  background: var(--surface-hover);
 }
 
 .contact-call:hover:not(:disabled) {
-  color: var(--on-accent);
-  background: var(--accent-primary);
+  color: var(--surface-base);
+  background: var(--text-primary);
 }
 
 .contact-remove {
@@ -169,17 +167,12 @@
   background: transparent;
 }
 
-.contact-remove:hover:not(:disabled) {
-  color: var(--color-error);
-  border-color: var(--color-error);
-}
+.contact-remove:hover:not(:disabled) { color: var(--color-error); }
 
 /* Armed: waiting for the confirming second tap. */
 .contact-remove.confirming {
-  padding: 0 var(--space-3);
   color: var(--on-accent);
   background: var(--color-error);
-  border-color: var(--color-error);
 }
 
 .contact-call:focus-visible,
