@@ -362,332 +362,6 @@ a:hover {
 }
 
 
-/* ── Dashboard Layout ── */
-.dashboard {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  overflow: hidden;
-  background: var(--surface-secondary);
-}
-
-/* ── Top Bar ── */
-.top-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-3) var(--space-6);
-  background: var(--surface-primary);
-  border-bottom: 1px solid var(--border-subtle);
-  box-shadow: var(--shadow-sm);
-  z-index: 10;
-  min-height: 56px;
-}
-
-.top-bar-left {
-  display: flex;
-  align-items: center;
-  gap: var(--space-6);
-}
-
-.top-bar-logo {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--accent-primary);
-  letter-spacing: -0.5px;
-}
-
-.top-bar-right {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-}
-
-.weather-badge {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-1) var(--space-3);
-  background: var(--accent-primary-light);
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--accent-primary);
-}
-
-.top-bar-user {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-full);
-  background: var(--surface-tertiary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  color: var(--text-muted);
-}
-
-.avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* The avatar is also the User Settings button */
-.avatar-btn {
-  padding: 0;
-  font: inherit;
-  cursor: pointer;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.top-bar-user .avatar-btn:hover { border-color: var(--border-strong); }
-
-.avatar-btn:focus-visible {
-  outline: 2px solid var(--accent-primary);
-  outline-offset: 2px;
-}
-
-.top-bar-user .avatar-btn.is-on {
-  color: var(--accent-primary);
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px var(--accent-primary-light);
-}
-
-.btn-sm {
-  height: 32px;
-  font-size: var(--font-size-sm);
-  padding: var(--space-1) var(--space-3);
-  gap: var(--space-1);
-}
-
-/* ── Car Panel (Left) ── */
-.car-panel {
-  position: relative;
-  width: 50%;
-  display: flex;
-  flex-direction: column;
-  background: var(--surface-primary);
-  border-right: 1px solid var(--border-subtle);
-  overflow-y: auto;
-}
-
-.car-panel-viz {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-6);
-  min-height: 0;
-}
-
-.car-panel-gauges {
-  padding: var(--space-4) var(--space-6);
-  border-top: 1px solid var(--border-subtle);
-}
-
-/* ── Car Visualization ── */
-.car-viz {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-4);
-  width: 100%;
-  max-width: 320px;
-  transform: translateY(30px);
-}
-
-/* ── Vehicle Gauges ── */
-
-.gauge-card {
-  flex: 1;
-  padding: var(--space-3);
-  background: var(--surface-secondary);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-subtle);
-}
-
-.gauge-card-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-2);
-}
-
-.gauge-value {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-1);
-  margin-bottom: var(--space-2);
-}
-
-.gauge-number {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
-  line-height: 1;
-}
-
-.gauge-unit {
-  font-size: var(--font-size-xs);
-  color: var(--text-muted);
-}
-
-.gauge-bar-track {
-  height: 4px;
-  background: var(--border-default);
-  border-radius: var(--radius-full);
-  overflow: hidden;
-}
-
-.gauge-bar-fill {
-  height: 100%;
-  border-radius: var(--radius-full);
-  transition: width 0.8s ease, background-color 0.5s ease;
-}
-
-/* ── Map Panel (Right) ── */
-.map-panel {
-  width: 50%;
-  position: relative;
-  background: var(--surface-tertiary);
-}
-
-.map-error,
-.map-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  gap: var(--space-3);
-  color: var(--text-secondary);
-}
-
-.spinner-small {
-  width: 24px;
-  height: 24px;
-  border: 2px solid var(--border-default);
-  border-top-color: var(--accent-primary);
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-}
-
-.map-geo-notice {
-  position: absolute;
-  bottom: var(--space-4);
-  left: 50%;
-  transform: translateX(-50%);
-  padding: var(--space-2) var(--space-4);
-  background: var(--color-warning-light);
-  color: #e67700;
-  font-size: var(--font-size-sm);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-  z-index: 5;
-}
-
-/* ── Map Search ── */
-.map-search {
-  position: absolute;
-  top: var(--space-4);
-  right: 60px;
-  left: auto;
-  width: 100%;
-  max-width: 320px;
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  background: var(--surface-primary);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  padding: 0 var(--space-3);
-  height: 44px;
-}
-
-.map-search-icon {
-  color: var(--text-muted);
-  flex-shrink: 0;
-}
-
-.map-search-input {
-  flex: 1;
-  border: none;
-  outline: none;
-  padding: var(--space-2) var(--space-3);
-  font-family: var(--font-sans);
-  font-size: var(--font-size-base);
-  color: var(--text-primary);
-  background: transparent;
-}
-
-.map-search-clear {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border: none;
-  background: var(--surface-tertiary);
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  color: var(--text-muted);
-  transition: all var(--transition-fast);
-  flex-shrink: 0;
-}
-
-.map-search-clear:hover {
-  background: var(--border-default);
-  color: var(--text-primary);
-}
-
-/* ── Status Bar ── */
-.status-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-2) var(--space-6);
-  background: var(--surface-primary);
-  border-top: 1px solid var(--border-subtle);
-  font-size: var(--font-size-xs);
-  color: var(--text-muted);
-  min-height: 32px;
-}
-
-.status-bar-left,
-.status-bar-right {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-}
-
-.status-indicator {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-}
-
-.status-indicator.connected {
-  color: var(--color-success);
-}
-
-.status-date {
-  color: var(--text-muted);
-}
-
-.status-time {
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-secondary);
-  font-variant-numeric: tabular-nums;
-}
-
 /* ── Animations ── */
 @keyframes fadeInUp {
   from {
@@ -706,57 +380,7 @@ a:hover {
   }
 }
 
-@keyframes pulse-glow {
-  0%, 100% { opacity: 0.15; }
-  50% { opacity: 0.3; }
-}
-
-@keyframes signal-blink {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; fill: #ff922b; }
-}
-
-/* ── Responsive ── */
-@media (max-width: 768px) {
-  .login-card {
-    padding: var(--space-6);
-  }
-
-  .dashboard-content {
-    flex-direction: column;
-  }
-
-  .car-panel,
-  .map-panel {
-    width: 100%;
-  }
-
-  .car-panel {
-    border-right: none;
-    border-bottom: 1px solid var(--border-subtle);
-    max-height: 50vh;
-  }
-
-  .map-panel {
-    min-height: 50vh;
-  }
-
-  .top-bar {
-    padding: var(--space-2) var(--space-4);
-  }
-
-  .top-bar-greeting {
-    display: none;
-  }
-
-  .vehicle-gauges {
-    flex-direction: column;
-  }
-
-  .status-bar {
-    padding: var(--space-2) var(--space-4);
-  }
-}
+/* ── Login ── */
 .auth-tabs {
   display: flex;
   gap: var(--space-2);
@@ -897,80 +521,13 @@ a:hover {
   animation: spin 0.6s linear infinite;
 }
 
-/* Spotify widget */
-.spotify-widget {
-  position: absolute;
-  top: var(--space-4);
-  left: var(--space-4);
-  right: var(--space-4);
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  gap: var(--space-5);
-  min-height: 150px;
-  padding: var(--space-6);
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-}
-
-.spotify-disconnected { justify-content: space-between; }
-
-.spotify-art {
-  width: 104px;
-  height: 104px;
-  flex: none;
-  object-fit: cover;
-  border-radius: var(--radius-sm);
-}
-
-.spotify-details {
-  display: flex;
-  flex: 1;
-  min-width: 0;
-  flex-direction: column;
-  line-height: 1.25;
-}
-
-.spotify-label {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: #1db954;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-}
-
-
-.spotify-actions { display: flex; gap: var(--space-2); }
-
-.spotify-actions button,
-.spotify-connect-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-full);
-  background: var(--surface-secondary);
-  color: var(--text-secondary);
-  cursor: pointer;
-}
-
-.spotify-actions button:hover,
-.spotify-connect-btn:hover { color: #1db954; border-color: #1db954; }
-.spotify-connect-btn { padding: 10px 16px; font-size: var(--font-size-sm); white-space: nowrap; }
-.spotify-error { position: absolute; top: 100%; left: 0; right: 0; padding-top: 4px; color: var(--color-error); font-size: var(--font-size-xs); }
-
 /* ═══════════════════════════════════════════════════════════
    Cockpit shell — rail · nav · content · dock
-   Appended after the original rules so it overrides them; the
-   light-theme selectors above that are no longer referenced by
-   any component simply go unused.
    ═══════════════════════════════════════════════════════════ */
 
 /* ── Shell grid ── */
 .dashboard {
+  position: relative;
   height: 100vh;
   display: grid;
   grid-template-rows: var(--topbar-height) 1fr var(--dock-height);
@@ -987,15 +544,26 @@ a:hover {
 
 /* ── Top strip ── */
 .top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   height: var(--topbar-height);
+  min-height: 56px;
   padding: 0 var(--space-4);
   background: var(--surface-sunken);
   border-bottom: 1px solid var(--border-subtle);
-  box-shadow: none;
+  z-index: 10;
+}
+
+.top-bar-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
 }
 
 .top-bar-logo {
   font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
   letter-spacing: -0.01em;
   color: var(--text-primary);
 }
@@ -1009,16 +577,81 @@ a:hover {
 
 .top-bar-greeting strong { color: var(--text-secondary); }
 
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.weather-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  background: var(--surface-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+}
+
+.top-bar-user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: var(--surface-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: var(--text-muted);
+}
+
 .top-bar-user .avatar {
   background: var(--surface-tertiary);
   color: var(--text-secondary);
   border: 1px solid var(--border-subtle);
 }
 
-.weather-badge {
-  background: var(--surface-tertiary);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-secondary);
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The avatar is also the User Settings button */
+.avatar-btn {
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.top-bar-user .avatar-btn:hover { border-color: var(--border-strong); }
+
+.avatar-btn:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.top-bar-user .avatar-btn.is-on {
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-primary-light);
+}
+
+.btn-sm {
+  height: 32px;
+  font-size: var(--font-size-sm);
+  padding: var(--space-1) var(--space-3);
+  gap: var(--space-1);
 }
 
 /* ── Left rail ── */
@@ -1033,30 +666,6 @@ a:hover {
   border-right: 1px solid var(--border-subtle);
 }
 
-/* The player now floats over the map; see .dash-media below. */
-
-.car-viz {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* ── Car bodywork ── */
-
-/* The roof is painted metal, not glass — keeping it body-coloured is what
-   separates the windscreen and rear screen into two distinct dark panes
-   instead of one slab running the length of the car. */
-
-@keyframes signal-blink {
-  0%, 49% { opacity: 1; }
-  50%, 100% { opacity: 0.15; }
-}
-
-/* ── Gauge column ──
-   Sits where the section nav used to. The three readings stack rather than
-   flowing into a grid, because at this width a row would clip the numbers. */
 /* ── Content area ── */
 .dash-content {
   position: relative;
@@ -1097,6 +706,13 @@ a:hover {
   background: var(--surface-elevated);
 }
 
+.gauge-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
 .gauge-label {
   color: var(--text-muted);
   font-size: var(--font-size-xs);
@@ -1107,18 +723,37 @@ a:hover {
 
 .gauge-icon { color: var(--accent-primary); }
 
+.gauge-value {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+}
+
 .gauge-number {
   color: var(--text-primary);
   font-family: var(--font-mono);
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
+  line-height: 1;
 }
 
-.gauge-unit { color: var(--text-muted); }
+.gauge-unit {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
 
 .gauge-bar-track {
+  height: 4px;
+  overflow: hidden;
   background: var(--surface-sunken);
   border-radius: var(--radius-full);
+}
+
+.gauge-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 0.8s ease, background-color 0.5s ease;
 }
 
 /* ── Dock ── */
@@ -1139,7 +774,6 @@ a:hover {
   flex: 1;
 }
 
-.dock-center { justify-content: center; }
 .dock-right { justify-content: flex-end; }
 
 .dock-badge {
@@ -1194,11 +828,6 @@ a:hover {
   outline-offset: 2px;
 }
 
-.dock-btn.on {
-  background: var(--accent-primary);
-  color: var(--on-accent);
-}
-
 .dock-date {
   color: var(--text-muted);
   font-size: var(--font-size-xs);
@@ -1211,16 +840,9 @@ a:hover {
   font-weight: var(--font-weight-semibold);
 }
 
-/* Centred over the map, matching the geolocation notice at the foot. */
-.map-search {
-  top: var(--space-3);
-  left: 50%;
-  right: auto;
-  transform: translateX(-50%);
-  max-width: 300px;
-}
-
+/* ── Map ── */
 .map-panel {
+  position: relative;
   width: 100%;
   height: 100%;
   border-radius: 0;
@@ -1228,43 +850,111 @@ a:hover {
   background: var(--surface-base);
 }
 
-.map-search {
-  background: var(--surface-primary);
-  border: 1px solid var(--border-default);
-  box-shadow: var(--shadow-lg);
-}
-
-.map-search input,
-.map-search-input {
-  background: transparent;
-  color: var(--text-primary);
-}
-
-.map-search input::placeholder,
-.map-search-input::placeholder { color: var(--text-muted); }
-
 .map-loading,
 .map-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: var(--space-3);
   color: var(--text-muted);
   background: var(--surface-base);
 }
 
+.spinner-small {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border-default);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
 .map-geo-notice {
+  position: absolute;
+  bottom: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--space-2) var(--space-4);
   background: var(--color-warning-light);
   border: 1px solid var(--color-warning);
   color: var(--color-warning);
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  z-index: 5;
 }
 
-/* ── Media card in the rail ──
-   The original widget floated over the car panel (position: absolute, white
-   fill). In the rail it is a normal block at the foot of the column. */
-/* Floats over the map, so unlike the rail version it needs elevation and an
-   opaque ground — map detail showing through would make the title unreadable. */
+/* Centred over the map, matching the geolocation notice at the foot. */
+.map-search {
+  position: absolute;
+  top: var(--space-3);
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 300px;
+  height: 44px;
+  padding: 0 var(--space-3);
+  background: var(--surface-primary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.map-search-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.map-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  background: transparent;
+}
+
+.map-search-input::placeholder { color: var(--text-muted); }
+
+.map-search-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: var(--surface-tertiary);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.map-search-clear:hover {
+  background: var(--border-default);
+  color: var(--text-primary);
+}
+
+/* ── Media player ──
+   Floats over the map, so it needs elevation and an opaque ground — map
+   detail showing through would make the title unreadable. The second row
+   holds position, then volume: the top row keeps the title its width, and
+   two more buttons up there would squeeze it down to a few letters. */
 .spotify-widget {
-  position: static;
-  z-index: auto;
-  min-height: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: var(--space-3);
+  row-gap: var(--space-2);
   padding: var(--space-3);
   background: var(--surface-primary);
   border: 1px solid var(--border-default);
@@ -1273,14 +963,23 @@ a:hover {
   color: var(--text-secondary);
 }
 
+.spotify-disconnected { justify-content: space-between; }
+
 .spotify-art {
   width: 56px;
   height: 56px;
-  flex-shrink: 0;
+  flex: none;
+  object-fit: cover;
   border-radius: var(--radius-sm);
 }
 
-.spotify-details { min-width: 0; }
+.spotify-details {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  line-height: 1.25;
+}
 
 .spotify-details strong,
 .spotify-details > span:last-child {
@@ -1301,24 +1000,47 @@ a:hover {
 }
 
 .spotify-label {
-  font-size: var(--font-size-xs);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
   color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
 }
+
+.spotify-actions { display: flex; gap: var(--space-2); }
 
 .spotify-actions button,
 .spotify-connect-btn {
-  background: var(--surface-tertiary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  background: var(--surface-tertiary);
   color: var(--text-secondary);
+  cursor: pointer;
 }
+
+.spotify-actions button:hover,
+.spotify-connect-btn:hover { color: #1db954; border-color: #1db954; }
 
 .spotify-actions button { width: 34px; height: 34px; }
 
-.spotify-error { position: static; padding-top: var(--space-1); }
+.spotify-connect-btn { padding: 10px 16px; font-size: var(--font-size-sm); white-space: nowrap; }
 
-/* Second row: position, then volume. The top row keeps the title its width;
-   two more buttons up there would squeeze it down to a few letters. */
-.spotify-widget { flex-wrap: wrap; row-gap: var(--space-2); }
+.spotify-error {
+  padding-top: var(--space-1);
+  color: var(--color-error);
+  font-size: var(--font-size-xs);
+}
+
+/* ── Narrow screens ── */
+@media (max-width: 768px) {
+  .login-card { padding: var(--space-6); }
+  .map-panel { min-height: 50vh; }
+  .top-bar-greeting { display: none; }
+}
 
 .spotify-progress {
   display: flex;
@@ -1515,14 +1237,11 @@ a:hover {
   min-height: 0;
   display: flex;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
   gap: var(--space-2);
+  width: 100%;
   overflow: hidden;
-  /* The original rule nudged this block down 30px to sit over the old car
-     panel. In the rail that offset pushes the indicator lamps onto the media
-     card, so it is cleared here. */
-  transform: none;
-  max-width: none;
 }
 
 /* The car stands on the street scene rather than on flat panel fill. The
@@ -1642,6 +1361,7 @@ a:hover {
 }
 
 .car-lamp {
+  position: relative;
   width: 38px;
   height: 30px;
   display: inline-flex;
@@ -1659,8 +1379,6 @@ a:hover {
   border-color: var(--accent-primary);
   color: var(--accent-primary);
 }
-
-.car-lamp { position: relative; }
 
 .car-lamp-auto {
   position: absolute;
@@ -1946,7 +1664,10 @@ a:hover {
   border-right: 1px solid var(--border-subtle);
 }
 
-.dock-center { gap: var(--space-3); }
+.dock-center {
+  justify-content: center;
+  gap: var(--space-3);
+}
 
 .dock-btn.on {
   background: var(--accent-primary-light);
@@ -2298,8 +2019,6 @@ a:hover {
 }
 
 /* ── Compact in-car call UI ── */
-.dashboard { position: relative; }
-
 /* The call dialog is fixed to the viewport by its own backdrop, so the
    wrapper needs no position of its own. Starting a call happens in the Call
    panel below. */
