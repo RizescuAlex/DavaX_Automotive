@@ -133,6 +133,10 @@
   --transition-fast: 120ms ease;
   --transition-base: 200ms ease;
   --transition-slow: 300ms ease;
+  /* Panels arriving: short, and only a few pixels of travel, from the side
+     they come from. On a screen used while driving, motion that pulls the
+     eye is a cost, not a flourish. */
+  --motion-arrive: 140ms cubic-bezier(0.2, 0, 0, 1);
 }
 
 /*
@@ -337,7 +341,7 @@ a:hover {
   max-width: 420px;
   box-shadow: var(--shadow-xl);
   text-align: center;
-  animation: fadeInUp 0.5s ease forwards;
+  animation: arrive-from-below var(--motion-arrive);
 }
 
 /* The wordmark as in the top bar: name in the text colour, the dot in blue */
@@ -361,15 +365,14 @@ a:hover {
 
 
 /* ── Animations ── */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@keyframes arrive-from-above {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes arrive-from-below {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
 }
 
 @keyframes spin {
@@ -1941,7 +1944,7 @@ a:hover {
   background: var(--surface-secondary);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xl);
-  animation: fadeInUp 160ms ease forwards;
+  animation: arrive-from-below var(--motion-arrive);
 }
 
 .climate-panel .climate-cabin { margin: 0; text-align: center; }
@@ -2061,6 +2064,7 @@ a:hover {
   background: var(--surface-secondary);
   box-shadow: var(--shadow-xl);
   overflow: hidden;
+  animation: arrive-from-above var(--motion-arrive);
 }
 
 .assistant-panel:focus,
@@ -2306,7 +2310,7 @@ a:hover {
   background: var(--surface-secondary);
   box-shadow: var(--shadow-xl);
   pointer-events: auto;
-  animation: call-card-in 180ms ease-out;
+  animation: arrive-from-below var(--motion-arrive);
 }
 
 .call-modal-info { display: flex; align-items: center; gap: var(--space-3); min-width: 0; flex: 1; }
@@ -2323,7 +2327,6 @@ a:hover {
 .call-action-decline { background: #e55353; }
 .call-modal-hint { position: absolute; top: calc(100% + var(--space-1)); left: 50%; transform: translateX(-50%); white-space: nowrap; }
 
-@keyframes call-card-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
 @media (max-width: 560px) {
   .call-modal-card { gap: var(--space-3); padding: var(--space-3); }
@@ -2333,4 +2336,18 @@ a:hover {
 @keyframes assistant-listening {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.55; }
+}
+
+/* With reduced motion asked for, panels appear in place and the states that
+   pulse (hazards, the listening mic) hold steady; their colour still says
+   they are on. The turn telltales and wipers have their own rules above. */
+@media (prefers-reduced-motion: reduce) {
+  .login-card,
+  .assistant-panel,
+  .prefs-panel,
+  .climate-panel,
+  .call-modal-card,
+  .animate-fade-in,
+  .dock-btn.alert,
+  .assistant-input .assistant-mic.on { animation: none; }
 }
