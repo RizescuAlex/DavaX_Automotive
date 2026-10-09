@@ -92,21 +92,14 @@ export function WiperIcon({ size = 18 }) {
   );
 }
 
-/** Two seats seen from above, the controlled one filled. */
+/** Heated seat in profile; the small side indicator identifies the seat. */
 export function SeatSideIcon({ side = "left", size = 16 }) {
   const isLeft = side === "left";
   return (
-    <svg width={size} height={size * 0.62} viewBox="0 0 16 10" aria-hidden="true">
-      <rect
-        x="0.75" y="0.75" width="6" height="8.5" rx="1.6"
-        fill={isLeft ? "currentColor" : "none"}
-        stroke="currentColor" strokeWidth="1.2" opacity={isLeft ? 1 : 0.45}
-      />
-      <rect
-        x="9.25" y="0.75" width="6" height="8.5" rx="1.6"
-        fill={isLeft ? "none" : "currentColor"}
-        stroke="currentColor" strokeWidth="1.2" opacity={isLeft ? 0.45 : 1}
-      />
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
+      <path d="M5 4.5 7.5 15 H17 M6 18 H18 M9 18 V21 M16 18 V21" />
+      <path d="M11 12 c-1.5-1.5 1.5-2.5 0-4 M15 12 c-1.5-1.5 1.5-2.5 0-4 M19 12 c-1.5-1.5 1.5-2.5 0-4" />
+      <path d={isLeft ? "M3 9 H1.5" : "M21 15 H22.5"} strokeWidth="2.5" />
     </svg>
   );
 }

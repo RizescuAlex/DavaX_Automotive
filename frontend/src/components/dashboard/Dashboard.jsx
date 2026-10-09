@@ -13,6 +13,7 @@ import CallPanel from "../calls/CallPanel";
 import UserSettingsPanel from "../user-settings/UserSettingsPanel";
 import ContactsPanel from "../contacts/ContactsPanel";
 import VehiclePreferencesPanel from "../vehicle-settings/VehiclePreferencesPanel";
+import "./Cockpit.css";
 
 /** Cockpit layout: top bar, rail, map with panels over it, dock. */
 export default function Dashboard() {

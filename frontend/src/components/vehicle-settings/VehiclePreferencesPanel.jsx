@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { GearSixIcon, XIcon } from "@phosphor-icons/react";
+import { GearSixIcon, MinusIcon, PlusIcon, XIcon } from "@phosphor-icons/react";
 import { getVehicleSettings, saveVehicleSettings } from "../../api/vehicle";
 import { useAppStore, CLIMATE_LIMITS, EXTERIOR_LIGHT_DEFAULTS } from "../../store";
 import { usePanelFocus } from "../../hooks/usePanelFocus";
@@ -97,6 +97,28 @@ function mergeLightingSettings(data) {
       },
     },
   };
+}
+
+/** Visible levels keep these small, discrete settings a single tap away. */
+function ClimateLevels({ label, value, max, onChange }) {
+  return (
+    <div className="settings-field">
+      <span className="settings-control-label">{label}</span>
+      <div className="settings-levels" role="group" aria-label={label}>
+        {Array.from({ length: max + 1 }, (_, level) => (
+          <button
+            key={level}
+            type="button"
+            aria-pressed={Number(value) === level}
+            aria-label={`${label}: ${level === 0 ? "off" : `level ${level}`}`}
+            onClick={() => onChange(level)}
+          >
+            {level === 0 ? "Off" : level}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 /**
@@ -270,7 +292,7 @@ function PreferencesContent({ onClose }) {
   };
 
   return (
-    <section ref={panelRef} tabIndex={-1} className="prefs-panel" aria-label="Vehicle Preferences">
+    <section ref={panelRef} tabIndex={-1} className="prefs-panel vehicle-prefs" aria-label="Vehicle Preferences">
       <header className="prefs-head">
         <GearSixIcon size={16} className="prefs-head-icon" aria-hidden="true" />
         <h2 className="prefs-head-title">Vehicle Preferences</h2>
@@ -284,6 +306,23 @@ function PreferencesContent({ onClose }) {
         </button>
       </header>
 
+      <nav className="prefs-sections" aria-label="Vehicle preference sections">
+        {[
+          ["climate", "Climate"],
+          ["ambient", "Cabin lighting"],
+          ["exterior", "Exterior lights"],
+          ["position", "Driving position"],
+        ].map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => panelRef.current?.querySelector(`#prefs-${id}`)?.scrollIntoView({ block: "start", inline: "nearest" })}
+          >
+            {label}
+          </button>
+        ))}
+      </nav>
+
       <div className="prefs-body">
         {loading ? (
           <p className="prefs-loading">Loading vehicle preferences…</p>
@@ -293,12 +332,23 @@ function PreferencesContent({ onClose }) {
             className="vehicle-settings-form"
             onSubmit={handleSave}
           >
-            <section className="settings-section">
+            <section className="settings-section" id="prefs-climate">
               <h2>Climate</h2>
 
-              <label className="settings-field">
-                Target temperature
+              <div className="settings-grid settings-climate-overview">
+              <div className="settings-field settings-temperature">
+                <label htmlFor="prefs-target-temperature">Target temperature (°C)</label>
+                <div className="settings-temperature-control">
+                  <button
+                    type="button"
+                    aria-label="Decrease preference temperature"
+                    disabled={settings.climate_settings.target_temperature <= CLIMATE_LIMITS.TEMP_MIN}
+                    onClick={() => updateNestedSetting("climate_settings", "target_temperature", Math.max(CLIMATE_LIMITS.TEMP_MIN, Number(settings.climate_settings.target_temperature) - CLIMATE_LIMITS.TEMP_STEP))}
+                  >
+                    <MinusIcon size={22} aria-hidden="true" />
+                  </button>
                 <input
+                  id="prefs-target-temperature"
                   type="number"
                   min={CLIMATE_LIMITS.TEMP_MIN}
                   max={CLIMATE_LIMITS.TEMP_MAX}
@@ -312,7 +362,17 @@ function PreferencesContent({ onClose }) {
                     )
                   }
                 />
-              </label>
+                  <span className="settings-temperature-unit" aria-hidden="true">°C</span>
+                  <button
+                    type="button"
+                    aria-label="Increase preference temperature"
+                    disabled={settings.climate_settings.target_temperature >= CLIMATE_LIMITS.TEMP_MAX}
+                    onClick={() => updateNestedSetting("climate_settings", "target_temperature", Math.min(CLIMATE_LIMITS.TEMP_MAX, Number(settings.climate_settings.target_temperature) + CLIMATE_LIMITS.TEMP_STEP))}
+                  >
+                    <PlusIcon size={22} aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
 
               <label className="settings-field">
                 Fan speed
@@ -331,67 +391,16 @@ function PreferencesContent({ onClose }) {
                 />
                 <span>{settings.climate_settings.fan_speed}/{CLIMATE_LIMITS.FAN_MAX}</span>
               </label>
+              </div>
 
               <div className="settings-grid">
-                <label className="settings-field">
-                  Driver seat heating
-                  <select
-                    value={settings.climate_settings.seat_heat_left}
-                    onChange={(event) =>
-                      updateNestedSetting(
-                        "climate_settings",
-                        "seat_heat_left",
-                        event.target.value
-                      )
-                    }
-                  >
-                    <option value="0">Off</option>
-                    <option value="1">Level 1</option>
-                    <option value="2">Level 2</option>
-                    <option value="3">Level 3</option>
-                  </select>
-                </label>
-
-                <label className="settings-field">
-                  Passenger seat heating
-                  <select
-                    value={settings.climate_settings.seat_heat_right}
-                    onChange={(event) =>
-                      updateNestedSetting(
-                        "climate_settings",
-                        "seat_heat_right",
-                        event.target.value
-                      )
-                    }
-                  >
-                    <option value="0">Off</option>
-                    <option value="1">Level 1</option>
-                    <option value="2">Level 2</option>
-                    <option value="3">Level 3</option>
-                  </select>
-                </label>
+                <ClimateLevels label="Driver seat heating" value={settings.climate_settings.seat_heat_left} max={CLIMATE_LIMITS.SEAT_HEAT_MAX} onChange={(value) => updateNestedSetting("climate_settings", "seat_heat_left", value)} />
+                <ClimateLevels label="Passenger seat heating" value={settings.climate_settings.seat_heat_right} max={CLIMATE_LIMITS.SEAT_HEAT_MAX} onChange={(value) => updateNestedSetting("climate_settings", "seat_heat_right", value)} />
               </div>
 
               {/* Dock settings, stored in the same climate_settings record */}
               <div className="settings-grid">
-                <label className="settings-field">
-                  Air conditioning
-                  <select
-                    value={settings.climate_settings.ac_level}
-                    onChange={(event) =>
-                      updateNestedSetting(
-                        "climate_settings",
-                        "ac_level",
-                        event.target.value
-                      )
-                    }
-                  >
-                    <option value="0">Off</option>
-                    <option value="1">Level 1</option>
-                    <option value="2">Level 2</option>
-                    <option value="3">Level 3</option>
-                  </select>
-                </label>
+                <ClimateLevels label="Air conditioning" value={settings.climate_settings.ac_level} max={CLIMATE_LIMITS.AC_MAX} onChange={(value) => updateNestedSetting("climate_settings", "ac_level", value)} />
 
                 <div className="settings-checks">
                   {[
@@ -414,7 +423,7 @@ function PreferencesContent({ onClose }) {
               </div>
             </section>
 
-            <section className="settings-section">
+            <section className="settings-section" id="prefs-ambient">
               <h2>Ambient lighting</h2>
 
               <AmbientLighting
@@ -426,7 +435,7 @@ function PreferencesContent({ onClose }) {
               />
             </section>
 
-            <section className="settings-section">
+            <section className="settings-section" id="prefs-exterior">
               <h2>Exterior lights</h2>
 
               <h3>Headlights</h3>
@@ -583,7 +592,7 @@ function PreferencesContent({ onClose }) {
               </label>
             </section>
 
-            <section className="settings-section">
+            <section className="settings-section" id="prefs-position">
               <h2>Mirrors</h2>
 
               <div className="settings-grid">
@@ -686,10 +695,10 @@ function PreferencesContent({ onClose }) {
 
       <footer className="prefs-foot">
         <span
-          className={`prefs-status ${error ? "error" : ""}`}
+          className={`prefs-status ${error ? "error" : message ? "success" : ""}`}
           role="status"
         >
-          {error || message}
+          {error || message || "Changes apply when saved."}
         </span>
         <button
           className="btn btn-primary prefs-save"

@@ -1,0 +1,405 @@
+/* Cockpit presentation only. The existing theme, actions and panel routing
+   remain the source of truth. Flat surfaces and mechanical controls keep the
+   visual language close to the vehicle rather than a web dashboard. */
+.dashboard {
+  --map-search-width: 340px;
+  --control-radius: 8px;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.dashboard button,
+.dashboard input,
+.dashboard select {
+  font-family: var(--font-sans);
+}
+
+.dashboard button:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 3px;
+}
+
+.dashboard .top-nav-btn {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+}
+
+.dashboard .top-nav-btn.is-on {
+  box-shadow: inset 0 -2px var(--text-primary);
+}
+
+.dashboard .top-nav-copilot {
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+}
+
+.dashboard .top-bar-right { gap: var(--space-2); }
+
+.dashboard .dock-btn,
+.dashboard .dock-seat,
+.dashboard .dock-temp {
+  border-radius: var(--control-radius);
+  font-family: var(--font-sans);
+}
+
+.dashboard .dock-label {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.dashboard .dock-btn.on .dock-label,
+.dashboard .dock-btn.alert .dock-label,
+.dashboard .dock-seat.on .dock-label { color: inherit; }
+
+.dashboard .dock-seat,
+.dashboard .dock-btn.ac { gap: 2px; }
+
+.dashboard .level-meter { height: 8px; }
+.dashboard .level-meter span { border-radius: 1px; }
+.dashboard .dock-seat.on { border-color: var(--color-heat); }
+
+.dashboard .dock-temp,
+.dashboard .dock-time,
+.dashboard .gauge-value { font-variant-numeric: tabular-nums; }
+
+.dashboard .map-search {
+  height: 48px;
+  max-width: min(var(--map-search-width), calc(100% - var(--space-8)));
+  border: 1px solid var(--border-default);
+  border-radius: var(--control-radius);
+  box-shadow: var(--shadow-md);
+}
+
+.dashboard .map-search > div { flex: 1; min-width: 0; }
+.dashboard .map-search-input { height: 46px; font-size: var(--font-size-md); }
+.dashboard .map-search-clear { width: 36px; height: 36px; border-radius: 6px; }
+.dashboard .map-geo-notice { top: 68px; }
+
+.dashboard .prefs-panel,
+.dashboard .assistant-panel {
+  top: 80px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.dashboard .contacts-panel,
+.dashboard .user-panel,
+.dashboard .call-panel { max-height: calc(100% - 112px); }
+
+.dashboard .prefs-head-title,
+.dashboard .assistant-head-title { font-size: var(--font-size-lg); }
+
+.dashboard .contact-call,
+.dashboard .contact-remove,
+.dashboard .spotify-connect-btn,
+.dashboard .climate-auto,
+.dashboard .ambient-toggle { border-radius: var(--control-radius); }
+
+.dashboard .climate-panel {
+  width: 280px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+}
+
+.dashboard .climate-head-title { font-size: var(--font-size-sm); }
+.dashboard .climate-auto { font-size: var(--font-size-xs); }
+.dashboard .climate-step { border: 1px solid var(--border-default); }
+
+/* Vehicle-specific overrides: the shared shell also serves profile and calls. */
+.vehicle-prefs .prefs-sections {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--border-default);
+  background: var(--surface-primary);
+  flex-shrink: 0;
+}
+
+.prefs-sections button {
+  min-height: 48px;
+  padding: var(--space-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--control-radius);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+.prefs-sections button:hover { background: var(--surface-hover); color: var(--text-primary); }
+
+.vehicle-prefs .prefs-body {
+  padding: 0 var(--space-5);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) var(--surface-secondary);
+}
+
+.vehicle-prefs .vehicle-settings-form { gap: 0; }
+
+.vehicle-prefs .settings-section {
+  padding: var(--space-5) 0 var(--space-6);
+  background: transparent;
+  border-radius: 0;
+  scroll-margin-top: 0;
+}
+
+.vehicle-prefs .settings-section + .settings-section { border-top: 1px solid var(--border-default); }
+.vehicle-prefs .settings-section h2 { font-size: var(--font-size-xl); margin-bottom: var(--space-4); }
+.vehicle-prefs .settings-field { font-size: var(--font-size-md); color: var(--text-secondary); gap: 8px; }
+.vehicle-prefs .settings-control-label { font-size: inherit; color: inherit; }
+.vehicle-prefs .settings-field input:not([type="range"]),
+.vehicle-prefs .settings-field select { border-color: var(--border-default); min-height: 48px; }
+
+.vehicle-prefs .settings-field input[type="range"],
+.vehicle-prefs .ambient-field input[type="range"] {
+  height: 36px;
+  min-height: 36px;
+  accent-color: var(--text-primary);
+  background: transparent;
+}
+
+.settings-temperature-control {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  background: var(--surface-primary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--control-radius);
+}
+
+.settings-temperature-control button {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--control-radius);
+  color: var(--text-primary);
+  background: var(--surface-tertiary);
+  cursor: pointer;
+}
+
+.settings-temperature-control button:hover:not(:disabled) { background: var(--surface-hover); }
+.settings-temperature-control button:disabled { opacity: 0.35; cursor: default; }
+
+.vehicle-prefs .settings-field .settings-temperature-control input {
+  flex: 1;
+  min-width: 0;
+  width: 0;
+  border-color: transparent;
+  background: transparent;
+  font-size: var(--font-size-2xl);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.settings-temperature-unit { color: var(--text-muted); padding-right: var(--space-3); }
+
+.settings-levels {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.settings-levels button {
+  min-height: 48px;
+  padding: var(--space-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--control-radius);
+  font-size: var(--font-size-md);
+  font-variant-numeric: tabular-nums;
+  background: var(--surface-primary);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.settings-levels button:hover { background: var(--surface-hover); }
+.settings-levels button[aria-pressed="true"] { background: var(--text-primary); color: var(--surface-base); border-color: var(--text-primary); }
+
+.vehicle-prefs .settings-checkbox {
+  justify-content: space-between;
+  flex-direction: row-reverse;
+  min-height: 48px;
+  padding: 8px 12px;
+  margin: 6px 0;
+  border: 1px solid var(--border-default);
+  border-radius: var(--control-radius);
+  background: var(--surface-primary);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+}
+
+.vehicle-prefs .settings-checkbox input {
+  appearance: none;
+  flex-shrink: 0;
+  width: 42px;
+  height: 24px;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: var(--surface-hover);
+  position: relative;
+}
+
+.vehicle-prefs .settings-checkbox input::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: transform var(--transition-fast);
+}
+
+.vehicle-prefs .settings-checkbox input:checked { background: var(--text-primary); border-color: var(--text-primary); }
+.vehicle-prefs .settings-checkbox input:checked::before { transform: translateX(18px); background: var(--surface-base); }
+.vehicle-prefs .settings-checkbox input:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 3px; }
+.vehicle-prefs .settings-checks { gap: 0; }
+.vehicle-prefs .prefs-status { color: var(--text-muted); }
+.vehicle-prefs .prefs-status.success { color: var(--color-success); }
+.vehicle-prefs .prefs-status.error { color: var(--color-error); }
+.vehicle-prefs .mirror-card { border: 1px solid var(--border-default); border-radius: var(--control-radius); }
+.vehicle-prefs .ambient { grid-template-columns: minmax(0, 220px) minmax(0, 1fr); }
+.vehicle-prefs .ambient-apply { height: auto; min-height: 48px; text-align: left; }
+
+/* The copilot is a stable vehicle panel, with real request states. */
+.dashboard .assistant-panel {
+  width: min(420px, calc(100% - var(--space-8)));
+  bottom: var(--space-8);
+  max-height: none;
+}
+
+.copilot-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background: var(--surface-primary);
+  flex-shrink: 0;
+}
+
+.copilot-signal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 44px;
+  height: 44px;
+  color: var(--text-primary);
+}
+
+.copilot-signal span { width: 3px; height: 12px; background: currentColor; border-radius: 1px; }
+.copilot-signal span:nth-child(2),
+.copilot-signal span:nth-child(4) { height: 22px; }
+.copilot-signal span:nth-child(3) { height: 32px; }
+.copilot-status-copy { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.copilot-eyebrow { color: var(--text-muted); font-size: var(--font-size-xs); }
+.copilot-status-copy strong { font-size: var(--font-size-lg); font-weight: var(--font-weight-medium); }
+.assistant-panel[data-phase="error"] .copilot-status-copy strong { color: var(--color-error); }
+
+.copilot-progress {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  list-style: none;
+  padding: var(--space-3) var(--space-5);
+  gap: var(--space-3);
+  border-block: 1px solid var(--border-default);
+  flex-shrink: 0;
+}
+
+.copilot-progress li { display: flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: var(--font-size-sm); }
+.copilot-progress li > span { font-variant-numeric: tabular-nums; }
+.copilot-progress li.current { color: var(--text-primary); font-weight: var(--font-weight-semibold); }
+.copilot-progress li.complete { color: var(--text-secondary); }
+.copilot-progress li.current > span { text-decoration: underline; text-underline-offset: 4px; }
+.dashboard .assistant-log { padding: var(--space-5); gap: var(--space-4); }
+.copilot-welcome h3 { font-size: var(--font-size-lg); font-weight: var(--font-weight-medium); margin-bottom: var(--space-2); }
+.dashboard .assistant-hint { font-size: var(--font-size-base); }
+.copilot-examples { margin-top: var(--space-5); }
+.copilot-examples > div { padding: var(--space-3) 0; border-top: 1px solid var(--border-default); }
+.copilot-examples dt { color: var(--text-muted); font-size: var(--font-size-xs); margin-bottom: 4px; }
+.copilot-examples dd { color: var(--text-secondary); font-size: var(--font-size-md); }
+.dashboard .assistant-line { font-size: var(--font-size-md); max-width: 100%; padding: var(--space-3); overflow-wrap: anywhere; }
+.dashboard .assistant-line-user { align-self: stretch; background: var(--surface-primary); border: 1px solid var(--border-default); }
+.dashboard .assistant-line-assistant { padding-inline: 0; }
+.assistant-speaker { display: block; margin-bottom: 6px; font-size: var(--font-size-xs); color: var(--text-muted); }
+.dashboard .assistant-input { padding: var(--space-4); }
+.dashboard .assistant-input input { height: 48px; font-size: var(--font-size-base); border-color: var(--border-default); }
+.dashboard .assistant-input button { min-height: 48px; flex-shrink: 0; }
+.dashboard .assistant-input .assistant-mic { width: 48px; border: 1px solid var(--border-strong); }
+.dashboard .assistant-input .assistant-mic.on { background: var(--text-primary); color: var(--surface-base); animation: none; }
+
+.assistant-panel[data-phase="listening"] .copilot-signal span,
+.assistant-panel[data-phase="processing"] .copilot-signal span { animation: copilot-voice 900ms ease-in-out infinite alternate; }
+.copilot-signal span:nth-child(2) { animation-delay: 150ms; }
+.copilot-signal span:nth-child(3) { animation-delay: 300ms; }
+.copilot-signal span:nth-child(4) { animation-delay: 100ms; }
+.copilot-signal span:nth-child(5) { animation-delay: 250ms; }
+
+@keyframes copilot-voice { to { transform: scaleY(0.45); } }
+
+@media (max-width: 1000px) {
+  .dashboard .top-bar-right { gap: 4px; }
+  .dashboard .dock-label { font-size: var(--font-size-xs); }
+  .dashboard .dock-center { gap: var(--space-2); }
+}
+
+@media (max-width: 860px) {
+  .dashboard.dashboard { grid-template-rows: var(--topbar-height) minmax(0, 1fr) var(--dock-height); }
+  /* On compact displays, use the space above the persistent dock instead of
+     squeezing the controls into the map below the vehicle rail. */
+  .dashboard .vehicle-prefs,
+  .dashboard .assistant-panel {
+    position: fixed;
+    top: calc(var(--topbar-height) + var(--space-3));
+    bottom: calc(var(--dock-height) + var(--space-3));
+    left: var(--space-3);
+    right: var(--space-3);
+    width: auto;
+    max-height: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .settings-climate-overview { grid-template-columns: 1fr; gap: 0; }
+  .vehicle-prefs .ambient { grid-template-columns: 1fr; }
+  .vehicle-prefs .prefs-sections { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: var(--space-2); }
+  .vehicle-prefs .prefs-body { padding-inline: var(--space-3); }
+  .vehicle-prefs .prefs-foot { padding-inline: var(--space-3); }
+  .vehicle-prefs .prefs-foot .prefs-status { font-size: var(--font-size-xs); }
+  .settings-temperature-control button { width: 48px; height: 48px; }
+  .dashboard .assistant-panel,
+  .dashboard .vehicle-prefs { left: var(--space-2); right: var(--space-2); width: auto; }
+  .copilot-status { padding: var(--space-3) var(--space-4); }
+  .copilot-progress { padding-inline: var(--space-4); }
+}
+
+@media (max-width: 760px) {
+  .dashboard { --dock-height: 124px; --dock-btn-size: 44px; }
+  .dashboard .dock { position: relative; padding: 8px 12px; }
+  .dashboard .dock-center { flex-wrap: wrap; min-width: 0; gap: 8px; }
+  .dashboard .dock-group,
+  .dashboard .dock-climate { flex-shrink: 0; }
+  .dashboard .dock-right { position: absolute; right: 16px; bottom: 14px; }
+}
+
+@media (max-width: 480px) {
+  .dashboard .dock-right { display: none; }
+}
+
+@media (max-height: 700px) {
+  .dashboard .assistant-head { padding-block: 4px; }
+  .copilot-status { padding-block: 8px; }
+  .copilot-progress { padding-block: 8px; }
+  .dashboard .assistant-input { padding-block: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .assistant-panel .copilot-signal span { animation: none !important; }
+  .vehicle-prefs .settings-checkbox input::before { transition: none; }
+}

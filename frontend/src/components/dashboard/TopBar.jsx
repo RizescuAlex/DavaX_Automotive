@@ -10,13 +10,13 @@ function AssistantButton() {
   return (
     <button
       type="button"
-      className={`top-nav-btn ${open ? "is-on" : ""}`}
+      className={`top-nav-btn top-nav-copilot ${open ? "is-on" : ""}`}
       onClick={toggleAssistant}
       aria-pressed={open}
       aria-label={open ? "Close the AI assistant" : "Open the AI assistant"}
     >
       <ChatCircleDotsIcon size={16} weight={open ? "fill" : "regular"} aria-hidden="true" />
-      <span className="top-nav-label">AI Assistant</span>
+      <span className="top-nav-label">Copilot</span>
     </button>
   );
 }

@@ -22,8 +22,9 @@ export default function SeatHeatButton({ side }) {
       title={`${seat} seat heating`}
       onClick={() => cycleSeatHeat(side)}
     >
-      <SeatSideIcon side={side} size={DOCK_ICON - 2} />
+      <SeatSideIcon side={side} size={DOCK_ICON} />
       <LevelMeter level={level} max={CLIMATE_LIMITS.SEAT_HEAT_MAX} />
+      <span className="dock-label" aria-hidden="true">{side === "left" ? "Driver" : "Pass."}</span>
     </button>
   );
 }

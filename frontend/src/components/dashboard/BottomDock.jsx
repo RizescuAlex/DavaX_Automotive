@@ -161,6 +161,7 @@ export default function BottomDock() {
           >
             <SnowflakeIcon size={DOCK_ICON} weight={acLevel > 0 ? "fill" : "regular"} />
             <LevelMeter level={acLevel} max={CLIMATE_LIMITS.AC_MAX} />
+            <span className="dock-label" aria-hidden="true">A/C</span>
           </button>
         </div>
 

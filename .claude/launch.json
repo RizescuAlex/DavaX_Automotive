@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "frontend-design-preview",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "cd frontend && set VITE_DESIGN_PREVIEW=true&& npx vite --port 5174 --strictPort"],
+      "port": 5174
+    },
+    {
+      "name": "frontend-login-preview",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "cd frontend && npx vite --port 5175 --strictPort"],
+      "port": 5175
+    }
+  ]
+}
