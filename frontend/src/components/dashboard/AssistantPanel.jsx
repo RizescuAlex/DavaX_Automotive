@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Bot, Mic, Send, X } from "lucide-react";
+import { ChatCircleDotsIcon, MicrophoneIcon, PaperPlaneRightIcon, XIcon } from "@phosphor-icons/react";
 import { buildContext, sendAssistantMessage } from "../../api/assistant";
 import { applyActions } from "../../assistant/dispatch";
 import { replyFor } from "../../assistant/describe";
@@ -151,7 +151,7 @@ export default function AssistantPanel() {
   return (
     <section ref={panelRef} tabIndex={-1} className="assistant-panel" aria-label="Assistant">
       <header className="assistant-head">
-        <Bot size={16} className="assistant-head-icon" />
+        <ChatCircleDotsIcon size={16} className="assistant-head-icon" />
         <h2 className="assistant-head-title">AI Assistant</h2>
         <button
           type="button"
@@ -159,7 +159,7 @@ export default function AssistantPanel() {
           onClick={close}
           aria-label="Close the assistant"
         >
-          <X size={16} />
+          <XIcon size={16} />
         </button>
       </header>
 
@@ -196,7 +196,7 @@ export default function AssistantPanel() {
             aria-label={listening ? "Stop listening" : "Speak to the assistant"}
             aria-pressed={listening}
           >
-            <Mic size={16} />
+            <MicrophoneIcon size={16} />
           </button>
         )}
 
@@ -211,7 +211,7 @@ export default function AssistantPanel() {
         />
 
         <button type="submit" disabled={busy || !draft.trim()} aria-label="Send">
-          <Send size={16} />
+          <PaperPlaneRightIcon size={16} />
         </button>
       </form>
     </section>

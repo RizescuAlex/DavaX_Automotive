@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Phone, UserMinus, UserPlus, Users, X } from "lucide-react";
+import { PhoneIcon, UserMinusIcon, UserPlusIcon, UsersIcon, XIcon } from "@phosphor-icons/react";
 import { DESIGN_PREVIEW } from "../../config/devPreview";
 import { placeCall } from "../../services/calls";
 import { addContact, listContacts, removeContact } from "../../services/contacts";
@@ -128,7 +128,7 @@ function ContactsContent({ onClose }) {
   return (
     <section ref={panelRef} tabIndex={-1} className="prefs-panel contacts-panel" aria-label="Contacts">
       <header className="prefs-head">
-        <Users size={16} className="prefs-head-icon" aria-hidden="true" />
+        <UsersIcon size={16} className="prefs-head-icon" aria-hidden="true" />
         <h2 className="prefs-head-title">Contacts</h2>
         <button
           type="button"
@@ -136,7 +136,7 @@ function ContactsContent({ onClose }) {
           onClick={onClose}
           aria-label="Close contacts"
         >
-          <X size={18} />
+          <XIcon size={18} />
         </button>
       </header>
 
@@ -153,7 +153,7 @@ function ContactsContent({ onClose }) {
           spellCheck={false}
         />
         <button type="submit" className="contacts-add-btn" disabled={adding || !draft.trim()}>
-          <UserPlus size={16} aria-hidden="true" />
+          <UserPlusIcon size={16} aria-hidden="true" />
           {adding ? "Adding…" : "Add"}
         </button>
       </form>
@@ -198,7 +198,7 @@ function ContactsContent({ onClose }) {
                     aria-label={`Call ${name}`}
                     title={`Call ${name}`}
                   >
-                    <Phone size={16} />
+                    <PhoneIcon size={16} />
                   </button>
                   <button
                     type="button"
@@ -208,7 +208,7 @@ function ContactsContent({ onClose }) {
                     aria-label={confirming ? `Confirm removing ${name}` : `Remove ${name}`}
                     title={confirming ? "Tap again to remove" : "Remove contact"}
                   >
-                    <UserMinus size={16} aria-hidden="true" />
+                    <UserMinusIcon size={16} aria-hidden="true" />
                     {confirming && <span>Remove?</span>}
                   </button>
                 </li>

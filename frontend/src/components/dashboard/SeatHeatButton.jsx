@@ -1,4 +1,4 @@
-import { Flame } from "lucide-react";
+import { FlameIcon } from "@phosphor-icons/react";
 import { useAppStore, CLIMATE_LIMITS } from "../../store";
 import { SeatSideIcon } from "./CarIcons";
 import { DOCK_ICON } from "../../config/constants";
@@ -31,7 +31,7 @@ export default function SeatHeatButton({ side }) {
       <SeatSideIcon side={side} size={DOCK_ICON - 2} />
       <span className="dock-seat-flames" aria-hidden="true">
         {LEVELS.map((step) => (
-          <Flame key={step} size={11} className={step <= level ? "lit" : ""} />
+          <FlameIcon key={step} size={11} className={step <= level ? "lit" : ""} />
         ))}
       </span>
     </button>

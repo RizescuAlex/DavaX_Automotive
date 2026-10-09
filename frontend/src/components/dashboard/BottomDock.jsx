@@ -1,8 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Wifi, Lightbulb, CornerUpLeft, CornerUpRight,
-  Minus, Plus, Snowflake,
-} from "lucide-react";
+import { ArrowBendUpLeftIcon, ArrowBendUpRightIcon, HeadlightsIcon, MinusIcon, PlusIcon, SnowflakeIcon, WifiHighIcon } from "@phosphor-icons/react";
 import { useAppStore, CLIMATE_LIMITS } from "../../store";
 import { DOCK_ICON } from "../../config/constants";
 import ClimatePanel from "./ClimatePanel";
@@ -68,7 +65,7 @@ export default function BottomDock() {
     <footer className="dock">
       <div className="dock-section dock-left">
         <span className="dock-status">
-          <Wifi size={13} aria-hidden="true" />
+          <WifiHighIcon size={13} aria-hidden="true" />
           Connected
         </span>
       </div>
@@ -84,7 +81,7 @@ export default function BottomDock() {
             title={headlightsAuto ? "Headlights (automatic)" : "Headlights"}
             onClick={toggleHeadlights}
           >
-            <Lightbulb size={DOCK_ICON} />
+            <HeadlightsIcon size={DOCK_ICON} weight={headlightsOn ? "fill" : "regular"} />
             <span className="dock-label" aria-hidden="true">{headlightsAuto ? "Auto" : "Lights"}</span>
           </button>
           <button
@@ -106,7 +103,7 @@ export default function BottomDock() {
             title="Manual left signal"
             onClick={toggleLeftSignal}
           >
-            <CornerUpLeft size={DOCK_ICON} />
+            <ArrowBendUpLeftIcon size={DOCK_ICON} weight={leftSignal ? "fill" : "regular"} />
             <span className="dock-label" aria-hidden="true">Left</span>
           </button>
           <button
@@ -117,7 +114,7 @@ export default function BottomDock() {
             title="Manual right signal"
             onClick={toggleRightSignal}
           >
-            <CornerUpRight size={DOCK_ICON} />
+            <ArrowBendUpRightIcon size={DOCK_ICON} weight={rightSignal ? "fill" : "regular"} />
             <span className="dock-label" aria-hidden="true">Right</span>
           </button>
         </div>
@@ -170,7 +167,7 @@ export default function BottomDock() {
             title="Air conditioning"
             onClick={cycleAcLevel}
           >
-            <Snowflake size={DOCK_ICON} />
+            <SnowflakeIcon size={DOCK_ICON} weight={acLevel > 0 ? "fill" : "regular"} />
             <span className="dock-ac-bars" aria-hidden="true">
               {[1, 2, 3].map((step) => (
                 <span key={step} className={step <= acLevel ? "lit" : ""} />
@@ -187,7 +184,7 @@ export default function BottomDock() {
             aria-label="Decrease target temperature"
             onClick={() => adjustTargetTemp(-CLIMATE_LIMITS.TEMP_STEP)}
           >
-            <Minus size={DOCK_ICON - 2} />
+            <MinusIcon size={DOCK_ICON - 2} />
           </button>
           <button
             type="button"
@@ -205,7 +202,7 @@ export default function BottomDock() {
             aria-label="Increase target temperature"
             onClick={() => adjustTargetTemp(CLIMATE_LIMITS.TEMP_STEP)}
           >
-            <Plus size={DOCK_ICON - 2} />
+            <PlusIcon size={DOCK_ICON - 2} />
           </button>
 
           {climateOpen && <ClimatePanel onClose={() => setClimateOpen(false)} />}

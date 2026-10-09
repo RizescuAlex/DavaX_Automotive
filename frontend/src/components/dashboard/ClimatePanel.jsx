@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Fan, Minus, Plus, Snowflake } from "lucide-react";
+import { FanIcon, MinusIcon, PlusIcon, SnowflakeIcon } from "@phosphor-icons/react";
 import { useAppStore, CLIMATE_LIMITS } from "../../store";
 
 const FAN_STEPS = Array.from({ length: CLIMATE_LIMITS.FAN_MAX }, (_, i) => i + 1);
@@ -47,7 +47,7 @@ export default function ClimatePanel({ onClose }) {
   return (
     <div className="climate-panel" ref={panelRef} role="dialog" aria-label="Climate">
       <header className="climate-head">
-        <Snowflake size={15} className="climate-head-icon" aria-hidden="true" />
+        <SnowflakeIcon size={15} className="climate-head-icon" aria-hidden="true" />
         <h3 className="climate-head-title">Climate</h3>
         <button
           type="button"
@@ -66,7 +66,7 @@ export default function ClimatePanel({ onClose }) {
 
       <div className="climate-fan">
         <span className="climate-fan-label">
-          <Fan size={13} aria-hidden="true" />
+          <FanIcon size={13} aria-hidden="true" />
           Fan
         </span>
         <div className="climate-fan-row">
@@ -76,7 +76,7 @@ export default function ClimatePanel({ onClose }) {
             aria-label="Decrease fan speed"
             onClick={() => adjustFanSpeed(-1)}
           >
-            <Minus size={15} aria-hidden="true" />
+            <MinusIcon size={15} aria-hidden="true" />
           </button>
 
           <span
@@ -95,7 +95,7 @@ export default function ClimatePanel({ onClose }) {
             aria-label="Increase fan speed"
             onClick={() => adjustFanSpeed(1)}
           >
-            <Plus size={15} aria-hidden="true" />
+            <PlusIcon size={15} aria-hidden="true" />
           </button>
         </div>
       </div>

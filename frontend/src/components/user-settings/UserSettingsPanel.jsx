@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { LogOut, User, X } from "lucide-react";
+import { SignOutIcon, UserIcon, XIcon } from "@phosphor-icons/react";
 import { useAuth } from "../../auth/useAuth";
 import { apiFetch } from "../../config/api";
 import { DESIGN_PREVIEW } from "../../config/devPreview";
@@ -156,7 +156,7 @@ function UserSettingsContent({ onClose }) {
   return (
     <section ref={panelRef} tabIndex={-1} className="prefs-panel user-panel" aria-label="User Settings">
       <header className="prefs-head">
-        <User size={16} className="prefs-head-icon" aria-hidden="true" />
+        <UserIcon size={16} className="prefs-head-icon" aria-hidden="true" />
         <h2 className="prefs-head-title">User Settings</h2>
         <button
           type="button"
@@ -164,7 +164,7 @@ function UserSettingsContent({ onClose }) {
           onClick={onClose}
           aria-label="Close user settings"
         >
-          <X size={18} />
+          <XIcon size={18} />
         </button>
       </header>
 
@@ -178,7 +178,7 @@ function UserSettingsContent({ onClose }) {
                 {profile.avatar_url || profile.photoURL ? (
                   <img src={profile.avatar_url || profile.photoURL} alt="" />
                 ) : (
-                  <User size={26} aria-hidden="true" />
+                  <UserIcon size={26} aria-hidden="true" />
                 )}
               </div>
               <div className="user-identity-text">
@@ -286,7 +286,7 @@ function UserSettingsContent({ onClose }) {
 
       <footer className="prefs-foot">
         <button type="button" className="btn btn-secondary user-signout" onClick={logout}>
-          <LogOut size={15} aria-hidden="true" />
+          <SignOutIcon size={15} aria-hidden="true" />
           Sign out
         </button>
         <span className={`prefs-status ${error ? "error" : ""}`} role="status">

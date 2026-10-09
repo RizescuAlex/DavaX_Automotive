@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Phone, X } from "lucide-react";
+import { PhoneIcon, XIcon } from "@phosphor-icons/react";
 import { useAppStore } from "../../store";
 import { usePanelFocus } from "../../hooks/usePanelFocus";
 import CallLauncher from "./CallLauncher";
@@ -28,7 +28,7 @@ function CallContent({ close }) {
   return (
     <section ref={panelRef} tabIndex={-1} className="prefs-panel call-panel" aria-label="Call">
       <header className="prefs-head">
-        <Phone size={16} className="prefs-head-icon" aria-hidden="true" />
+        <PhoneIcon size={16} className="prefs-head-icon" aria-hidden="true" />
         <h2 className="prefs-head-title">Call</h2>
         <button
           type="button"
@@ -36,7 +36,7 @@ function CallContent({ close }) {
           onClick={close}
           aria-label="Close the call panel"
         >
-          <X size={18} />
+          <XIcon size={18} />
         </button>
       </header>
 

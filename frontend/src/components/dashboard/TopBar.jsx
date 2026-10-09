@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bot, Sun, Cloud, CloudRain, User, Moon, Settings, Phone, Users } from "lucide-react";
+import { ChatCircleDotsIcon, CloudIcon, CloudRainIcon, GearSixIcon, MoonIcon, PhoneIcon, SunIcon, UserIcon, UsersIcon } from "@phosphor-icons/react";
 import { APP_NAME } from "../../config/constants";
 import { useAppStore } from "../../store";
 
@@ -22,7 +22,7 @@ function AssistantButton() {
       aria-pressed={open}
       aria-label={open ? "Close the AI assistant" : "Open the AI assistant"}
     >
-      <Bot size={14} />
+      <ChatCircleDotsIcon size={16} weight={open ? "fill" : "regular"} aria-hidden="true" />
       AI Assistant
     </button>
   );
@@ -41,7 +41,7 @@ function CallButton() {
       aria-pressed={open}
       aria-label={open ? "Close the call panel" : "Open the call panel"}
     >
-      <Phone size={14} />
+      <PhoneIcon size={16} weight={open ? "fill" : "regular"} aria-hidden="true" />
       Call
     </button>
   );
@@ -60,7 +60,7 @@ function ContactsButton() {
       aria-pressed={open}
       aria-label={open ? "Close contacts" : "Open contacts"}
     >
-      <Users size={14} />
+      <UsersIcon size={16} weight={open ? "fill" : "regular"} aria-hidden="true" />
       Contacts
     </button>
   );
@@ -83,7 +83,7 @@ function UserSettingsButton({ photoURL }) {
       aria-label={open ? "Close user settings" : "Open user settings"}
       title="User settings"
     >
-      {photoURL ? <img src={photoURL} alt="" className="avatar-img" /> : <User size={18} />}
+      {photoURL ? <img src={photoURL} alt="" className="avatar-img" /> : <UserIcon size={20} weight={open ? "fill" : "regular"} aria-hidden="true" />}
     </button>
   );
 }
@@ -101,7 +101,7 @@ function PreferencesButton() {
       aria-pressed={open}
       aria-label={open ? "Close vehicle preferences" : "Open vehicle preferences"}
     >
-      <Settings size={14} />
+      <GearSixIcon size={16} weight={open ? "fill" : "regular"} aria-hidden="true" />
       Vehicle Preferences
     </button>
   );
@@ -127,7 +127,7 @@ function ThemeToggle() {
       aria-label={goingToDark ? "Switch to night mode" : "Switch to day mode"}
       title={goingToDark ? "Night mode" : "Day mode"}
     >
-      {goingToDark ? <Moon size={16} aria-hidden="true" /> : <Sun size={16} aria-hidden="true" />}
+      {goingToDark ? <MoonIcon size={16} aria-hidden="true" /> : <SunIcon size={16} aria-hidden="true" />}
     </button>
   );
 }
@@ -171,9 +171,9 @@ function WeatherBadge() {
   if (!weather) return null;
 
   const Icon =
-    weather.desc === "Rain" ? CloudRain
-    : weather.desc === "Clouds" ? Cloud
-    : Sun;
+    weather.desc === "Rain" ? CloudRainIcon
+    : weather.desc === "Clouds" ? CloudIcon
+    : SunIcon;
 
   return (
     <div className="weather-badge">

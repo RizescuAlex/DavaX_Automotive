@@ -1,4 +1,4 @@
-import { Lightbulb, CornerUpLeft, CornerUpRight } from "lucide-react";
+import { ArrowBendUpLeftIcon, ArrowBendUpRightIcon, HeadlightsIcon } from "@phosphor-icons/react";
 import { useAppStore } from "../../store";
 import carIso from "../../assets/car-iso.svg";
 import { FrontFogIcon, RearFogIcon } from "./CarIcons";
@@ -56,7 +56,7 @@ export default function CarVisualization() {
           aria-label={leftBlinking ? "Left turn signal active" : "Left turn signal inactive"}
           title={leftBlinking ? "Left turn signal active" : "Left signal"}
         >
-          <CornerUpLeft size={16} aria-hidden="true" />
+          <ArrowBendUpLeftIcon size={16} weight={leftBlinking ? "fill" : "regular"} aria-hidden="true" />
         </span>
         {headlights.fog_lights && (
           <span className="car-lamp fog" title="Front fog lights on">
@@ -67,7 +67,7 @@ export default function CarVisualization() {
           className={`car-lamp ${headlightsOn ? "on" : ""}`}
           title={headlightsAuto ? "Headlights, automatic" : "Headlights"}
         >
-          <Lightbulb size={16} aria-hidden="true" />
+          <HeadlightsIcon size={16} weight={headlightsOn ? "fill" : "regular"} aria-hidden="true" />
           {headlightsAuto && <span className="car-lamp-auto" aria-hidden="true">A</span>}
         </span>
         {rearLights.rear_fog_lights && (
@@ -81,7 +81,7 @@ export default function CarVisualization() {
           aria-label={rightBlinking ? "Right turn signal active" : "Right turn signal inactive"}
           title={rightBlinking ? "Right turn signal active" : "Right signal"}
         >
-          <CornerUpRight size={16} aria-hidden="true" />
+          <ArrowBendUpRightIcon size={16} weight={rightBlinking ? "fill" : "regular"} aria-hidden="true" />
         </span>
       </div>
 

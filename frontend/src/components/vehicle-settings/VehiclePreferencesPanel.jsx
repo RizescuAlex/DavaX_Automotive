@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Settings, X } from "lucide-react";
+import { GearSixIcon, XIcon } from "@phosphor-icons/react";
 import { getVehicleSettings, saveVehicleSettings } from "../../api/vehicle";
 import { useAppStore, CLIMATE_LIMITS, EXTERIOR_LIGHT_DEFAULTS } from "../../store";
 import { usePanelFocus } from "../../hooks/usePanelFocus";
@@ -279,7 +279,7 @@ function PreferencesContent({ onClose }) {
   return (
     <section ref={panelRef} tabIndex={-1} className="prefs-panel" aria-label="Vehicle Preferences">
       <header className="prefs-head">
-        <Settings size={16} className="prefs-head-icon" aria-hidden="true" />
+        <GearSixIcon size={16} className="prefs-head-icon" aria-hidden="true" />
         <h2 className="prefs-head-title">Vehicle Preferences</h2>
         <button
           type="button"
@@ -287,7 +287,7 @@ function PreferencesContent({ onClose }) {
           onClick={onClose}
           aria-label="Close vehicle preferences"
         >
-          <X size={18} />
+          <XIcon size={18} />
         </button>
       </header>
 

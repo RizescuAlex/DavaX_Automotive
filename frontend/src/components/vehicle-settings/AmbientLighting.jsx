@@ -1,4 +1,4 @@
-import { Lightbulb } from "lucide-react";
+import { LightbulbIcon } from "@phosphor-icons/react";
 
 /**
  * Where each zone sits on the cabin plan, in percent of the stage. The car
@@ -104,7 +104,7 @@ export default function AmbientLighting({ interior, selected, onSelect, onChange
 
       <div className="ambient-controls">
         <div className="ambient-head">
-          <Lightbulb size={16} className="ambient-head-icon" aria-hidden="true" />
+          <LightbulbIcon size={16} className="ambient-head-icon" aria-hidden="true" />
           <h3>{zone.label}</h3>
           <button
             type="button"

@@ -4,7 +4,7 @@ import {
   useJsApiLoader,
   Marker,
 } from "@react-google-maps/api";
-import { Clock, Fuel, Route, TriangleAlert, X } from "lucide-react";
+import { ClockIcon, GasPumpIcon, PathIcon, WarningIcon, XIcon } from "@phosphor-icons/react";
 import { MAP_CONFIG } from "../../config/constants";
 import MapSearch from "./MapSearch";
 import { apiFetch } from "../../config/api";
@@ -824,7 +824,7 @@ export default function MapPanel() {
               {plannedStops.map((stop) => (
                 <div key={stop.place_id} className="route-stop">
                   <span className="route-stop-info">
-                    <Fuel size={14} aria-hidden="true" />
+                    <GasPumpIcon size={14} aria-hidden="true" />
                     {stop.name}
                   </span>
                   <button
@@ -883,12 +883,12 @@ export default function MapPanel() {
       {routeData && (
         <div className="route-summary">
           <div className="route-summary-item">
-            <Clock size={18} className="route-summary-icon" aria-hidden="true" />
+            <ClockIcon size={18} className="route-summary-icon" aria-hidden="true" />
             {routeData.duration}
           </div>
 
           <div className="route-summary-item">
-            <Route size={18} className="route-summary-icon" aria-hidden="true" />
+            <PathIcon size={18} className="route-summary-icon" aria-hidden="true" />
             {routeData.distance}
           </div>
 
@@ -921,7 +921,7 @@ export default function MapPanel() {
               title="Cancel route"
               className="route-cancel-btn"
             >
-              <X size={15} aria-hidden="true" />
+              <XIcon size={15} aria-hidden="true" />
             </button>
           )}
         </div>
@@ -929,7 +929,7 @@ export default function MapPanel() {
 
       {(navigationError || geoError) && (
         <div className="map-geo-notice" role="status">
-          <TriangleAlert size={15} className="map-geo-notice-icon" aria-hidden="true" />
+          <WarningIcon size={15} className="map-geo-notice-icon" aria-hidden="true" />
           <span>
             {navigationError ||
               "Location unavailable. Using the fallback location."}

@@ -1,16 +1,18 @@
 /**
- * Automotive glyphs lucide does not carry.
+ * Automotive glyphs the Phosphor set does not carry.
  *
  * Drawn to match the symbols moulded onto real dashboard buttons, because a
  * driver already knows those shapes — a generic "wind" or "droplet" icon would
  * make them read the tooltip instead. Stroke-only and currentColor, so they
- * inherit button state and theme like every lucide icon beside them.
+ * inherit button state and theme like the Phosphor icons beside them, at
+ * the same 1.5 stroke as Phosphor's regular weight (16 units on its 256
+ * grid, scaled to this 24 one).
  */
 
 const base = {
   fill: "none",
   stroke: "currentColor",
-  strokeWidth: 1.75,
+  strokeWidth: 1.5,
   strokeLinecap: "round",
   strokeLinejoin: "round",
   "aria-hidden": "true",
@@ -19,7 +21,7 @@ const base = {
 /**
  * The hazard symbol: one triangle nested inside another.
  *
- * Not lucide's TriangleAlert, which puts an exclamation mark inside a single
+ * Not a warning icon, which puts an exclamation mark inside a single
  * triangle — that is a generic warning sign. The moulded button in a car is
  * two bare outlined triangles, and that is the shape a driver's eye is looking
  * for.
@@ -30,13 +32,10 @@ const base = {
  * wide, so they merged into one thick line. That leaves 3.2 units between the
  * centrelines, about 1.3px of daylight once both strokes are drawn at 18px.
  *
- * Stroke is 1.5 rather than the shared 1.75: two nested outlines in an 18px
- * box need the extra room, and at this size the difference is invisible
- * beside the other glyphs.
  */
 export function HazardIcon({ size = 18 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" {...base} strokeWidth={1.5}>
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
       <path d="M12 3.4 21.6 19.9 H2.4 Z" />
       <path d="M12 9.78 16.03 16.71 H7.97 Z" />
     </svg>
