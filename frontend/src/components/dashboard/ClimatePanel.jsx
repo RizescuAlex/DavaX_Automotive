@@ -1,19 +1,12 @@
 import { useEffect, useRef } from "react";
-import { Fan, Minus, Plus, Snowflake } from "lucide-react";
+import { FanIcon, MinusIcon, PlusIcon, SnowflakeIcon } from "@phosphor-icons/react";
 import { useAppStore, CLIMATE_LIMITS } from "../../store";
 
 const FAN_STEPS = Array.from({ length: CLIMATE_LIMITS.FAN_MAX }, (_, i) => i + 1);
 
 /**
- * The detailed half of climate, opened from the temperature in the dock.
- *
- * The dock carries what a driver reaches for mid-journey — temperature, seat
- * heat, A/C level, defrost. What gets set once and left alone lives here, so
- * the bar stays readable at a glance instead of becoming a wall of icons.
- *
- * Adjusting the fan by hand drops out of auto, the way a real HVAC panel does,
- * so no control is ever disabled — a disabled control in a dark cockpit is
- * hard to tell from a broken one.
+ * Climate pop-up, opened from the dock temperature: fan speed and auto mode.
+ * Adjusting the fan leaves auto mode, so no control is ever disabled.
  */
 export default function ClimatePanel({ onClose }) {
   const targetTemp = useAppStore((s) => s.targetTemp);
@@ -26,9 +19,8 @@ export default function ClimatePanel({ onClose }) {
 
   const panelRef = useRef(null);
 
-  // Close on Escape or on a click outside, the two things anyone expects of a
-  // popover. Pointerdown rather than click so it closes before the underlying
-  // control reacts.
+  // Close on Escape or a click outside. pointerdown so it closes before the
+  // control underneath reacts.
   useEffect(() => {
     const onKey = (e) => { if (e.key === "Escape") onClose(); };
     const onDown = (e) => {
@@ -47,7 +39,7 @@ export default function ClimatePanel({ onClose }) {
   return (
     <div className="climate-panel" ref={panelRef} role="dialog" aria-label="Climate">
       <header className="climate-head">
-        <Snowflake size={15} className="climate-head-icon" aria-hidden="true" />
+        <SnowflakeIcon size={15} className="climate-head-icon" aria-hidden="true" />
         <h3 className="climate-head-title">Climate</h3>
         <button
           type="button"
@@ -66,17 +58,17 @@ export default function ClimatePanel({ onClose }) {
 
       <div className="climate-fan">
         <span className="climate-fan-label">
-          <Fan size={13} aria-hidden="true" />
+          <FanIcon size={13} aria-hidden="true" />
           Fan
         </span>
         <div className="climate-fan-row">
           <button
             type="button"
-            className="climate-step climate-step-sm"
+            className="climate-step"
             aria-label="Decrease fan speed"
             onClick={() => adjustFanSpeed(-1)}
           >
-            <Minus size={15} aria-hidden="true" />
+            <MinusIcon size={15} aria-hidden="true" />
           </button>
 
           <span
@@ -91,11 +83,11 @@ export default function ClimatePanel({ onClose }) {
 
           <button
             type="button"
-            className="climate-step climate-step-sm"
+            className="climate-step"
             aria-label="Increase fan speed"
             onClick={() => adjustFanSpeed(1)}
           >
-            <Plus size={15} aria-hidden="true" />
+            <PlusIcon size={15} aria-hidden="true" />
           </button>
         </div>
       </div>

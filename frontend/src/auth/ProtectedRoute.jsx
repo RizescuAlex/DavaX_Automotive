@@ -10,7 +10,7 @@ export default function ProtectedRoute({ children }) {
   const location = useLocation();
 
   // Design preview: render every protected screen directly, no auth, no
-  // onboarding redirects — so /dashboard and /onboarding are both reachable.
+  // onboarding redirects, so /dashboard and /onboarding are both reachable.
   if (DESIGN_PREVIEW) {
     return children;
   }

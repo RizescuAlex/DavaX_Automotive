@@ -1,84 +1,72 @@
-/* ═══════════════════════════════════════════════════════════
-   DavaX Automotive — Design System
-   Inspired by Bolt UI: light, clean, white-first aesthetic
-   ═══════════════════════════════════════════════════════════ */
+/* DavaX Automotive design system. :root holds the night theme (the default);
+   [data-theme="light"] overrides it. */
 
 /* ── Design Tokens ── */
-/*
-   Palette: "Stormy morning"
-     #384959  deep slate   — app chrome and panels
-     #6A89A7  muted slate  — borders and dividers
-     #88BDF2  sky blue     — accent / active state
-     #BDDDFC  pale ice     — primary text
-
-   Text colours are derived from the palette rather than taken from it
-   directly, so every text/background pair clears WCAG AA (4.5:1). Measured
-   against --surface-primary #384959: pale ice 6.5:1, muted ice 4.9:1,
-   sky blue 4.6:1. #6A89A7 sits at 2.7:1, so it is used only for borders
-   and never for text.
-*/
+/* Contrast, worst case across all surfaces: text-primary 13.3:1, text-secondary
+   9.1:1, text-muted 4.7:1, accent-primary 7.4:1, on-accent 9.7:1, semantic
+   colours 6.2:1 or more. --border-strong (1.6:1) is for borders only. */
 :root {
-  /* Surfaces — darkest at the back, lifting toward the viewer */
-  --surface-base: #2b3744;
-  --surface-primary: #384959;
-  --surface-secondary: #3f5264;
-  --surface-tertiary: #42566b;
-  --surface-elevated: #42566b;
-  --surface-hover: #4e6480;
-  --surface-sunken: #222c36;
+  /* Surfaces, darkest at the back */
+  --surface-base: #0b0c0e;
+  --surface-primary: #121316;
+  --surface-secondary: #17181b;
+  --surface-tertiary: #1d1e22;
+  --surface-elevated: #1d1e22;
+  --surface-hover: #26272b;
+  --surface-sunken: #0b0c0e;
 
   /* Borders */
-  --border-subtle: #44596d;
-  --border-default: #526c85;
-  --border-strong: #6a89a7;
+  --border-subtle: #1f2024;
+  --border-default: #2c2d32;
+  --border-strong: #44464d;
 
   /* Accent */
-  --accent-primary: #88bdf2;
-  --accent-primary-hover: #a5cdf6;
-  --accent-primary-active: #6fa9e4;
-  --accent-primary-light: rgba(136, 189, 242, 0.16);
-  --accent-primary-glow: rgba(136, 189, 242, 0.34);
-  --accent-secondary: #bdddfc;
-  --accent-secondary-hover: #d6ebfe;
+  --accent-primary: #8ab8ff;
+  --accent-primary-hover: #a8caff;
+  --accent-primary-active: #6fa3f0;
+  --accent-primary-light: rgba(138, 184, 255, 0.14);
+  --accent-primary-glow: rgba(138, 184, 255, 0.3);
+  --accent-secondary: #c4dbff;
+  --accent-secondary-hover: #dce9ff;
   /* Text that sits on top of an accent fill */
-  --on-accent: #16212b;
+  --on-accent: #0b0c0e;
 
   /* Text */
-  --text-primary: #e8f2fc;
-  --text-secondary: #bdddfc;
-  --text-muted: #a8c0d6;
-  --text-inverse: #16212b;
+  --text-primary: #f2f2f0;
+  --text-secondary: #c9cacd;
+  --text-muted: #8e9097;
+  --text-inverse: #0b0c0e;
 
   /* Semantic */
   --color-success: #6fd3a3;
-  --color-success-light: rgba(111, 211, 163, 0.16);
+  --color-success-light: rgba(111, 211, 163, 0.14);
   --color-warning: #f2c57c;
-  --color-warning-light: rgba(242, 197, 124, 0.16);
+  --color-warning-light: rgba(242, 197, 124, 0.14);
   --color-error: #f28b82;
-  --color-error-light: rgba(242, 139, 130, 0.16);
+  --color-error-light: rgba(242, 139, 130, 0.14);
 
-  /* Shadows — deeper than the light theme, since dark UI needs more
-     separation to read as layered rather than flat */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.36);
-  --shadow-lg: 0 6px 18px rgba(0, 0, 0, 0.44);
-  --shadow-xl: 0 12px 34px rgba(0, 0, 0, 0.52);
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 12px 34px rgba(0, 0, 0, 0.55);
 
-  /* Vehicle stage — the shading that sits the car on the road. Tokenised
-     because a shadow tuned for night asphalt reads as dirt in daylight. */
-  /* Seat heating. Warm rather than the accent blue, because "hot" reading as
-     cold is the one mistake this control cannot afford. Not --color-warning:
-     heat is a setting, not a fault. */
-  --color-heat: #f2a15c;
+  /* Seat heating. Separate from --color-warning: heat is a setting, not a
+     fault. */
+  --color-heat: #ffb38a;
 
-  --stage-vignette: rgba(22, 32, 42, 0.62);
-  --stage-inset: rgba(0, 0, 0, 0.45);
-  --stage-contact: rgba(10, 15, 20, 0.7);
-  --stage-drop: rgba(9, 14, 19, 0.55);
+  /* Shading for the car on the street scene */
+  --stage-vignette: rgba(11, 12, 14, 0.62);
+  --stage-inset: rgba(0, 0, 0, 0.5);
+  --stage-contact: rgba(0, 0, 0, 0.7);
+  --stage-drop: rgba(0, 0, 0, 0.55);
+  /* Headlight pool on the road */
+  --stage-headlight: rgba(242, 242, 236, 0.22);
 
-  /* Typography */
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+  /* Typography. The mono face is for figures that change (clock, temperature,
+     readings). */
+  --font-sans: "Overpass", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "Overpass Mono", ui-monospace, "Cascadia Mono", monospace;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.8125rem;
   --font-size-base: 0.875rem;
@@ -87,6 +75,8 @@
   --font-size-xl: 1.25rem;
   --font-size-2xl: 1.5rem;
   --font-size-3xl: 1.875rem;
+  /* Speed readout */
+  --font-size-display: 5.5rem;
   --font-weight-light: 300;
   --font-weight-regular: 400;
   --font-weight-medium: 500;
@@ -112,92 +102,79 @@
   --radius-xl: 16px;
   --radius-full: 9999px;
 
-  /* Layout — rail, map, dock */
+  /* Layout: rail, map, dock */
   --rail-width: 300px;
-  --dock-height: 76px;
-  /* Dock controls: sized for a hand on a moving car, not a mouse */
-  --dock-btn-size: 52px;
-  --topbar-height: 44px;
+  --dock-height: 84px;
+  /* Dock buttons: touch-sized, with room for a label */
+  --dock-btn-size: 60px;
+  --topbar-height: 52px;
+  /* Shared by the map search bar and the notice below it */
+  --map-search-width: 300px;
 
   /* Transitions */
   --transition-fast: 120ms ease;
   --transition-base: 200ms ease;
   --transition-slow: 300ms ease;
+  /* Panel entrance */
+  --motion-arrive: 140ms cubic-bezier(0.2, 0, 0, 1);
 }
 
-/*
-   Day theme: "Stormy morning" in daylight.
-
-   Same family as the night palette — cool slate-blues over a white-first
-   ground — rather than a second unrelated look. The accent darkens from
-   #88bdf2 to #1f6fb2 because the night accent sits at 1.9:1 on white and
-   would fail as text or as a button fill.
-
-   Measured, worst case across all four surfaces (white, secondary #f4f7fb,
-   base #e8eef5, sunken #dce5ef):
-     text-primary   12.8:1    text-muted     4.8:1
-     text-secondary  7.4:1    accent-primary 4.9:1
-     white on accent 5.3:1    success/warning/error all above 5.9:1
-   --border-strong is 2.2:1 and, as in the night theme, is only ever a
-   border — never text.
-
-   Night stays the default in :root, so the cockpit is dark unless the
-   driver asks otherwise.
-*/
+/* Day theme. Contrast, worst case across all surfaces: text-primary 15.0:1,
+   text-secondary 8.8:1, text-muted 5.0:1, accent-primary 4.6:1, white on accent
+   5.7:1, semantic colours 4.7:1 or more. --border-strong is for borders only. */
 :root[data-theme="light"] {
-  /* Surfaces — lightest at the front, settling back toward the ground */
-  --surface-base: #e8eef5;
+  /* Surfaces */
+  --surface-base: #f3f3f1;
   --surface-primary: #ffffff;
-  --surface-secondary: #f4f7fb;
-  --surface-tertiary: #eaf0f7;
+  --surface-secondary: #f7f7f5;
+  --surface-tertiary: #ececea;
   --surface-elevated: #ffffff;
-  --surface-hover: #e1eaf4;
-  --surface-sunken: #dce5ef;
+  --surface-hover: #e6e6e3;
+  --surface-sunken: #f3f3f1;
 
   /* Borders */
-  --border-subtle: #dfe7f0;
-  --border-default: #c4d3e3;
-  --border-strong: #9cb2c8;
+  --border-subtle: #e4e4e0;
+  --border-default: #cfcfca;
+  --border-strong: #a9aaa5;
 
   /* Accent */
-  --accent-primary: #1f6fb2;
-  --accent-primary-hover: #195c95;
-  --accent-primary-active: #14496f;
-  --accent-primary-light: rgba(31, 111, 178, 0.12);
-  --accent-primary-glow: rgba(31, 111, 178, 0.25);
-  --accent-secondary: #2c5f88;
-  --accent-secondary-hover: #244e6f;
+  --accent-primary: #1764c7;
+  --accent-primary-hover: #1253a8;
+  --accent-primary-active: #0e4285;
+  --accent-primary-light: rgba(23, 100, 199, 0.1);
+  --accent-primary-glow: rgba(23, 100, 199, 0.22);
+  --accent-secondary: #2d4f80;
+  --accent-secondary-hover: #23406a;
   --on-accent: #ffffff;
 
   /* Text */
-  --text-primary: #16212b;
-  --text-secondary: #33485a;
-  --text-muted: #516475;
+  --text-primary: #111214;
+  --text-secondary: #3a3c41;
+  --text-muted: #5e6066;
   --text-inverse: #ffffff;
 
   /* Semantic */
   --color-success: #17714a;
   --color-success-light: rgba(23, 113, 74, 0.12);
   --color-warning: #8a5a00;
-  --color-warning-light: rgba(138, 90, 0, 0.14);
+  --color-warning-light: rgba(138, 90, 0, 0.12);
   --color-error: #b3261e;
   --color-error-light: rgba(179, 38, 30, 0.1);
 
-  /* Shadows — far lighter than the night theme; on a pale ground a heavy
-     shadow reads as dirt rather than elevation */
-  --shadow-sm: 0 1px 2px rgba(22, 33, 43, 0.06);
-  --shadow-md: 0 2px 6px rgba(22, 33, 43, 0.08);
-  --shadow-lg: 0 6px 18px rgba(22, 33, 43, 0.1);
-  --shadow-xl: 0 12px 34px rgba(22, 33, 43, 0.14);
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(17, 18, 20, 0.06);
+  --shadow-md: 0 2px 6px rgba(17, 18, 20, 0.08);
+  --shadow-lg: 0 8px 24px rgba(17, 18, 20, 0.1);
+  --shadow-xl: 0 12px 34px rgba(17, 18, 20, 0.14);
 
-  /* Stage shading, lightened: enough to seat the car on the road, not so
-     much that the pale asphalt looks soiled. */
-  --color-heat: #b35a12;
+  --color-heat: #a1420f;
 
-  --stage-vignette: rgba(120, 140, 160, 0.26);
-  --stage-inset: rgba(90, 110, 130, 0.16);
-  --stage-contact: rgba(60, 80, 100, 0.34);
-  --stage-drop: rgba(60, 80, 100, 0.28);
+  /* Stage shading */
+  --stage-vignette: rgba(110, 110, 105, 0.24);
+  --stage-inset: rgba(80, 80, 76, 0.14);
+  --stage-contact: rgba(40, 40, 38, 0.32);
+  --stage-drop: rgba(40, 40, 38, 0.26);
+  --stage-headlight: rgba(255, 255, 250, 0.55);
 }
 
 /* ── Reset & Base ── */
@@ -266,48 +243,44 @@ a:hover {
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all var(--transition-base);
-  height: 40px;
+  height: 44px;
   white-space: nowrap;
 }
+
+.btn svg { flex-shrink: 0; }
+
+.btn:disabled { opacity: 0.55; cursor: default; }
+
+.btn:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.btn-block { width: 100%; }
 
 .btn:active {
   transform: scale(0.98);
 }
 
+/* Primary buttons use the text colour; the accent is kept for the route and
+   selection. */
 .btn-primary {
-  background: var(--accent-primary);
-  color: var(--text-inverse);
-  border-color: var(--accent-primary);
+  background: var(--text-primary);
+  color: var(--surface-base);
 }
 
-.btn-primary:hover {
-  background: var(--accent-primary-hover);
-  border-color: var(--accent-primary-hover);
-  box-shadow: var(--shadow-md);
-}
+.btn-primary:hover { background: var(--text-secondary); }
 
 .btn-secondary {
-  background: var(--surface-primary);
+  background: var(--surface-hover);
   color: var(--text-primary);
-  border-color: var(--border-default);
 }
 
-.btn-secondary:hover {
-  background: var(--surface-secondary);
-  border-color: var(--border-strong);
-}
-
-/* A top-bar button whose panel is open */
-.btn-secondary.is-on {
-  color: var(--accent-primary);
-  background: var(--accent-primary-light);
-  border-color: var(--accent-primary);
-}
+.btn-secondary:hover { background: var(--border-default); }
 
 .btn-google {
-  background: var(--surface-primary);
+  background: var(--surface-hover);
   color: var(--text-primary);
-  border: 1px solid var(--border-default);
   font-weight: var(--font-weight-medium);
   height: 48px;
   padding: var(--space-3) var(--space-6);
@@ -315,11 +288,7 @@ a:hover {
   border-radius: var(--radius-lg);
 }
 
-.btn-google:hover {
-  background: var(--surface-secondary);
-  border-color: var(--border-strong);
-  box-shadow: var(--shadow-md);
-}
+.btn-google:hover { background: var(--border-default); }
 
 /* ── Login Page ── */
 .login-page {
@@ -327,32 +296,31 @@ a:hover {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: var(--surface-secondary);
+  background: var(--surface-base);
   padding: var(--space-4);
 }
 
 .login-card {
-  background: var(--surface-primary);
-  border: 1px solid var(--border-subtle);
+  background: var(--surface-secondary);
   border-radius: var(--radius-xl);
   padding: var(--space-10);
   width: 100%;
   max-width: 420px;
   box-shadow: var(--shadow-xl);
   text-align: center;
-  animation: fadeInUp 0.5s ease forwards;
+  animation: arrive-from-below var(--motion-arrive);
 }
 
 .login-card .logo {
-  font-size: var(--font-size-2xl);
+  font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
-  color: var(--accent-primary);
+  color: var(--text-primary);
   margin-bottom: var(--space-2);
-  letter-spacing: -0.5px;
+  letter-spacing: -0.02em;
 }
 
 .login-card .logo span {
-  color: var(--text-primary);
+  color: var(--accent-primary);
 }
 
 .login-card .subtitle {
@@ -362,342 +330,15 @@ a:hover {
 }
 
 
-/* ── Dashboard Layout ── */
-.dashboard {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  overflow: hidden;
-  background: var(--surface-secondary);
-}
-
-/* ── Top Bar ── */
-.top-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-3) var(--space-6);
-  background: var(--surface-primary);
-  border-bottom: 1px solid var(--border-subtle);
-  box-shadow: var(--shadow-sm);
-  z-index: 10;
-  min-height: 56px;
-}
-
-.top-bar-left {
-  display: flex;
-  align-items: center;
-  gap: var(--space-6);
-}
-
-.top-bar-logo {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--accent-primary);
-  letter-spacing: -0.5px;
-}
-
-.top-bar-right {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-}
-
-.weather-badge {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-1) var(--space-3);
-  background: var(--accent-primary-light);
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--accent-primary);
-}
-
-.top-bar-user {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-full);
-  background: var(--surface-tertiary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  color: var(--text-muted);
-}
-
-.avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* The avatar is also the User Settings button */
-.avatar-btn {
-  padding: 0;
-  font: inherit;
-  cursor: pointer;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.top-bar-user .avatar-btn:hover { border-color: var(--border-strong); }
-
-.avatar-btn:focus-visible {
-  outline: 2px solid var(--accent-primary);
-  outline-offset: 2px;
-}
-
-.top-bar-user .avatar-btn.is-on {
-  color: var(--accent-primary);
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px var(--accent-primary-light);
-}
-
-.btn-sm {
-  height: 32px;
-  font-size: var(--font-size-sm);
-  padding: var(--space-1) var(--space-3);
-  gap: var(--space-1);
-}
-
-/* ── Car Panel (Left) ── */
-.car-panel {
-  position: relative;
-  width: 50%;
-  display: flex;
-  flex-direction: column;
-  background: var(--surface-primary);
-  border-right: 1px solid var(--border-subtle);
-  overflow-y: auto;
-}
-
-.car-panel-viz {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-6);
-  min-height: 0;
-}
-
-.car-panel-gauges {
-  padding: var(--space-4) var(--space-6);
-  border-top: 1px solid var(--border-subtle);
-}
-
-/* ── Car Visualization ── */
-.car-viz {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-4);
-  width: 100%;
-  max-width: 320px;
-  transform: translateY(30px);
-}
-
-/* ── Vehicle Gauges ── */
-
-.gauge-card {
-  flex: 1;
-  padding: var(--space-3);
-  background: var(--surface-secondary);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-subtle);
-}
-
-.gauge-card-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-2);
-}
-
-.gauge-value {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-1);
-  margin-bottom: var(--space-2);
-}
-
-.gauge-number {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
-  line-height: 1;
-}
-
-.gauge-unit {
-  font-size: var(--font-size-xs);
-  color: var(--text-muted);
-}
-
-.gauge-bar-track {
-  height: 4px;
-  background: var(--border-default);
-  border-radius: var(--radius-full);
-  overflow: hidden;
-}
-
-.gauge-bar-fill {
-  height: 100%;
-  border-radius: var(--radius-full);
-  transition: width 0.8s ease, background-color 0.5s ease;
-}
-
-/* ── Map Panel (Right) ── */
-.map-panel {
-  width: 50%;
-  position: relative;
-  background: var(--surface-tertiary);
-}
-
-.map-error,
-.map-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  gap: var(--space-3);
-  color: var(--text-secondary);
-}
-
-.spinner-small {
-  width: 24px;
-  height: 24px;
-  border: 2px solid var(--border-default);
-  border-top-color: var(--accent-primary);
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-}
-
-.map-geo-notice {
-  position: absolute;
-  bottom: var(--space-4);
-  left: 50%;
-  transform: translateX(-50%);
-  padding: var(--space-2) var(--space-4);
-  background: var(--color-warning-light);
-  color: #e67700;
-  font-size: var(--font-size-sm);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-  z-index: 5;
-}
-
-/* ── Map Search ── */
-.map-search {
-  position: absolute;
-  top: var(--space-4);
-  right: 60px;
-  left: auto;
-  width: 100%;
-  max-width: 320px;
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  background: var(--surface-primary);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  padding: 0 var(--space-3);
-  height: 44px;
-}
-
-.map-search-icon {
-  color: var(--text-muted);
-  flex-shrink: 0;
-}
-
-.map-search-input {
-  flex: 1;
-  border: none;
-  outline: none;
-  padding: var(--space-2) var(--space-3);
-  font-family: var(--font-sans);
-  font-size: var(--font-size-base);
-  color: var(--text-primary);
-  background: transparent;
-}
-
-.map-search-clear {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border: none;
-  background: var(--surface-tertiary);
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  color: var(--text-muted);
-  transition: all var(--transition-fast);
-  flex-shrink: 0;
-}
-
-.map-search-clear:hover {
-  background: var(--border-default);
-  color: var(--text-primary);
-}
-
-/* ── Status Bar ── */
-.status-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-2) var(--space-6);
-  background: var(--surface-primary);
-  border-top: 1px solid var(--border-subtle);
-  font-size: var(--font-size-xs);
-  color: var(--text-muted);
-  min-height: 32px;
-}
-
-.status-bar-left,
-.status-bar-right {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-}
-
-.status-indicator {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-}
-
-.status-indicator.connected {
-  color: var(--color-success);
-}
-
-.status-date {
-  color: var(--text-muted);
-}
-
-.status-time {
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-secondary);
-  font-variant-numeric: tabular-nums;
-}
-
 /* ── Animations ── */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@keyframes arrive-from-above {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes arrive-from-below {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
 }
 
 @keyframes spin {
@@ -706,61 +347,11 @@ a:hover {
   }
 }
 
-@keyframes pulse-glow {
-  0%, 100% { opacity: 0.15; }
-  50% { opacity: 0.3; }
-}
-
-@keyframes signal-blink {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; fill: #ff922b; }
-}
-
-/* ── Responsive ── */
-@media (max-width: 768px) {
-  .login-card {
-    padding: var(--space-6);
-  }
-
-  .dashboard-content {
-    flex-direction: column;
-  }
-
-  .car-panel,
-  .map-panel {
-    width: 100%;
-  }
-
-  .car-panel {
-    border-right: none;
-    border-bottom: 1px solid var(--border-subtle);
-    max-height: 50vh;
-  }
-
-  .map-panel {
-    min-height: 50vh;
-  }
-
-  .top-bar {
-    padding: var(--space-2) var(--space-4);
-  }
-
-  .top-bar-greeting {
-    display: none;
-  }
-
-  .vehicle-gauges {
-    flex-direction: column;
-  }
-
-  .status-bar {
-    padding: var(--space-2) var(--space-4);
-  }
-}
+/* ── Login ── */
 .auth-tabs {
   display: flex;
-  gap: var(--space-2);
-  background: var(--surface-secondary);
+  gap: var(--space-1);
+  background: var(--surface-primary);
   border-radius: var(--radius-lg);
   padding: var(--space-1);
   margin-bottom: var(--space-6);
@@ -772,6 +363,7 @@ a:hover {
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
+  min-height: 44px;
   padding: var(--space-2) var(--space-3);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
@@ -784,10 +376,16 @@ a:hover {
   transition: all var(--transition-base);
 }
 
+.auth-tab svg { flex-shrink: 0; }
+
 .auth-tab.active {
-  background: var(--surface-primary);
+  background: var(--surface-hover);
   color: var(--text-primary);
-  box-shadow: var(--shadow-sm);
+}
+
+.auth-tab:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
 }
 
 .auth-tab:hover:not(.active) {
@@ -815,6 +413,7 @@ a:hover {
   color: var(--text-secondary);
 }
 
+/* Inset field; the border shows only on focus */
 .form-input {
   width: 100%;
   padding: var(--space-2) var(--space-3);
@@ -822,10 +421,10 @@ a:hover {
   font-size: var(--font-size-base);
   color: var(--text-primary);
   background: var(--surface-primary);
-  border: 1px solid var(--border-default);
+  border: 1px solid transparent;
   border-radius: var(--radius-md);
-  height: 40px;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  height: 44px;
+  transition: border-color var(--transition-fast);
   outline: none;
 }
 
@@ -833,10 +432,11 @@ a:hover {
   color: var(--text-muted);
 }
 
-.form-input:focus {
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px var(--accent-primary-light);
-}
+.form-input:focus { border-color: var(--accent-primary); }
+
+/* .form-group has no margin, so the form sets the spacing. */
+.auth-form { display: flex; flex-direction: column; gap: var(--space-4); }
+.auth-submit { margin-top: var(--space-2); }
 
 /* ── Auth Error ── */
 .auth-error {
@@ -858,18 +458,19 @@ a:hover {
 .auth-toggle-btn {
   background: none;
   border: none;
-  color: var(--accent-primary);
+  color: var(--text-primary);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
   cursor: pointer;
-  padding: 0;
-  transition: color var(--transition-fast);
+  /* 44px tap area without changing the line */
+  display: inline-block;
+  padding: var(--space-3) var(--space-1);
+  margin: calc(var(--space-3) * -1) 0;
 }
 
-.auth-toggle-btn:hover {
-  color: var(--accent-primary-hover);
-  text-decoration: underline;
-}
+.auth-toggle-btn:hover { color: var(--text-secondary); }
 
 /* ── Auth Footnote ── */
 .auth-footnote {
@@ -897,80 +498,11 @@ a:hover {
   animation: spin 0.6s linear infinite;
 }
 
-/* Spotify widget */
-.spotify-widget {
-  position: absolute;
-  top: var(--space-4);
-  left: var(--space-4);
-  right: var(--space-4);
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  gap: var(--space-5);
-  min-height: 150px;
-  padding: var(--space-6);
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-}
-
-.spotify-disconnected { justify-content: space-between; }
-
-.spotify-art {
-  width: 104px;
-  height: 104px;
-  flex: none;
-  object-fit: cover;
-  border-radius: var(--radius-sm);
-}
-
-.spotify-details {
-  display: flex;
-  flex: 1;
-  min-width: 0;
-  flex-direction: column;
-  line-height: 1.25;
-}
-
-.spotify-label {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: #1db954;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-}
-
-
-.spotify-actions { display: flex; gap: var(--space-2); }
-
-.spotify-actions button,
-.spotify-connect-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-full);
-  background: var(--surface-secondary);
-  color: var(--text-secondary);
-  cursor: pointer;
-}
-
-.spotify-actions button:hover,
-.spotify-connect-btn:hover { color: #1db954; border-color: #1db954; }
-.spotify-connect-btn { padding: 10px 16px; font-size: var(--font-size-sm); white-space: nowrap; }
-.spotify-error { position: absolute; top: 100%; left: 0; right: 0; padding-top: 4px; color: var(--color-error); font-size: var(--font-size-xs); }
-
-/* ═══════════════════════════════════════════════════════════
-   Cockpit shell — rail · nav · content · dock
-   Appended after the original rules so it overrides them; the
-   light-theme selectors above that are no longer referenced by
-   any component simply go unused.
-   ═══════════════════════════════════════════════════════════ */
+/* Cockpit shell: top bar, rail, map, dock */
 
 /* ── Shell grid ── */
 .dashboard {
+  position: relative;
   height: 100vh;
   display: grid;
   grid-template-rows: var(--topbar-height) 1fr var(--dock-height);
@@ -987,15 +519,25 @@ a:hover {
 
 /* ── Top strip ── */
 .top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   height: var(--topbar-height);
   padding: 0 var(--space-4);
   background: var(--surface-sunken);
   border-bottom: 1px solid var(--border-subtle);
-  box-shadow: none;
+  z-index: 10;
+}
+
+.top-bar-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
 }
 
 .top-bar-logo {
   font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
   letter-spacing: -0.01em;
   color: var(--text-primary);
 }
@@ -1009,16 +551,115 @@ a:hover {
 
 .top-bar-greeting strong { color: var(--text-secondary); }
 
-.top-bar-user .avatar {
-  background: var(--surface-tertiary);
-  color: var(--text-secondary);
-  border: 1px solid var(--border-subtle);
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
 }
 
 .weather-badge {
-  background: var(--surface-tertiary);
-  border: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   color: var(--text-secondary);
+}
+
+.top-bar-user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: var(--surface-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: var(--text-muted);
+}
+
+.top-bar-user .avatar {
+  background: var(--surface-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The avatar doubles as the User Settings button */
+.avatar-btn {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.top-bar-user .avatar-btn:hover { border-color: var(--border-strong); }
+
+.avatar-btn:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.top-bar-user .avatar-btn.is-on {
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-primary-light);
+}
+
+/* Top-bar panel tabs */
+.top-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 44px;
+  padding: 0 var(--space-3);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-muted);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.top-nav-btn:hover { color: var(--text-primary); background: var(--surface-hover); }
+
+.top-nav-btn,
+.top-bar-greeting { white-space: nowrap; }
+
+/* Narrow screens: hide the greeting, then the tab labels (the aria-labels
+   stay). */
+@media (max-width: 1000px) {
+  .top-bar-greeting { display: none; }
+}
+
+@media (max-width: 940px) {
+  .top-nav-label { display: none; }
+  .top-nav-btn { width: 44px; padding: 0; justify-content: center; }
+}
+
+.top-nav-btn.is-on { color: var(--text-primary); background: var(--surface-tertiary); }
+
+.top-nav-btn:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
 }
 
 /* ── Left rail ── */
@@ -1027,36 +668,11 @@ a:hover {
   overflow: hidden;
   flex-direction: column;
   min-height: 0;
-  padding: var(--space-4);
-  gap: var(--space-3);
-  background: var(--surface-primary);
-  border-right: 1px solid var(--border-subtle);
+  padding: var(--space-5) var(--space-4) var(--space-4);
+  gap: var(--space-4);
+  background: var(--surface-base);
 }
 
-/* The player now floats over the map; see .dash-media below. */
-
-.car-viz {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* ── Car bodywork ── */
-
-/* The roof is painted metal, not glass — keeping it body-coloured is what
-   separates the windscreen and rear screen into two distinct dark panes
-   instead of one slab running the length of the car. */
-
-@keyframes signal-blink {
-  0%, 49% { opacity: 1; }
-  50%, 100% { opacity: 0.15; }
-}
-
-/* ── Gauge column ──
-   Sits where the section nav used to. The three readings stack rather than
-   flowing into a grid, because at this width a row would clip the numbers. */
 /* ── Content area ── */
 .dash-content {
   position: relative;
@@ -1065,9 +681,7 @@ a:hover {
   background: var(--surface-base);
 }
 
-/* Media player, docked over the bottom-left of the map. An overlay is the
-   right shape here — unlike the rail, the map has room to spare and nothing
-   underneath that the player hides. */
+/* Media player, over the bottom-left of the map */
 .dash-media {
   position: absolute;
   z-index: 6;
@@ -1077,13 +691,12 @@ a:hover {
 }
 
 /* ── Gauges ── */
-/* Two readings side by side at the foot of the rail. minmax(0, ...) rather
-   than a bare 1fr: a plain 1fr track refuses to shrink below its content's
-   min-content width and pushes a scrollbar into the rail instead. */
+/* minmax(0, 1fr): a bare 1fr track won't shrink below its content and overflows
+   the rail. */
 .vehicle-gauges {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-3);
+  gap: var(--space-5);
   flex-shrink: 0;
 }
 
@@ -1091,10 +704,6 @@ a:hover {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  background: var(--surface-elevated);
 }
 
 .gauge-label {
@@ -1105,20 +714,37 @@ a:hover {
   text-transform: uppercase;
 }
 
-.gauge-icon { color: var(--accent-primary); }
+.gauge-value {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+}
 
 .gauge-number {
   color: var(--text-primary);
   font-family: var(--font-mono);
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
+  line-height: 1;
 }
 
-.gauge-unit { color: var(--text-muted); }
+.gauge-unit {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
 
 .gauge-bar-track {
+  height: 4px;
+  overflow: hidden;
   background: var(--surface-sunken);
   border-radius: var(--radius-full);
+}
+
+.gauge-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 0.8s ease, background-color 0.5s ease;
 }
 
 /* ── Dock ── */
@@ -1139,25 +765,7 @@ a:hover {
   flex: 1;
 }
 
-.dock-center { justify-content: center; }
 .dock-right { justify-content: flex-end; }
-
-.dock-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  color: var(--text-primary);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-}
-
-.dock-badge small {
-  color: var(--text-muted);
-  font-family: var(--font-sans);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-regular);
-}
 
 .dock-status {
   display: inline-flex;
@@ -1168,17 +776,18 @@ a:hover {
   font-weight: var(--font-weight-medium);
 }
 
-/* Idle buttons carry a filled face and the brighter secondary text colour,
-   so an off control still reads as a control rather than a loose glyph. */
+/* Icon over a label, no background until hovered or on */
 .dock-btn {
   width: var(--dock-btn-size);
   height: var(--dock-btn-size);
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--border-subtle);
+  gap: var(--space-1);
+  border: 1px solid transparent;
   border-radius: var(--radius-lg);
-  background: var(--surface-primary);
+  background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
   transition: background var(--transition-fast), color var(--transition-fast);
@@ -1194,14 +803,16 @@ a:hover {
   outline-offset: 2px;
 }
 
-.dock-btn.on {
-  background: var(--accent-primary);
-  color: var(--on-accent);
-}
-
 .dock-date {
   color: var(--text-muted);
   font-size: var(--font-size-xs);
+}
+
+.dock-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  color: var(--text-muted);
 }
 
 .dock-time {
@@ -1211,16 +822,9 @@ a:hover {
   font-weight: var(--font-weight-semibold);
 }
 
-/* Centred over the map, matching the geolocation notice at the foot. */
-.map-search {
-  top: var(--space-3);
-  left: 50%;
-  right: auto;
-  transform: translateX(-50%);
-  max-width: 300px;
-}
-
+/* ── Map ── */
 .map-panel {
+  position: relative;
   width: 100%;
   height: 100%;
   border-radius: 0;
@@ -1228,59 +832,375 @@ a:hover {
   background: var(--surface-base);
 }
 
-.map-search {
-  background: var(--surface-primary);
-  border: 1px solid var(--border-default);
-  box-shadow: var(--shadow-lg);
-}
-
-.map-search input,
-.map-search-input {
-  background: transparent;
-  color: var(--text-primary);
-}
-
-.map-search input::placeholder,
-.map-search-input::placeholder { color: var(--text-muted); }
-
 .map-loading,
 .map-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: var(--space-3);
   color: var(--text-muted);
   background: var(--surface-base);
 }
 
+.spinner-small {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border-default);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+/* Below the search bar (12px + 44px + 8px) and no wider than it, so it clears
+   the route panel. */
 .map-geo-notice {
-  background: var(--color-warning-light);
-  border: 1px solid var(--color-warning);
+  position: absolute;
+  top: calc(var(--space-3) + 44px + var(--space-2));
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: min(var(--map-search-width), calc(100% - var(--space-8)));
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 5;
+}
+
+.map-geo-notice-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
   color: var(--color-warning);
 }
 
-/* ── Media card in the rail ──
-   The original widget floated over the car panel (position: absolute, white
-   fill). In the rail it is a normal block at the foot of the column. */
-/* Floats over the map, so unlike the rail version it needs elevation and an
-   opaque ground — map detail showing through would make the title unreadable. */
-.spotify-widget {
-  position: static;
-  z-index: auto;
-  min-height: 0;
-  gap: var(--space-3);
-  padding: var(--space-3);
-  background: var(--surface-primary);
-  border: 1px solid var(--border-default);
+/* Centred over the map */
+.map-search {
+  position: absolute;
+  top: var(--space-3);
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: var(--map-search-width);
+  height: 44px;
+  padding: 0 var(--space-3);
+  background: var(--surface-secondary);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+/* The input has no outline, so the bar shows focus */
+.map-search:focus-within {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.map-search-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.map-search-input {
+  flex: 1;
+  width: 100%;
+  height: 44px;
+  border: none;
+  outline: none;
+  padding: 0 var(--space-3);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  background: transparent;
+}
+
+.map-search-input::placeholder { color: var(--text-muted); }
+
+.map-search-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: var(--surface-tertiary);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.map-search-clear:hover {
+  background: var(--border-default);
+  color: var(--text-primary);
+}
+
+/* Route planner overlays: options panel, routing status, summary pill */
+.route-options {
+  position: absolute;
+  top: 76px;
+  left: var(--space-5);
+  z-index: 10;
+  width: min(320px, calc(100% - 40px));
+  max-height: calc(100% - 190px);
+  overflow-y: auto;
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+}
+
+.route-options-head {
+  padding: var(--space-4) 18px var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.route-options-title { font-size: 1rem; }
+
+.route-options-dest {
+  margin-top: var(--space-1);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.route-option {
+  display: block;
+  width: 100%;
+  padding: 14px 18px;
+  text-align: left;
+  color: var(--text-primary);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--border-subtle);
+  cursor: pointer;
+}
+
+/* Selected route: raised background, time in the route colour */
+.route-option[aria-pressed="true"] { background: var(--surface-tertiary); }
+.route-option[aria-pressed="true"] .route-option-summary strong { color: var(--accent-primary); }
+
+/* Disabled once the trip is confirmed or running */
+.route-option:disabled {
+  cursor: default;
+  opacity: 0.8;
+}
+
+.route-option-summary {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.route-option-why {
+  display: block;
+  margin-top: 6px;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.route-option-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: var(--space-2);
+}
+
+.route-option-tag {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.route-option-tag.eco { color: var(--accent-primary); }
+.route-option-tag.risk { color: var(--color-warning); }
+
+.route-stops {
+  padding: var(--space-3) 18px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.route-stops-title {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-size: 0.82rem;
+}
+
+/* Suggested rows have their own top border */
+.route-stops.suggested .route-stops-title { margin-bottom: 6px; }
+
+.route-stop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 0;
+}
+
+.route-stops.suggested .route-stop {
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.route-stop-info {
+  min-width: 0;
+  font-size: 0.78rem;
+}
+
+.route-stops:not(.suggested) .route-stop-info {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+}
+
+.route-stop-name {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.route-stop-meta {
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+}
+
+.route-stop-remove,
+.route-stop-add {
+  background: transparent;
+  color: var(--accent-primary);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.route-stop-remove {
+  border: 0;
+  font-size: 0.75rem;
+}
+
+.route-stop-add {
+  border: 0;
+  border-radius: var(--radius-full);
+  padding: 6px var(--space-3);
+  font-size: 0.72rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  background: var(--surface-hover);
+}
+
+.route-status {
+  position: absolute;
+  top: 76px;
+  left: var(--space-5);
+  z-index: 10;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Bottom-right, clear of Google's zoom controls */
+.route-summary {
+  position: absolute;
+  bottom: var(--space-4);
+  right: var(--space-16);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-6);
+  border-radius: var(--radius-xl);
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+  box-shadow: var(--shadow-lg);
+}
+
+.route-summary-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.route-summary-icon { color: var(--text-muted); }
+
+.route-drive-btn {
+  margin-left: var(--space-4);
+  padding: 10px 18px;
+  border-radius: var(--radius-lg);
+  background: var(--accent-primary);
+  color: var(--on-accent);
+  font: inherit;
+  font-weight: var(--font-weight-semibold);
+  border: none;
+  cursor: pointer;
+}
+
+/* Disabled while the trip is being confirmed */
+.route-drive-btn:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.route-cancel-btn {
+  margin-left: -12px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--surface-hover);
+  color: var(--text-secondary);
+  border: 0;
+  cursor: pointer;
+}
+
+/* Media player. Opaque so map labels don't show through; progress and volume
+   wrap to a second row. */
+.spotify-widget {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  row-gap: var(--space-2);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  background: var(--surface-secondary);
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
   color: var(--text-secondary);
 }
 
+.spotify-disconnected { justify-content: space-between; }
+
 .spotify-art {
   width: 56px;
   height: 56px;
-  flex-shrink: 0;
+  flex: none;
+  object-fit: cover;
   border-radius: var(--radius-sm);
 }
 
-.spotify-details { min-width: 0; }
+.spotify-details {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  line-height: 1.25;
+}
 
 .spotify-details strong,
 .spotify-details > span:last-child {
@@ -1301,24 +1221,56 @@ a:hover {
 }
 
 .spotify-label {
-  font-size: var(--font-size-xs);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
   color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
 }
+
+.spotify-actions { display: flex; gap: var(--space-2); }
 
 .spotify-actions button,
 .spotify-connect-btn {
-  background: var(--surface-tertiary);
-  border: 1px solid var(--border-subtle);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  background: transparent;
   color: var(--text-secondary);
+  cursor: pointer;
 }
 
-.spotify-actions button { width: 34px; height: 34px; }
+.spotify-connect-btn {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+  font: inherit;
+  font-weight: var(--font-weight-medium);
+}
 
-.spotify-error { position: static; padding-top: var(--space-1); }
+.spotify-actions button:hover,
+.spotify-connect-btn:hover { color: #1db954; border-color: #1db954; }
 
-/* Second row: position, then volume. The top row keeps the title its width;
-   two more buttons up there would squeeze it down to a few letters. */
-.spotify-widget { flex-wrap: wrap; row-gap: var(--space-2); }
+.spotify-actions button { width: 44px; height: 44px; }
+
+.spotify-connect-btn { min-height: 44px; padding: 0 var(--space-4); font-size: var(--font-size-sm); white-space: nowrap; }
+
+.spotify-actions button:hover { background: var(--surface-hover); }
+
+.spotify-error {
+  padding-top: var(--space-1);
+  color: var(--color-error);
+  font-size: var(--font-size-xs);
+}
+
+/* ── Narrow screens ── */
+@media (max-width: 768px) {
+  .login-card { padding: var(--space-6); }
+  .map-panel { min-height: 50vh; }
+  .top-bar-greeting { display: none; }
+}
 
 .spotify-progress {
   display: flex;
@@ -1337,8 +1289,7 @@ a:hover {
   text-align: center;
 }
 
-/* The bar: a thin track filled to --progress, with a thumb that only shows
-   when the driver reaches for it. */
+/* Seek bar: track filled to --progress, thumb shown on hover and focus */
 .spotify-seek {
   flex: 1;
   min-width: 0;
@@ -1355,21 +1306,21 @@ a:hover {
   border-radius: var(--radius-full);
   background: linear-gradient(
     to right,
-    var(--accent-primary) var(--progress),
-    var(--border-default) var(--progress)
+    var(--text-primary) var(--progress),
+    var(--surface-hover) var(--progress)
   );
 }
 
 .spotify-seek::-moz-range-track {
   height: 4px;
   border-radius: var(--radius-full);
-  background: var(--border-default);
+  background: var(--surface-hover);
 }
 
 .spotify-seek::-moz-range-progress {
   height: 4px;
   border-radius: var(--radius-full);
-  background: var(--accent-primary);
+  background: var(--text-primary);
 }
 
 .spotify-seek::-webkit-slider-thumb {
@@ -1411,9 +1362,7 @@ a:hover {
   flex-shrink: 0;
   align-items: center;
   gap: var(--space-1);
-  margin-left: var(--space-2);
-  padding-left: var(--space-3);
-  border-left: 1px solid var(--border-subtle);
+  margin-left: var(--space-3);
 }
 
 .spotify-volume button {
@@ -1424,8 +1373,8 @@ a:hover {
   height: 28px;
   padding: 0;
   color: var(--text-secondary);
-  background: var(--surface-tertiary);
-  border: 1px solid var(--border-subtle);
+  background: var(--surface-hover);
+  border: 1px solid transparent;
   border-radius: var(--radius-full);
   cursor: pointer;
 }
@@ -1448,34 +1397,39 @@ a:hover {
   text-align: center;
 }
 
-/* ── Narrow screens ──
-   The dock's full-size controls need about 1160px. Below that it gives way in
-   order of what a driver can spare: the date and connection status first,
-   then button size, then the speed badge (the rail shows speed too). Each
-   step is sized so the strip never grows wider than the window — if it does,
-   the whole cockpit grid stretches with it and slides off the left edge. */
+/* Narrow screens: hide the date and status, then shrink the dock buttons, then
+   hide the left section. The dock must never be wider than the window, or the
+   whole grid overflows. */
 @media (max-width: 1320px) {
   .dock-date,
   .dock-status { display: none; }
-  .dock-group { padding-right: var(--space-2); }
-  .dock-center { gap: var(--space-2); }
+  .dock-center { gap: var(--space-5); }
 }
 
 @media (max-width: 1200px) {
-  :root { --dock-btn-size: 46px; }
-  .dock-group { gap: var(--space-1); }
-  .dock-seat { width: 52px; }
+  :root { --dock-btn-size: 54px; }
+  .dock-center { gap: var(--space-4); }
 }
 
 @media (max-width: 1100px) {
   :root { --rail-width: 248px; }
+  /* Narrower map: shrink the media card and route summary so they fit side by
+     side, and start the route panel below the location notice. */
+  .dash-media { width: min(280px, calc(100% - var(--space-8))); }
+  .route-summary { gap: var(--space-3); padding-left: var(--space-4); }
+  .route-summary-icon { display: none; }
+  .route-drive-btn { margin-left: var(--space-1); padding: var(--space-2) var(--space-3); }
+  .route-options,
+  .route-status { top: 128px; }
+  .route-options { max-height: calc(100% - 242px); }
+  /* Hide track skipping so the title has room */
+  .spotify-actions button[aria-label$="track"] { display: none; }
 }
 
 @media (max-width: 1000px) {
-  :root { --dock-btn-size: 42px; }
+  :root { --dock-btn-size: 50px; }
   .dock-left { display: none; }
-  .dock-seat { width: 46px; }
-  .dock-btn.ac { width: 46px; }
+  .dock-center { gap: var(--space-3); }
   .dock-temp { min-width: 70px; }
 }
 
@@ -1498,8 +1452,7 @@ a:hover {
     width: 160px;
     flex-shrink: 0;
   }
-  /* Full width at the foot of the map rather than a floating card, which at
-     this width would cover most of it. */
+  /* Full-width bar along the bottom of the map */
   .dash-media {
     left: var(--space-3);
     right: var(--space-3);
@@ -1509,25 +1462,19 @@ a:hover {
   .dock-left .dock-status { display: none; }
 }
 
-/* ── Vehicle illustration (imported 3/4 view) ── */
+/* Vehicle illustration */
 .car-viz {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: var(--space-2);
+  gap: var(--space-3);
+  width: 100%;
   overflow: hidden;
-  /* The original rule nudged this block down 30px to sit over the old car
-     panel. In the rail that offset pushes the indicator lamps onto the media
-     card, so it is cleared here. */
-  transform: none;
-  max-width: none;
 }
 
-/* The car stands on the street scene rather than on flat panel fill. The
-   artwork is 4:3 and the rail is not, so it is cropped around the centre,
-   biased downward to hold the asphalt — not the verge — under the wheels. */
+/* Street scene behind the car. The art is 4:3, so it is cropped, biased down to
+   keep the road under the wheels. */
 .car-viz-stage {
   position: relative;
   flex: 1;
@@ -1537,7 +1484,6 @@ a:hover {
   justify-content: center;
   overflow: hidden;
   padding: var(--space-3);
-  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   background-color: var(--surface-sunken);
   background-image: url("./assets/street-bg.svg");
@@ -1551,8 +1497,7 @@ a:hover {
   background-image: url("./assets/street-bg-light.svg");
 }
 
-/* Darkens the crop toward the frame so the scene fades into the card edge
-   instead of ending on a hard rectangle. */
+/* Vignette toward the edges */
 .car-viz-stage::after {
   content: "";
   position: absolute;
@@ -1574,7 +1519,7 @@ a:hover {
   filter: drop-shadow(0 10px 14px var(--stage-drop));
 }
 
-/* Contact shadow — without it the car reads as pasted over the asphalt */
+/* Contact shadow under the car */
 .car-shadow {
   position: absolute;
   z-index: 1;
@@ -1591,8 +1536,7 @@ a:hover {
   );
 }
 
-/* Pool of light under the nose. Its opacity is set inline from the
-   headlight brightness preference, or dimly for daytime running lights. */
+/* Headlight pool; opacity is set inline from the brightness setting */
 .car-glow {
   position: absolute;
   z-index: 1;
@@ -1604,7 +1548,7 @@ a:hover {
   border-radius: 50%;
   background: radial-gradient(
     ellipse at center,
-    var(--accent-primary-glow) 0%,
+    var(--stage-headlight) 0%,
     transparent 68%
   );
   opacity: 0;
@@ -1615,16 +1559,18 @@ a:hover {
 .car-readout {
   display: flex;
   align-items: baseline;
-  justify-content: center;
   gap: var(--space-2);
 }
 
+/* Tabular figures so the speed doesn't jitter */
 .car-speed-num {
-  font-family: var(--font-mono);
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-display);
+  font-weight: var(--font-weight-light);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
   color: var(--text-primary);
-  line-height: 1;
+  line-height: 0.9;
 }
 
 .car-speed-label {
@@ -1635,32 +1581,29 @@ a:hover {
   color: var(--text-muted);
 }
 
+/* Telltales: faint when off, coloured when on */
 .car-lamps {
   display: flex;
-  justify-content: center;
-  gap: var(--space-2);
+  gap: var(--space-1);
 }
 
 .car-lamp {
-  width: 38px;
-  height: 30px;
+  position: relative;
+  width: 34px;
+  height: 28px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  background: var(--surface-sunken);
+  background: transparent;
   color: var(--text-muted);
   transition: background var(--transition-fast), color var(--transition-fast);
 }
 
 .car-lamp.on {
   background: var(--accent-primary-light);
-  border-color: var(--accent-primary);
   color: var(--accent-primary);
 }
-
-.car-lamp { position: relative; }
 
 .car-lamp-auto {
   position: absolute;
@@ -1672,23 +1615,20 @@ a:hover {
   line-height: 1;
 }
 
-/* Fog lamps are telltales that only appear while lit. Green for the front
-   and amber for the rear, the colours the real warning lights use. */
+/* Fog telltales only show while lit: green front, amber rear, as on real
+   warning lights. */
 .car-lamp.fog {
   background: var(--color-success-light);
-  border-color: var(--color-success);
   color: var(--color-success);
 }
 
 .car-lamp.fog.rear {
   background: var(--color-warning-light);
-  border-color: var(--color-warning);
   color: var(--color-warning);
 }
 
 .car-lamp.blink {
   background: var(--color-warning-light);
-  border-color: var(--color-warning);
   color: var(--color-warning);
   animation: signal-blink 1000ms steps(1, end) infinite;
 }
@@ -1700,30 +1640,14 @@ a:hover {
   }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   Climate card
-   A control rather than a readout, so it carries more height
-   than the fuel and engine tiles above it. Every hit target
-   is 44px, which is also why the +/- pairs are buttons rather
-   than a slider — a 4px-wide thumb is not a driving control.
-   ═══════════════════════════════════════════════════════════ */
-.climate-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4) var(--space-4);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  background: var(--surface-elevated);
-}
-
+/* Climate pop-up, opened from the dock temperature */
 .climate-head {
   display: flex;
   align-items: center;
   gap: var(--space-2);
 }
 
-.climate-head-icon { color: var(--accent-primary); flex-shrink: 0; }
+.climate-head-icon { color: var(--text-muted); flex-shrink: 0; }
 
 .climate-head-title {
   flex: 1;
@@ -1736,36 +1660,27 @@ a:hover {
 }
 
 .climate-auto {
-  padding: var(--space-1) var(--space-2);
-  min-height: 26px;
+  padding: var(--space-1) var(--space-3);
+  min-width: 56px;
+  min-height: 44px;
   font-family: var(--font-sans);
   font-size: 10px;
   font-weight: var(--font-weight-semibold);
   letter-spacing: 0.8px;
   text-transform: uppercase;
-  color: var(--text-muted);
-  background: transparent;
-  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  background: var(--surface-hover);
+  border: 0;
   border-radius: var(--radius-full);
   cursor: pointer;
-  transition: color var(--transition-fast), border-color var(--transition-fast),
-    background-color var(--transition-fast);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
 }
 
-.climate-auto:hover { color: var(--text-secondary); border-color: var(--border-strong); }
+.climate-auto:hover { color: var(--text-primary); }
 
 .climate-auto.on {
-  color: var(--on-accent);
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-}
-
-/* ── Target temperature ── */
-.climate-target {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
+  color: var(--surface-base);
+  background: var(--text-primary);
 }
 
 .climate-step {
@@ -1776,47 +1691,16 @@ a:hover {
   height: 44px;
   flex-shrink: 0;
   color: var(--text-secondary);
-  background: var(--surface-secondary);
-  border: 1px solid var(--border-default);
+  background: var(--surface-hover);
+  border: 0;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: color var(--transition-fast), border-color var(--transition-fast),
-    background-color var(--transition-fast);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
 }
 
-.climate-step:hover {
-  color: var(--accent-primary);
-  border-color: var(--accent-primary);
-  background: var(--surface-hover);
-}
+.climate-step:hover { color: var(--text-primary); background: var(--border-default); }
 
-.climate-step:active { background: var(--accent-primary-light); }
 
-.climate-step-sm { width: 40px; height: 40px; }
-
-.climate-reading {
-  margin: 0;
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 1px;
-  flex: 1;
-  min-width: 0;
-}
-
-.climate-reading-value {
-  font-family: var(--font-mono);
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  line-height: 1;
-  color: var(--text-primary);
-  font-variant-numeric: tabular-nums;
-}
-
-.climate-reading-unit {
-  font-size: var(--font-size-sm);
-  color: var(--text-muted);
-}
 
 .climate-cabin {
   margin: calc(var(--space-2) * -1) 0 0;
@@ -1867,13 +1751,12 @@ a:hover {
   min-width: 0;
 }
 
-/* Bars step up in height as well as colour, so fan level survives being read
-   by someone who cannot separate the two blues. */
+/* Bar heights step up too, so the level doesn't rely on colour alone */
 .climate-fan-bar {
   flex: 1;
   min-width: 0;
   border-radius: 2px;
-  background: var(--border-default);
+  background: var(--surface-hover);
   transition: background-color var(--transition-base);
 }
 
@@ -1883,101 +1766,57 @@ a:hover {
 .climate-fan-bar:nth-child(4) { height: 85%; }
 .climate-fan-bar:nth-child(5) { height: 100%; }
 
-.climate-fan-bar.on { background: var(--accent-primary); }
-
-/* ── A/C ── */
-.climate-ac {
-  min-height: 44px;
-  font-family: var(--font-sans);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--text-secondary);
-  background: var(--surface-secondary);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: color var(--transition-fast), border-color var(--transition-fast),
-    background-color var(--transition-fast);
-}
-
-.climate-ac:hover { color: var(--text-primary); border-color: var(--border-strong); }
-
-.climate-ac.on {
-  color: var(--accent-primary);
-  background: var(--accent-primary-light);
-  border-color: var(--accent-primary);
-}
+.climate-fan-bar.on { background: var(--text-primary); }
 
 /* ── Day/night toggle ── */
 .theme-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   flex-shrink: 0;
   color: var(--text-muted);
   background: transparent;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-full);
+  border: 0;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: color var(--transition-fast), border-color var(--transition-fast),
-    background-color var(--transition-fast);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
 }
 
 .theme-toggle:hover {
-  color: var(--accent-primary);
-  border-color: var(--accent-primary);
-  background: var(--accent-primary-light);
+  color: var(--text-primary);
+  background: var(--surface-hover);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   Dock controls
-   Grouped rather than an undifferentiated row of icons: lights
-   and signals, then comfort, then temperature. The separators
-   are what let a driver find a control by position instead of
-   reading every glyph.
-   ═══════════════════════════════════════════════════════════ */
+/* Dock controls, grouped: lights and signals, visibility, comfort, temperature */
 .dock-group {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  padding-right: var(--space-3);
-  border-right: 1px solid var(--border-subtle);
+  gap: var(--space-1);
 }
 
-.dock-center { gap: var(--space-3); }
+.dock-center {
+  justify-content: center;
+  gap: var(--space-6);
+}
 
+/* On: solid face in the text colour */
 .dock-btn.on {
-  background: var(--accent-primary-light);
-  color: var(--accent-primary);
-  border-color: var(--accent-primary);
+  background: var(--text-primary);
+  color: var(--surface-base);
 }
 
-/* Hazards go red rather than the accent or the amber warning colour: it is
-   the one control here that means "something is wrong", and red is the colour
-   moulded into the button on a real dashboard. */
+.dock-btn.on .dock-label { color: inherit; }
+
+/* Hazards use the error colour */
 .dock-btn.alert {
   background: var(--color-error-light);
   color: var(--color-error);
-  border-color: var(--color-error);
   animation: signal-blink 700ms steps(1, end) infinite;
 }
 
-/* A small letter in the corner of a dock button — "A" while the headlights
-   are on automatic */
-.dock-btn.has-badge { position: relative; }
-
-.dock-level {
-  position: absolute;
-  right: 6px;
-  bottom: 4px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: var(--font-weight-bold);
-  line-height: 1;
-  color: var(--accent-primary);
-}
+.dock-btn.alert .dock-label { color: inherit; }
 
 /* ── Temperature ── */
 .dock-climate {
@@ -2008,10 +1847,11 @@ a:hover {
 .dock-temp:hover { background: var(--surface-hover); }
 
 .dock-temp.open {
-  background: var(--accent-primary-light);
-  border-color: var(--accent-primary);
-  color: var(--accent-primary);
+  background: var(--text-primary);
+  color: var(--surface-base);
 }
+
+.dock-temp.open span { color: inherit; }
 
 .dock-temp:focus-visible {
   outline: 2px solid var(--accent-primary);
@@ -2019,22 +1859,21 @@ a:hover {
 }
 
 /* ── Climate panel ── */
+/* Right-aligned to the temperature control so it stays on screen */
 .climate-panel {
   position: absolute;
   z-index: 20;
   bottom: calc(100% + var(--space-3));
-  left: 50%;
-  transform: translateX(-50%);
+  right: 0;
   width: 260px;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4) var(--space-4);
-  background: var(--surface-elevated);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
+  background: var(--surface-secondary);
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xl);
-  animation: fadeInUp 160ms ease forwards;
+  animation: arrive-from-below var(--motion-arrive);
 }
 
 .climate-panel .climate-cabin { margin: 0; text-align: center; }
@@ -2046,16 +1885,15 @@ a:hover {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  width: 60px;
+  width: var(--dock-btn-size);
   height: var(--dock-btn-size);
   padding: 0;
   color: var(--text-secondary);
-  background: var(--surface-primary);
-  border: 1px solid var(--border-subtle);
+  background: transparent;
+  border: 1px solid transparent;
   border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast),
-    border-color var(--transition-fast);
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
 
 .dock-seat:hover { background: var(--surface-hover); color: var(--text-primary); }
@@ -2068,58 +1906,33 @@ a:hover {
 .dock-seat.on {
   color: var(--color-heat);
   background: var(--color-warning-light);
-  border-color: var(--color-heat);
 }
 
-.dock-seat-flames {
+/* Level meter for seat heat and A/C: segments use the button's colour; unlit
+   ones stay faint. */
+.level-meter {
   display: flex;
-  align-items: center;
-  gap: 2px;
+  gap: 3px;
   height: 12px;
+  align-items: center;
 }
 
-/* Unlit flames stay visible so the control always shows it has three steps,
-   rather than appearing to be a plain toggle until you press it. */
-.dock-seat-flames svg {
-  opacity: 0.28;
-  transition: opacity var(--transition-fast), color var(--transition-fast);
-}
-
-.dock-seat-flames svg.lit {
-  opacity: 1;
-  color: var(--color-heat);
-}
-
-/* ── A/C intensity ── */
-.dock-btn.ac {
-  position: relative;
-  width: 56px;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.dock-ac-bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 2px;
-  height: 10px;
-}
-
-.dock-ac-bars span {
-  width: 6px;
-  border-radius: 1px;
+.level-meter span {
+  width: 9px;
+  height: 4px;
+  border-radius: var(--radius-full);
   background: currentColor;
   opacity: 0.25;
   transition: opacity var(--transition-fast);
 }
 
-.dock-ac-bars span:nth-child(1) { height: 5px; }
-.dock-ac-bars span:nth-child(2) { height: 7px; }
-.dock-ac-bars span:nth-child(3) { height: 10px; }
-.dock-ac-bars span.lit { opacity: 1; }
+.level-meter span.lit { opacity: 1; }
 
-/* Wipers sweep while they are running — a static highlight would not say
-   whether they are on or merely selected. */
+/* ── A/C intensity ── */
+.dock-btn.ac { position: relative; }
+
+
+/* The wiper arm moves while the wipers run */
 .wiper-arm {
   transform-origin: 6.5px 18px;
   transform-box: fill-box;
@@ -2138,41 +1951,37 @@ a:hover {
   50% { transform: rotate(38deg); }
 }
 
-/* ── Assistant ──
-   Hangs from the top-right of the map. It is opened from the top bar, not from
-   a floating button: as a round control in the bottom-right corner it sat on
-   top of Google's zoom buttons and ate the clicks meant for them.
-
-   The top offset clears the search bar — 44px tall at var(--space-3) — so the
-   two never collide, whatever the window width. Anchoring by the centred
-   search's horizontal position would only hold on a wide screen. */
+/* Assistant panel, top-right of the map below the search bar */
 .assistant-panel {
   position: absolute;
   z-index: 6;
   right: var(--space-4);
   top: calc(var(--space-3) * 2 + 44px);
   width: min(360px, calc(100% - var(--space-8)));
-  /* Capped rather than fixed: the log grows with the conversation but must
-     stop short of Google's attribution strip along the foot of the map. */
+  /* Capped to stop above Google's attribution strip */
   max-height: min(420px, calc(100% - var(--space-3) * 2 - 44px - var(--space-8)));
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  background: var(--surface-primary);
+  border-radius: var(--radius-xl);
+  background: var(--surface-secondary);
+  box-shadow: var(--shadow-xl);
   overflow: hidden;
+  animation: arrive-from-above var(--motion-arrive);
 }
+
+.assistant-panel:focus,
+.prefs-panel:focus { outline: none; }
 
 .assistant-head {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-3);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--border-subtle);
   flex-shrink: 0;
 }
 
-.assistant-head-icon { color: var(--accent-primary); flex-shrink: 0; }
+.assistant-head-icon { color: var(--text-muted); flex-shrink: 0; }
 
 .assistant-head-title {
   flex: 1;
@@ -2185,22 +1994,25 @@ a:hover {
 .assistant-close {
   display: grid;
   place-items: center;
+  width: 44px;
+  height: 44px;
   border: 0;
+  border-radius: var(--radius-md);
   background: none;
   color: var(--text-muted);
   cursor: pointer;
 }
 
-.assistant-close:hover { color: var(--text-secondary); }
+.assistant-close:hover { color: var(--text-primary); background: var(--surface-hover); }
 
 .assistant-log {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: var(--space-3);
+  padding: var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 
 .assistant-hint {
@@ -2219,15 +2031,16 @@ a:hover {
   max-width: 85%;
 }
 
+/* User messages in a bubble, replies as plain text */
 .assistant-line-user {
   align-self: flex-end;
-  background: var(--accent-primary);
-  color: var(--surface-base);
+  background: var(--surface-hover);
+  color: var(--text-primary);
 }
 
 .assistant-line-assistant {
   align-self: flex-start;
-  background: var(--surface-tertiary);
+  padding-inline: 0;
   color: var(--text-primary);
 }
 
@@ -2247,11 +2060,13 @@ a:hover {
 .assistant-input input {
   flex: 1;
   min-width: 0;
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--border-subtle);
+  height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid transparent;
   border-radius: var(--radius-md);
-  background: var(--surface-sunken);
+  background: var(--surface-primary);
   color: var(--text-primary);
+  font: inherit;
   font-size: var(--font-size-sm);
 }
 
@@ -2263,50 +2078,44 @@ a:hover {
 .assistant-input button {
   display: grid;
   place-items: center;
-  width: 36px;
-  border: 1px solid var(--border-subtle);
+  width: 44px;
+  border: 0;
   border-radius: var(--radius-md);
-  background: var(--surface-tertiary);
-  color: var(--accent-primary);
+  background: var(--text-primary);
+  color: var(--surface-base);
   cursor: pointer;
 }
 
-.assistant-input button:disabled { opacity: 0.45; cursor: default; }
-.assistant-input button:not(:disabled):hover { border-color: var(--border-strong); }
+.assistant-input button:disabled { opacity: 0.35; cursor: default; }
+.assistant-input button:not(:disabled):hover { background: var(--text-secondary); }
 
-/* Push-to-talk. Hidden entirely where the Web Speech API is missing, so the
-   row collapses to input + send rather than showing a dead control. */
-.assistant-mic {
+/* Push-to-talk; hidden where the Web Speech API is unavailable */
+.assistant-input .assistant-mic {
   display: grid;
   place-items: center;
-  width: 36px;
+  width: 44px;
   flex-shrink: 0;
-  border: 1px solid var(--border-subtle);
+  border: 0;
   border-radius: var(--radius-md);
-  background: var(--surface-tertiary);
+  background: var(--surface-hover);
   color: var(--text-secondary);
   cursor: pointer;
 }
 
-.assistant-mic:disabled { opacity: 0.45; cursor: default; }
-.assistant-mic:not(:disabled):hover { border-color: var(--border-strong); }
+.assistant-input .assistant-mic:disabled { opacity: 0.35; cursor: default; }
+.assistant-input .assistant-mic:not(:disabled):hover { color: var(--text-primary); background: var(--border-default); }
 
-.assistant-mic.on {
+.assistant-input .assistant-mic.on {
   color: var(--accent-primary);
-  border-color: var(--accent-primary);
+  background: var(--accent-primary-light);
   animation: assistant-listening 1.2s ease-in-out infinite;
 }
 
 /* ── Compact in-car call UI ── */
-.dashboard { position: relative; }
-
-/* The call dialog is fixed to the viewport by its own backdrop, so the
-   wrapper needs no position of its own. Starting a call happens in the Call
-   panel below. */
+/* The call dialog is position: fixed, so this wrapper needs no box of its own. */
 .call-session { display: contents; }
 
-/* ── Call panel ──
-   The Vehicle Preferences shell (.prefs-panel), sized to its one form. */
+/* Call panel (uses the .prefs-panel shell) */
 .call-panel {
   width: min(400px, calc(100% - var(--space-8)));
   bottom: auto;
@@ -2335,12 +2144,12 @@ a:hover {
 .call-launcher-input {
   flex: 1;
   min-width: 0;
-  height: 40px;
+  height: 44px;
   padding: 0 var(--space-3);
-  border: 1px solid var(--border-default);
+  border: 1px solid transparent;
   border-radius: var(--radius-md);
   color: var(--text-primary);
-  background: var(--surface-sunken);
+  background: var(--surface-primary);
   outline: none;
   font: inherit;
 }
@@ -2351,19 +2160,19 @@ a:hover {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  height: 40px;
+  height: 44px;
   padding: 0 var(--space-4);
   border: 0;
   border-radius: var(--radius-md);
-  color: var(--on-accent);
-  background: var(--accent-primary);
+  color: var(--surface-base);
+  background: var(--text-primary);
   cursor: pointer;
   font: inherit;
   font-weight: var(--font-weight-semibold);
   white-space: nowrap;
 }
 
-.call-launcher-button:hover:not(:disabled) { background: var(--accent-primary-hover); }
+.call-launcher-button:hover:not(:disabled) { background: var(--text-secondary); }
 .call-launcher-button:disabled { cursor: wait; opacity: 0.7; }
 
 .call-launcher-message {
@@ -2391,17 +2200,16 @@ a:hover {
   width: min(540px, calc(100vw - 2 * var(--space-6)));
   min-height: 88px;
   padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--border-default);
   border-radius: var(--radius-xl);
   color: var(--text-primary);
-  background: rgba(20, 30, 40, 0.96);
-  box-shadow: var(--shadow-xl), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  background: var(--surface-secondary);
+  box-shadow: var(--shadow-xl);
   pointer-events: auto;
-  animation: call-card-in 180ms ease-out;
+  animation: arrive-from-below var(--motion-arrive);
 }
 
 .call-modal-info { display: flex; align-items: center; gap: var(--space-3); min-width: 0; flex: 1; }
-.call-modal-icon { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; border: 1px solid rgba(136, 189, 242, 0.35); border-radius: var(--radius-full); color: var(--accent-primary); background: rgba(136, 189, 242, 0.14); }
+.call-modal-icon { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; border-radius: var(--radius-full); color: var(--accent-primary); background: var(--accent-primary-light); }
 .call-modal-copy { display: flex; min-width: 0; flex-direction: column; gap: 2px; }
 .call-modal-label { color: var(--accent-primary); font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); letter-spacing: 0.04em; text-transform: uppercase; }
 .call-modal-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--font-size-lg); }
@@ -2414,7 +2222,6 @@ a:hover {
 .call-action-decline { background: #e55353; }
 .call-modal-hint { position: absolute; top: calc(100% + var(--space-1)); left: 50%; transform: translateX(-50%); white-space: nowrap; }
 
-@keyframes call-card-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
 @media (max-width: 560px) {
   .call-modal-card { gap: var(--space-3); padding: var(--space-3); }
@@ -2424,4 +2231,16 @@ a:hover {
 @keyframes assistant-listening {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.55; }
+}
+
+/* Reduced motion: no panel entrances, no pulsing */
+@media (prefers-reduced-motion: reduce) {
+  .login-card,
+  .assistant-panel,
+  .prefs-panel,
+  .climate-panel,
+  .call-modal-card,
+  .animate-fade-in,
+  .dock-btn.alert,
+  .assistant-input .assistant-mic.on { animation: none; }
 }

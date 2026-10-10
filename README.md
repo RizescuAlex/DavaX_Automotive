@@ -37,7 +37,7 @@ common reason the project fails to start on a new machine.
 | File | Required? | How to get it |
 | --- | --- | --- |
 | `.env` | **Yes** | `cp .env.example .env` |
-| `frontend/.env.local` | No | Only for design-preview mode, below |
+| `.env.local` | No | Only for design-preview mode, below |
 
 ## Optional integrations
 
@@ -48,22 +48,30 @@ Compose reads `env_file` at container creation, so a reload is not enough.
 | Feature | Variables | Notes |
 | --- | --- | --- |
 | Google sign-in | `FIREBASE_PROJECT_ID`, `VITE_FIREBASE_*` | Add your host under Firebase Console → Authentication → Settings → Authorized domains |
-| Assistant | `GEMINI_API_KEY` | Backend-side only, deliberately no `VITE_` twin |
+| Assistant | `OPENAI_API_KEY` | Backend-side only, deliberately no `VITE_` twin |
 | Maps | `VITE_GOOGLE_MAPS_API_KEY` | Map panel is blank without it |
 | Music | `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET` | Playback requires a Spotify **Premium** account |
 | Weather | `VITE_OPENWEATHERMAP_API_KEY` | Badge is hidden without it |
 
 ## Design preview
 
-To review layout with no backend, no database and no credentials at all:
+To review layout with no backend, no database and no credentials at all, run
+the Vite dev server on the host with the flag in a `.env.local` at the **repo
+root**:
 
 ```bash
-echo 'VITE_DESIGN_PREVIEW=true' > frontend/.env.local
+echo 'VITE_DESIGN_PREVIEW=true' > .env.local
+cd frontend && npm run dev
 ```
+
+The root, not `frontend/`: `vite.config.js` sets `envDir: ".."`, so Vite never
+reads env files inside `frontend/`. Under Docker it sees no env files at all;
+there, add `VITE_DESIGN_PREVIEW=true` to `.env` (Compose passes it to the
+container) and run `docker compose up -d --force-recreate frontend`.
 
 Auth is bypassed and a mock user is injected, so every screen renders. It is
 double-gated on `import.meta.env.DEV`, so it cannot be switched on in a
-production build. Delete the file to restore the real login flow.
+production build. Delete the file (or the line) to restore the real login flow.
 
 ## Common commands
 

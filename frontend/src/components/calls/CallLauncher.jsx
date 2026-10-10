@@ -1,10 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { placeCall } from "../../services/calls";
 
-/**
- * @param {() => void} [onCalled]  runs once the call is placed, so the panel
- *                                 around this can step aside for the call dialog
- */
+/** @param {() => void} [onCalled] called once the call is placed */
 export default function CallLauncher({ onCalled }) {
   const [username, setUsername] = useState("");
   const inputRef = useRef(null);

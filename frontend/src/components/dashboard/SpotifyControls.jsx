@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Minus, Pause, Play, Plus, Volume1, Volume2, VolumeX } from "lucide-react";
+import { MinusIcon, PauseIcon, PlayIcon, PlusIcon, SkipBackIcon, SkipForwardIcon, SpeakerHighIcon, SpeakerLowIcon, SpeakerSlashIcon } from "@phosphor-icons/react";
 import {
   getCurrentTrack,
   loginToSpotify,
@@ -13,10 +13,10 @@ import {
 } from "../../api/spotify";
 import SpotifyWebPlayer from "./SpotifyWebPlayer";
 
-/** Volume moves in tenths, like the physical steps of a car's volume knob. */
+/** Volume step, in percent. */
 const VOLUME_STEP = 10;
 
-/** The web player's starting volume, used until Spotify reports a device level. */
+/** Starting volume until Spotify reports one. */
 const DEFAULT_VOLUME = 62;
 
 /** 83000 -> "1:23" */
@@ -31,15 +31,15 @@ export default function SpotifyControls() {
   const [track, setTrack] = useState(null);
   const [player, setPlayer] = useState(null);
   const [error, setError] = useState("");
-  // Position the driver is dragging to, before it is sent to Spotify.
+  // Seek position while dragging, before it is sent.
   const [scrubMs, setScrubMs] = useState(null);
   const [now, setNow] = useState(() => Date.now());
 
   const refresh = useCallback(async () => {
     try {
       const current = await getCurrentTrack();
-      // synced_at marks when progress_ms was true, so the bar can move on its
-      // own between the five-second polls.
+      // synced_at is when progress_ms was measured, so the bar can advance
+      // between the 5 s polls.
       setTrack((previous) => ({
         ...current,
         volume_percent: current.volume_percent ?? previous?.volume_percent ?? null,
@@ -57,7 +57,7 @@ export default function SpotifyControls() {
     return () => clearInterval(interval);
   }, [refresh]);
 
-  // Tick the clock only while music plays; a paused bar has nothing to move.
+  // Only tick while playing.
   useEffect(() => {
     if (!track?.playing) return undefined;
     const interval = setInterval(() => setNow(Date.now()), 500);
@@ -103,15 +103,14 @@ export default function SpotifyControls() {
   const elapsedMs = track?.playing ? now - (track.synced_at ?? now) : 0;
   const positionMs = scrubMs ?? Math.min(durationMs, (track?.progress_ms ?? 0) + elapsedMs);
   const volume = track?.volume_percent ?? DEFAULT_VOLUME;
-  // The speaker says what the percentage beside it measures, and roughly how
-  // loud: crossed out when muted, one wave below half, two from half up.
-  const VolumeIcon = volume === 0 ? VolumeX : volume < 50 ? Volume1 : Volume2;
+  // Speaker icon: muted, low (< 50%) or high.
+  const VolumeIcon = volume === 0 ? SpeakerSlashIcon : volume < 50 ? SpeakerLowIcon : SpeakerHighIcon;
 
   const commitSeek = async () => {
     if (scrubMs === null) return;
     const target = scrubMs;
     setScrubMs(null);
-    // Move the bar at once; the next poll corrects it if Spotify disagrees.
+    // Update the bar now; the next poll corrects it.
     setTrack((previous) => ({ ...previous, progress_ms: target, synced_at: Date.now() }));
     try {
       await seekSpotifyTrack(target);
@@ -123,9 +122,8 @@ export default function SpotifyControls() {
   const changeVolume = async (delta) => {
     const next = Math.min(100, Math.max(0, volume + delta));
     if (next === volume) return;
-    // Optimistic, and deliberately not followed by a refresh: Spotify reports
-    // the new level a moment late, and re-reading at once would bounce the
-    // number back to the old one before it settled.
+    // Not followed by a refresh: Spotify reports the new level late, and an
+    // immediate re-read would show the old value.
     setTrack((previous) => ({ ...previous, volume_percent: next }));
     try {
       await setSpotifyVolume(next);
@@ -150,16 +148,16 @@ export default function SpotifyControls() {
       <SpotifyWebPlayer onReady={handleReady} onStateChange={handlePlayerState} onError={setError} />
       {track?.image_url && <img className="spotify-art" src={track.image_url} alt="" />}
       <div className="spotify-details">
-        <span className="spotify-label"><Volume2 size={13} /> Spotify</span>
+        <span className="spotify-label"><SpeakerHighIcon size={13} /> Spotify</span>
         <strong>{track?.title || "Nothing playing"}</strong>
         <span>{track?.artist || "Connect your account to play music"}</span>
       </div>
       <div className="spotify-actions">
-        <button aria-label="Previous track" onClick={() => run(previousSpotifyTrack)}><ChevronLeft size={15} /></button>
+        <button aria-label="Previous track" onClick={() => run(previousSpotifyTrack)}><SkipBackIcon size={15} /></button>
         <button aria-label={track?.playing ? "Pause" : "Play"} onClick={() => run(track?.playing ? pauseMusic : playMusic)}>
-          {track?.playing ? <Pause size={15} /> : <Play size={15} />}
+          {track?.playing ? <PauseIcon size={15} /> : <PlayIcon size={15} />}
         </button>
-        <button aria-label="Next track" onClick={() => run(nextSpotifyTrack)}><ChevronRight size={15} /></button>
+        <button aria-label="Next track" onClick={() => run(nextSpotifyTrack)}><SkipForwardIcon size={15} /></button>
       </div>
       {!player && <button className="spotify-connect-btn" onClick={loginToSpotify}>Connect</button>}
 
@@ -191,7 +189,7 @@ export default function SpotifyControls() {
               disabled={volume <= 0}
               onClick={() => changeVolume(-VOLUME_STEP)}
             >
-              <Minus size={13} />
+              <MinusIcon size={13} />
             </button>
             <span className="spotify-volume-level" aria-live="polite">
               {volume}%
@@ -203,7 +201,7 @@ export default function SpotifyControls() {
               disabled={volume >= 100}
               onClick={() => changeVolume(VOLUME_STEP)}
             >
-              <Plus size={13} />
+              <PlusIcon size={13} />
             </button>
           </div>
         </div>

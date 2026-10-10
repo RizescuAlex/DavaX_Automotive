@@ -1,10 +1,8 @@
-import { Lightbulb } from "lucide-react";
+import { LightbulbIcon } from "@phosphor-icons/react";
 
 /**
- * Where each zone sits on the cabin plan, in percent of the stage. The car
- * points up and is left-hand drive, so the driver's footwell is front-left.
- * Overhead lamps sit at the windscreen header and above the rear bench;
- * footwells sit ahead of the seat they light.
+ * Zone positions on the cabin plan, in percent. The car points up and is left-
+ * hand drive.
  */
 export const LIGHT_ZONES = [
   { id: "front_left_overhead", label: "Front-left overhead", x: 40, y: 27 },
@@ -16,7 +14,7 @@ export const LIGHT_ZONES = [
   { id: "rear_overhead", label: "Rear overhead", x: 50, y: 74 },
 ];
 
-/** Presets a driver picks from; the last swatch opens a free colour picker. */
+/** Preset colours; the last swatch opens a colour picker. */
 const PRESETS = [
   ["#ffffff", "White"],
   ["#ffd9a8", "Warm white"],
@@ -28,7 +26,7 @@ const PRESETS = [
   ["#ff9f5a", "Amber"],
 ];
 
-/** A top-down cabin in the cockpit's own tokens, so it follows day and night. */
+/** Top-down cabin drawn with theme tokens. */
 function CabinPlan() {
   return (
     <svg className="ambient-cabin" viewBox="0 0 200 320" aria-hidden="true">
@@ -61,9 +59,7 @@ export default function AmbientLighting({ interior, selected, onSelect, onChange
       <div className="ambient-stage">
         <CabinPlan />
 
-        {/* The light itself: each lit zone washes its colour over the cabin,
-            as strong as its brightness, so the plan reads as a preview rather
-            than a diagram. */}
+        {/* Each lit zone tints the cabin in its colour and brightness */}
         {LIGHT_ZONES.map(({ id, x, y }) => {
           const { enabled, color, brightness } = interior[id];
           return (
@@ -104,7 +100,7 @@ export default function AmbientLighting({ interior, selected, onSelect, onChange
 
       <div className="ambient-controls">
         <div className="ambient-head">
-          <Lightbulb size={16} className="ambient-head-icon" aria-hidden="true" />
+          <LightbulbIcon size={16} className="ambient-head-icon" aria-hidden="true" />
           <h3>{zone.label}</h3>
           <button
             type="button"
@@ -161,7 +157,7 @@ export default function AmbientLighting({ interior, selected, onSelect, onChange
           />
         </label>
 
-        <button type="button" className="btn btn-secondary btn-sm ambient-apply" onClick={onApplyToAll}>
+        <button type="button" className="btn btn-secondary ambient-apply" onClick={onApplyToAll}>
           Use this colour and brightness everywhere
         </button>
       </div>

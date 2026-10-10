@@ -26,7 +26,7 @@ async def send_message(
     await _get_user_from_token(token, db)
 
     try:
-        reply, actions = await ask(payload.message, payload.context)
+        answer = await ask(payload.message, payload.context)
     except AssistantUnavailableError as exc:
         raise HTTPException(
             status_code=(
@@ -37,4 +37,4 @@ async def send_message(
             detail=str(exc),
         ) from exc
 
-    return AssistantMessageOut(reply=reply, actions=actions)
+    return AssistantMessageOut(reply=answer.reply, actions=answer.actions)

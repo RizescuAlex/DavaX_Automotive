@@ -1,18 +1,11 @@
-import { Lightbulb, CornerUpLeft, CornerUpRight } from "lucide-react";
+import { ArrowBendUpLeftIcon, ArrowBendUpRightIcon, HeadlightsIcon } from "@phosphor-icons/react";
 import { useAppStore } from "../../store";
 import carIso from "../../assets/car-iso.svg";
 import { FrontFogIcon, RearFogIcon } from "./CarIcons";
 
 /**
- * Vehicle status.
- *
- * The illustration is a fixed 3/4 view, so it cannot show left and right
- * indicators the way the old overhead drawing did. The lamps below it carry
- * that state instead, which also keeps the live readouts legible at rail width.
- *
- * The stage is backed by the street scene (see `.car-viz-stage` in index.css),
- * so the contact shadow below is what keeps the car from floating above the
- * asphalt rather than sitting on it.
+ * Speed, telltales and the car on its street scene. The car is a fixed 3/4
+ * view, so turn signals are shown by the telltales.
  */
 export default function CarVisualization() {
   const headlightsOn = useAppStore((s) => s.headlightsOn);
@@ -26,9 +19,8 @@ export default function CarVisualization() {
     (s) => s.exteriorLights.headlights.automatic && s.headlightsOverride === null
   );
 
-  // Automatic simulation has its own state and takes display priority while a
-  // maneuver is active. Once it clears, the manual controls and hazards show
-  // exactly as before.
+  // An automatic (route) signal takes priority over the manual ones while
+  // active.
   const leftBlinking = automaticTurnSignal
     ? automaticTurnSignal === "left"
     : leftSignal || hazardsOn;
@@ -36,23 +28,13 @@ export default function CarVisualization() {
     ? automaticTurnSignal === "right"
     : rightSignal || hazardsOn;
 
-  // Headlights throw a pool as strong as their brightness setting; with them
-  // off, daytime running lights still leave a faint one.
+  // Headlight pool scales with brightness; daytime running lights give a faint
+  // one.
   const drlOnly = !headlightsOn && headlights.daytime_running;
   const glowStrength = headlightsOn ? headlights.brightness / 100 : drlOnly ? 0.3 : 0;
 
   return (
     <div className="car-viz">
-      <div className="car-viz-stage">
-        <div
-          className="car-glow"
-          style={{ opacity: glowStrength }}
-          aria-hidden="true"
-        />
-        <div className="car-shadow" aria-hidden="true" />
-        <img src={carIso} alt="Your vehicle" className="car-photo" />
-      </div>
-
       <div className="car-readout">
         <span className="car-speed-num">{Math.round(speed)}</span>
         <span className="car-speed-label">km/h</span>
@@ -65,7 +47,7 @@ export default function CarVisualization() {
           aria-label={leftBlinking ? "Left turn signal active" : "Left turn signal inactive"}
           title={leftBlinking ? "Left turn signal active" : "Left signal"}
         >
-          <CornerUpLeft size={16} aria-hidden="true" />
+          <ArrowBendUpLeftIcon size={16} weight={leftBlinking ? "fill" : "regular"} aria-hidden="true" />
         </span>
         {headlights.fog_lights && (
           <span className="car-lamp fog" title="Front fog lights on">
@@ -76,7 +58,7 @@ export default function CarVisualization() {
           className={`car-lamp ${headlightsOn ? "on" : ""}`}
           title={headlightsAuto ? "Headlights, automatic" : "Headlights"}
         >
-          <Lightbulb size={16} aria-hidden="true" />
+          <HeadlightsIcon size={16} weight={headlightsOn ? "fill" : "regular"} aria-hidden="true" />
           {headlightsAuto && <span className="car-lamp-auto" aria-hidden="true">A</span>}
         </span>
         {rearLights.rear_fog_lights && (
@@ -90,8 +72,18 @@ export default function CarVisualization() {
           aria-label={rightBlinking ? "Right turn signal active" : "Right turn signal inactive"}
           title={rightBlinking ? "Right turn signal active" : "Right signal"}
         >
-          <CornerUpRight size={16} aria-hidden="true" />
+          <ArrowBendUpRightIcon size={16} weight={rightBlinking ? "fill" : "regular"} aria-hidden="true" />
         </span>
+      </div>
+
+      <div className="car-viz-stage">
+        <div
+          className="car-glow"
+          style={{ opacity: glowStrength }}
+          aria-hidden="true"
+        />
+        <div className="car-shadow" aria-hidden="true" />
+        <img src={carIso} alt="Your vehicle" className="car-photo" />
       </div>
     </div>
   );

@@ -1,5 +1,4 @@
-/* User Settings — the Vehicle Preferences panel shell (.prefs-panel), sized
-   down: it carries a profile and a handful of route questions, not a car. */
+/* User Settings: the .prefs-panel shell, narrower. */
 
 .user-panel {
   width: min(460px, calc(100% - var(--space-8)));
@@ -22,8 +21,7 @@
   height: 52px;
   overflow: hidden;
   color: var(--text-secondary);
-  background: var(--surface-tertiary);
-  border: 1px solid var(--border-subtle);
+  background: var(--surface-hover);
   border-radius: var(--radius-full);
 }
 
@@ -72,21 +70,17 @@
   color: var(--text-muted);
 }
 
-/* Sign out is red at rest, not only on hover: it is the one button here that
-   ends the session, and it should say so before the pointer gets there.
-   Hover fills it solid. --on-accent keeps the label legible on that fill in
-   both themes (dark text on the night red, white on the day red). */
+/* Sign out is red even at rest, since it ends the session. --on-accent keeps
+   the label readable on the solid hover fill in both themes. */
 .user-signout {
   gap: var(--space-2);
   color: var(--color-error);
   background: var(--color-error-light);
-  border-color: var(--color-error);
 }
 
 .user-signout:hover {
   color: var(--on-accent);
   background: var(--color-error);
-  border-color: var(--color-error);
 }
 
 .user-signout:focus-visible {

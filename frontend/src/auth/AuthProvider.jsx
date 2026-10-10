@@ -57,10 +57,9 @@ export function AuthProvider({ children }) {
     clearBackendUser();
   };
 
-  // The active user is the backend profile (Google users) or our custom JWT user
-  // (email/password). A Firebase session alone is NOT enough: the backend profile
-  // is what carries onboarding_completed, so we stay unauthenticated until
-  // /auth/me or POST /auth/login has given us one.
+  // Authenticated means we have a backend profile (Google) or a custom JWT user
+  // (email/password). A Firebase session alone isn't enough, because the
+  // backend profile carries onboarding_completed.
   const user = (firebaseUser && backendUser) ? backendUser : (customToken ? customUser : null);
   const isAuthenticated = !!user;
 

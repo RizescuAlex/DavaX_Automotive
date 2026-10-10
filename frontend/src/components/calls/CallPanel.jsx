@@ -1,27 +1,28 @@
-import { Phone, X } from "lucide-react";
+import { useRef } from "react";
+import { PhoneIcon, XIcon } from "@phosphor-icons/react";
 import { useAppStore } from "../../store";
+import { usePanelFocus } from "../../hooks/usePanelFocus";
 import CallLauncher from "./CallLauncher";
 import "../vehicle-settings/VehiclePreferencesPanel.css";
 
-/**
- * Starting a call, as a panel over the map opened from the top bar's Call
- * button — the same family as the assistant and preferences panels.
- *
- * Once the call is placed the panel closes: the call dialog takes over from
- * there, and an open launcher behind it would only invite a second call.
- */
+/** Call panel. Closes once the call is placed; the call dialog takes over. */
 export default function CallPanel() {
   const open = useAppStore((s) => s.callOpen);
   const setCallOpen = useAppStore((s) => s.setCallOpen);
 
   if (!open) return null;
+  return <CallContent close={() => setCallOpen(false)} />;
+}
 
-  const close = () => setCallOpen(false);
+function CallContent({ close }) {
+  // Focus in on open, Escape to close, focus back to the opener.
+  const panelRef = useRef(null);
+  usePanelFocus(panelRef, close);
 
   return (
-    <section className="prefs-panel call-panel" aria-label="Call">
+    <section ref={panelRef} tabIndex={-1} className="prefs-panel call-panel" aria-label="Call">
       <header className="prefs-head">
-        <Phone size={16} className="prefs-head-icon" aria-hidden="true" />
+        <PhoneIcon size={16} className="prefs-head-icon" aria-hidden="true" />
         <h2 className="prefs-head-title">Call</h2>
         <button
           type="button"
@@ -29,7 +30,7 @@ export default function CallPanel() {
           onClick={close}
           aria-label="Close the call panel"
         >
-          <X size={18} />
+          <XIcon size={18} />
         </button>
       </header>
 

@@ -9,9 +9,7 @@ export default function CallSession() {
 
   return (
     <div className="call-session">
-      {/* Starting a call lives in the top bar's Call panel (CallPanel); this
-          only carries the dialog for a call in progress, which has to show
-          whatever else is open. */}
+      {/* Dialog for a call in progress; calls are started from CallPanel. */}
       <IncomingCallModal
         call={call}
         isIncoming={isIncoming}

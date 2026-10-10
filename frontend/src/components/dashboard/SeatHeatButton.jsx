@@ -1,17 +1,11 @@
-import { Flame } from "lucide-react";
 import { useAppStore, CLIMATE_LIMITS } from "../../store";
 import { SeatSideIcon } from "./CarIcons";
 import { DOCK_ICON } from "../../config/constants";
-
-const LEVELS = Array.from({ length: CLIMATE_LIMITS.SEAT_HEAT_MAX }, (_, i) => i + 1);
+import LevelMeter from "./LevelMeter";
 
 /**
- * Seat heating for one seat.
- *
- * Two things have to be readable without stopping to think: which seat this
- * is, and how hot it is set. The pictogram answers the first by filling the
- * cushion this button controls; the flames answer the second by count, so the
- * level is legible without reading a numeral.
+ * Seat heating for one seat: the icon shows which seat, the meter shows the
+ * level (0–3).
  */
 export default function SeatHeatButton({ side }) {
   const level = useAppStore((s) => (side === "left" ? s.seatHeatLeft : s.seatHeatRight));
@@ -28,12 +22,9 @@ export default function SeatHeatButton({ side }) {
       title={`${seat} seat heating`}
       onClick={() => cycleSeatHeat(side)}
     >
-      <SeatSideIcon side={side} size={DOCK_ICON - 2} />
-      <span className="dock-seat-flames" aria-hidden="true">
-        {LEVELS.map((step) => (
-          <Flame key={step} size={11} className={step <= level ? "lit" : ""} />
-        ))}
-      </span>
+      <SeatSideIcon side={side} size={DOCK_ICON} />
+      <LevelMeter level={level} max={CLIMATE_LIMITS.SEAT_HEAT_MAX} />
+      <span className="dock-label" aria-hidden="true">{side === "left" ? "Driver" : "Pass."}</span>
     </button>
   );
 }

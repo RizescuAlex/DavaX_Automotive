@@ -1,49 +1,31 @@
 /**
- * Automotive glyphs lucide does not carry.
- *
- * Drawn to match the symbols moulded onto real dashboard buttons, because a
- * driver already knows those shapes — a generic "wind" or "droplet" icon would
- * make them read the tooltip instead. Stroke-only and currentColor, so they
- * inherit button state and theme like every lucide icon beside them.
+ * Car control glyphs Phosphor doesn't have, drawn like the symbols on real
+ * dashboard buttons. Stroke 1.5 to match Phosphor's regular weight.
  */
 
 const base = {
   fill: "none",
   stroke: "currentColor",
-  strokeWidth: 1.75,
+  strokeWidth: 1.5,
   strokeLinecap: "round",
   strokeLinejoin: "round",
   "aria-hidden": "true",
 };
 
 /**
- * The hazard symbol: one triangle nested inside another.
- *
- * Not lucide's TriangleAlert, which puts an exclamation mark inside a single
- * triangle — that is a generic warning sign. The moulded button in a car is
- * two bare outlined triangles, and that is the shape a driver's eye is looking
- * for.
- *
- * The inner triangle is the outer one scaled to 0.42 about their shared
- * centroid, which keeps the gap equal on all three sides — picking the
- * coordinates by eye left the two bases closer together than the stroke was
- * wide, so they merged into one thick line. That leaves 3.2 units between the
- * centrelines, about 1.3px of daylight once both strokes are drawn at 18px.
- *
- * Stroke is 1.5 rather than the shared 1.75: two nested outlines in an 18px
- * box need the extra room, and at this size the difference is invisible
- * beside the other glyphs.
+ * Hazard symbol: two nested triangles. The inner one is the outer scaled to
+ * 0.42 about the centroid so the gap is even on all sides.
  */
 export function HazardIcon({ size = 18 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" {...base} strokeWidth={1.5}>
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
       <path d="M12 3.4 21.6 19.9 H2.4 Z" />
       <path d="M12 9.78 16.03 16.71 H7.97 Z" />
     </svg>
   );
 }
 
-/** Three wavy arrows rising inside a raked windscreen. */
+/** Front defogger: wavy arrows in a windscreen. */
 export function FrontDefogIcon({ size = 18 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
@@ -55,7 +37,7 @@ export function FrontDefogIcon({ size = 18 }) {
   );
 }
 
-/** The same waves inside the squarer outline of a rear screen. */
+/** Rear defogger: wavy arrows in a rear window. */
 export function RearDefogIcon({ size = 18 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
@@ -68,8 +50,7 @@ export function RearDefogIcon({ size = 18 }) {
 }
 
 /**
- * Front fog lamp: a lamp facing left, beams dipping toward the road, cut by
- * the wavy line that stands for fog. The warning-light shape, not a bulb.
+ * Front fog lamp: lamp facing left, beams angled down, crossed by a wavy line.
  */
 export function FrontFogIcon({ size = 18 }) {
   return (
@@ -83,7 +64,7 @@ export function FrontFogIcon({ size = 18 }) {
   );
 }
 
-/** Rear fog lamp: the lamp faces right and its beams run level. */
+/** Rear fog lamp: lamp facing right, level beams. */
 export function RearFogIcon({ size = 18 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
@@ -96,7 +77,7 @@ export function RearFogIcon({ size = 18 }) {
   );
 }
 
-/** A wiper arm sweeping a windscreen, with the spray it clears. */
+/** Wipers: an arm across a windscreen. */
 export function WiperIcon({ size = 18 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
@@ -111,24 +92,14 @@ export function WiperIcon({ size = 18 }) {
   );
 }
 
-/**
- * Which seat a heater button belongs to: two cushions seen from above, the
- * controlled one filled. Cheaper to read at a glance than an L/R letter.
- */
+/** Heated seat in profile; the small side indicator identifies the seat. */
 export function SeatSideIcon({ side = "left", size = 16 }) {
   const isLeft = side === "left";
   return (
-    <svg width={size} height={size * 0.62} viewBox="0 0 16 10" aria-hidden="true">
-      <rect
-        x="0.75" y="0.75" width="6" height="8.5" rx="1.6"
-        fill={isLeft ? "currentColor" : "none"}
-        stroke="currentColor" strokeWidth="1.2" opacity={isLeft ? 1 : 0.45}
-      />
-      <rect
-        x="9.25" y="0.75" width="6" height="8.5" rx="1.6"
-        fill={isLeft ? "none" : "currentColor"}
-        stroke="currentColor" strokeWidth="1.2" opacity={isLeft ? 0.45 : 1}
-      />
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
+      <path d="M5 4.5 7.5 15 H17 M6 18 H18 M9 18 V21 M16 18 V21" />
+      <path d="M11 12 c-1.5-1.5 1.5-2.5 0-4 M15 12 c-1.5-1.5 1.5-2.5 0-4 M19 12 c-1.5-1.5 1.5-2.5 0-4" />
+      <path d={isLeft ? "M3 9 H1.5" : "M21 15 H22.5"} strokeWidth="2.5" />
     </svg>
   );
 }

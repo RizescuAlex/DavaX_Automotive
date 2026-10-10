@@ -1,6 +1,6 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { Autocomplete } from "@react-google-maps/api";
-import { Search, X } from "lucide-react";
+import { MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react";
 
 export default function MapSearch({ onPlaceSelect, resetKey = 0 }) {
   const [query, setQuery] = useState("");
@@ -28,7 +28,7 @@ export default function MapSearch({ onPlaceSelect, resetKey = 0 }) {
 
   return (
     <div className="map-search">
-      <Search size={16} className="map-search-icon" />
+      <MagnifyingGlassIcon size={16} className="map-search-icon" />
       <Autocomplete
         onLoad={onLoad}
         onPlaceChanged={onPlaceChanged}
@@ -40,6 +40,7 @@ export default function MapSearch({ onPlaceSelect, resetKey = 0 }) {
           id="map-search-input"
           type="text"
           className="map-search-input"
+          aria-label="Search for a destination"
           placeholder="Search a destination…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -47,7 +48,7 @@ export default function MapSearch({ onPlaceSelect, resetKey = 0 }) {
       </Autocomplete>
       {query && (
         <button className="map-search-clear" onClick={handleClear} aria-label="Clear search">
-          <X size={14} />
+          <XIcon size={14} />
         </button>
       )}
     </div>

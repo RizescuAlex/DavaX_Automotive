@@ -2,34 +2,25 @@ import { apiFetch } from "../config/api";
 import { DESIGN_PREVIEW } from "../config/devPreview";
 
 /**
- * The in-car assistant, against POST /assistant/message.
- *
- * The backend executes nothing: it returns a spoken reply plus a list of
- * actions, and the dispatcher applies those to the store. See
- * src/assistant/dispatch.js.
- *
- * No-ops under DESIGN_PREVIEW for the same reason as the vehicle client —
- * there is no session in preview mode, so apiFetch would take a 401 and
- * hard-redirect to /login, which preview bounces back to /dashboard.
+ * Client for POST /assistant/message. Returns a reply and a list of actions;
+ * see assistant/dispatch.js. No-op under DESIGN_PREVIEW (see api/vehicle.js).
  */
 
 const PATH = "/assistant/message";
 
-/** Generous: a cold model call runs a few seconds, but never half a minute. */
 const REQUEST_TIMEOUT_MS = 30000;
 
 /**
- * @param {string} message      what the driver said
- * @param {object} context      the dashboard snapshot (see buildContext)
- * @returns {Promise<{reply: string, actions: Array<{tool: string, args: object}>}>}
+ * @param {string} message
+ * @param {object} context dashboard snapshot (see buildContext)
+ * @returns {Promise<{reply: string, actions: Array<{tool: string, args:
+ *   object}>}>}
  */
 export async function sendAssistantMessage(message, context) {
   if (DESIGN_PREVIEW) {
     return { reply: "The assistant is unavailable in design preview.", actions: [] };
   }
 
-  // A hung request would otherwise leave the panel spinning with no way out,
-  // which is worse in a car than a plain failure.
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
@@ -50,12 +41,8 @@ export async function sendAssistantMessage(message, context) {
 }
 
 /**
- * Snapshot the store for the model.
- *
- * Names are the backend's (snake_case, and target_temperature rather than the
- * store's targetTemp) because they have to match VehicleContext field for
- * field — anything unrecognised is dropped by pydantic without complaint, so a
- * typo here would silently leave the model blind to one reading.
+ * Snapshot of the store for the model. Keys must match the backend's
+ * VehicleContext exactly: pydantic silently drops unknown fields.
  */
 export function buildContext(state) {
   return {

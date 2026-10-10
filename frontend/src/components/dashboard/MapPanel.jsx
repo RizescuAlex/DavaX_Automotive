@@ -4,7 +4,8 @@ import {
   useJsApiLoader,
   Marker,
 } from "@react-google-maps/api";
-import { X } from "lucide-react";
+import { destinationIcon, fuelStopIcon, weatherIcon } from "./mapMarkers";
+import { ClockIcon, GasPumpIcon, PathIcon, WarningIcon, XIcon } from "@phosphor-icons/react";
 import { MAP_CONFIG } from "../../config/constants";
 import MapSearch from "./MapSearch";
 import { apiFetch } from "../../config/api";
@@ -706,10 +707,7 @@ export default function MapPanel() {
   }
 
   return (
-    <div
-      className="map-panel"
-      style={{ position: "relative", width: "100%", height: "100%" }}
-    >
+    <div className="map-panel">
       <MapSearch
         onPlaceSelect={handlePlaceSelect}
         resetKey={searchResetKey}
@@ -739,7 +737,9 @@ export default function MapPanel() {
           />
         )}
 
-        {destLocation && <Marker position={destLocation} />}
+        {destLocation && (
+          <Marker position={destLocation} icon={destinationIcon(token)} zIndex={6} />
+        )}
 
         {tripData?.weather_warnings
           ?.filter(
@@ -753,13 +753,13 @@ export default function MapPanel() {
             key={`weather-${index}`}
             position={{ lat: warning.lat, lng: warning.lng }}
             title={warning.message}
-            label={{ text: "!", color: "#ffffff", fontWeight: "700" }}
+            icon={weatherIcon(token)}
             zIndex={5}
           />
           ))}
 
         {[
-          ...plannedStops,
+          ...plannedStops.map((stop) => ({ ...stop, planned: true })),
           ...(tripData?.suggested_stops ?? []).filter(
             (suggestion) => !plannedStops.some((stop) => stop.place_id === suggestion.place_id)
           ),
@@ -768,7 +768,7 @@ export default function MapPanel() {
             key={`stop-${stop.place_id}`}
             position={{ lat: stop.lat, lng: stop.lng }}
             title={`${stop.name} · ${stop.arrival_fuel_pct}% fuel on arrival`}
-            label={{ text: "⛽", fontSize: "16px" }}
+            icon={fuelStopIcon(token, stop.planned)}
             zIndex={4}
           />
         ))}
@@ -776,27 +776,10 @@ export default function MapPanel() {
       </GoogleMap>
 
       {!isDriving && tripData?.routes?.length > 0 && (
-        <aside
-          aria-label="Route options"
-          style={{
-            position: "absolute",
-            top: "76px",
-            left: "20px",
-            width: "min(320px, calc(100% - 40px))",
-            maxHeight: "calc(100% - 190px)",
-            overflowY: "auto",
-            background: "var(--surface-primary)",
-            color: "var(--text-primary)",
-            border: "1px solid var(--border-default)",
-            borderRadius: "16px",
-            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.24)",
-            backdropFilter: "blur(12px)",
-            zIndex: 10,
-          }}
-        >
-          <div style={{ padding: "16px 18px 12px", borderBottom: "1px solid var(--border-default)" }}>
-            <strong style={{ fontSize: "1rem" }}>Route Options</strong>
-            <div style={{ marginTop: "4px", color: "var(--text-secondary)", fontSize: "0.8rem" }}>
+        <aside className="route-options" aria-label="Route options">
+          <div className="route-options-head">
+            <strong className="route-options-title">Route Options</strong>
+            <div className="route-options-dest">
               {tripData.destination_address || "Choose a route"}
             </div>
           </div>
@@ -809,64 +792,50 @@ export default function MapPanel() {
                 onClick={() => setSelectedIndex(index)}
                 disabled={tripConfirmed || isDriving || isConfirming}
                 aria-pressed={isSelected}
-                style={{
-                  display: "block",
-                  width: "100%",
-                  padding: "14px 18px",
-                  textAlign: "left",
-                  color: "var(--text-primary)",
-                  background: isSelected ? "var(--surface-sunken)" : "transparent",
-                  border: 0,
-                  borderLeft: `4px solid ${isSelected ? "var(--accent-primary)" : "transparent"}`,
-                  borderBottom: "1px solid var(--border-default)",
-                  cursor: tripConfirmed || isDriving || isConfirming ? "default" : "pointer",
-                  opacity: tripConfirmed || isDriving || isConfirming ? 0.8 : 1,
-                }}
+                className="route-option"
               >
-                <span style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
+                <span className="route-option-summary">
                   <strong>{route.duration_text}</strong>
                   <span>{route.distance_text}</span>
                 </span>
                 {route.explanation && (
-                  <span style={{ display: "block", marginTop: "6px", color: "var(--text-secondary)", fontSize: "0.8rem", lineHeight: 1.4 }}>
+                  <span className="route-option-why">
                     {route.explanation}
                   </span>
                 )}
-                <span style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "8px" }}>
+                <span className="route-option-tags">
                   {Number.isFinite(route.scores?.utility) && (
-                    <span style={{ fontSize: "0.72rem", color: "var(--text-secondary)" }}>
+                    <span className="route-option-tag">
                       Utility: {(route.scores.utility * 100).toFixed(0)}%
                     </span>
                   )}
                   {route.labels?.includes("FUEL_EFFICIENT") && (
-                    <span style={{ fontSize: "0.72rem", color: "var(--accent-primary)" }}>Eco</span>
+                    <span className="route-option-tag eco">Eco</span>
                   )}
                   {route.scores?.weather_risk > 0.3 && (
-                    <span style={{ fontSize: "0.72rem", color: "#e8590c" }}>Weather risk</span>
+                    <span className="route-option-tag risk">Weather risk</span>
                   )}
                 </span>
               </button>
             );
           })}
           {plannedStops.length > 0 && (
-            <section style={{ padding: "12px 18px", borderTop: "1px solid var(--border-default)" }}>
-              <strong style={{ display: "block", marginBottom: "8px", fontSize: "0.82rem" }}>
+            <section className="route-stops">
+              <strong className="route-stops-title">
                 Stops on this route
               </strong>
               {plannedStops.map((stop) => (
-                <div
-                  key={stop.place_id}
-                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", padding: "6px 0" }}
-                >
-                  <span style={{ minWidth: 0, fontSize: "0.78rem", color: "var(--text-secondary)" }}>
-                    ⛽ {stop.name}
+                <div key={stop.place_id} className="route-stop">
+                  <span className="route-stop-info">
+                    <GasPumpIcon size={14} aria-hidden="true" />
+                    {stop.name}
                   </span>
                   <button
                     type="button"
                     onClick={() => removePlannedStop(stop.place_id)}
                     aria-label={`Remove ${stop.name} from the route`}
                     disabled={isRouting || isDriving || tripConfirmed || isConfirming}
-                    style={{ border: 0, background: "transparent", color: "var(--accent-primary)", cursor: "pointer", fontSize: "0.75rem", whiteSpace: "nowrap" }}
+                    className="route-stop-remove"
                   >
                     Remove
                   </button>
@@ -878,20 +847,17 @@ export default function MapPanel() {
           {(tripData.suggested_stops ?? []).some(
             (stop) => !plannedStops.some((planned) => planned.place_id === stop.place_id)
           ) && (
-            <section style={{ padding: "12px 18px", borderTop: "1px solid var(--border-default)" }}>
-              <strong style={{ display: "block", marginBottom: "6px", fontSize: "0.82rem" }}>
+            <section className="route-stops suggested">
+              <strong className="route-stops-title">
                 Suggested fuel stops
               </strong>
               {(tripData.suggested_stops ?? [])
                 .filter((stop) => !plannedStops.some((planned) => planned.place_id === stop.place_id))
                 .map((stop) => (
-                  <div
-                    key={stop.place_id}
-                    style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", padding: "8px 0", borderTop: "1px solid var(--border-default)" }}
-                  >
-                    <span style={{ minWidth: 0, fontSize: "0.78rem" }}>
-                      <span style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{stop.name}</span>
-                      <span style={{ color: "var(--text-secondary)", fontSize: "0.72rem" }}>
+                  <div key={stop.place_id} className="route-stop">
+                    <span className="route-stop-info">
+                      <span className="route-stop-name">{stop.name}</span>
+                      <span className="route-stop-meta">
                         {stop.arrival_fuel_pct}% fuel · {stop.detour_min} min detour
                       </span>
                     </span>
@@ -900,7 +866,7 @@ export default function MapPanel() {
                       onClick={() => addSuggestedStop(stop)}
                       aria-label={`Add ${stop.name} as a route stop`}
                       disabled={isRouting || isDriving || tripConfirmed || isConfirming}
-                      style={{ border: "1px solid var(--accent-primary)", borderRadius: "14px", padding: "5px 9px", background: "transparent", color: "var(--accent-primary)", cursor: "pointer", fontSize: "0.72rem", whiteSpace: "nowrap" }}
+                      className="route-stop-add"
                     >
                       Add stop
                     </button>
@@ -912,46 +878,20 @@ export default function MapPanel() {
       )}
 
       {isRouting && (
-        <div
-          role="status"
-          style={{ position: "absolute", top: "76px", left: "20px", padding: "12px 16px", borderRadius: "12px", background: "var(--surface-primary)", color: "var(--text-primary)", border: "1px solid var(--border-default)", boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)", zIndex: 10 }}
-        >
+        <div className="route-status" role="status">
           {plannedStops.length > 0 ? "Updating route through selected stops…" : "Finding route…"}
         </div>
       )}
 
       {routeData && (
-        <div
-          style={{
-            position: "absolute",
-            bottom: "30px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            background: "var(--surface-primary)",
-            padding: "14px 28px",
-            borderRadius: "30px",
-            color: "var(--text-primary)",
-            display: "flex",
-            alignItems: "center",
-            gap: "24px",
-            fontWeight: "600",
-            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
-            backdropFilter: "blur(12px)",
-            border: "1px solid var(--border-default)",
-            zIndex: 10,
-          }}
-        >
-          <div
-            style={{ display: "flex", alignItems: "center", gap: "8px" }}
-          >
-            <span style={{ fontSize: "1.2rem" }}>🚗</span>
+        <div className="route-summary">
+          <div className="route-summary-item">
+            <ClockIcon size={18} className="route-summary-icon" aria-hidden="true" />
             {routeData.duration}
           </div>
 
-          <div
-            style={{ display: "flex", alignItems: "center", gap: "8px" }}
-          >
-            <span style={{ fontSize: "1.2rem" }}>📏</span>
+          <div className="route-summary-item">
+            <PathIcon size={18} className="route-summary-icon" aria-hidden="true" />
             {routeData.distance}
           </div>
 
@@ -960,16 +900,7 @@ export default function MapPanel() {
               type="button"
               onClick={handleStartDriving}
               disabled={isConfirming}
-              style={{
-                marginLeft: "16px",
-                padding: "8px 16px",
-                borderRadius: "20px",
-                background: "var(--accent-primary)",
-                color: "white",
-                border: "none",
-                cursor: isConfirming ? "wait" : "pointer",
-                opacity: isConfirming ? 0.7 : 1,
-              }}
+              className="route-drive-btn"
             >
               {isConfirming ? "Confirming…" : "Start Driving"}
             </button>
@@ -979,15 +910,7 @@ export default function MapPanel() {
             <button
               type="button"
               onClick={() => stopDrivingSimulation()}
-              style={{
-                marginLeft: "16px",
-                padding: "8px 16px",
-                borderRadius: "20px",
-                background: "var(--accent-primary)",
-                color: "white",
-                border: "none",
-                cursor: "pointer",
-              }}
+              className="route-drive-btn"
             >
               Stop Driving
             </button>
@@ -999,31 +922,21 @@ export default function MapPanel() {
               onClick={cancelRoute}
               aria-label="Cancel route"
               title="Cancel route"
-              style={{
-                marginLeft: "-12px",
-                width: "36px",
-                height: "36px",
-                padding: 0,
-                borderRadius: "50%",
-                background: "var(--surface-sunken)",
-                color: "var(--text-secondary)",
-                border: "1px solid var(--border-default)",
-                cursor: "pointer",
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
+              className="route-cancel-btn"
             >
-              <X size={15} aria-hidden="true" />
+              <XIcon size={15} aria-hidden="true" />
             </button>
           )}
         </div>
       )}
 
       {(navigationError || geoError) && (
-        <div className="map-geo-notice">
-          {navigationError ||
-            "Location unavailable. Using the fallback location."}
+        <div className="map-geo-notice" role="status">
+          <WarningIcon size={15} className="map-geo-notice-icon" aria-hidden="true" />
+          <span>
+            {navigationError ||
+              "Location unavailable. Using the fallback location."}
+          </span>
         </div>
       )}
     </div>

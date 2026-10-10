@@ -1,23 +1,12 @@
-/*
-   Vehicle Preferences, as a panel over the map.
-
-   Built like the assistant panel — header with icon, title and close; a body
-   that scrolls; the panel's own edge and shadow — but larger, because it
-   carries the whole form. It hangs at the same height as the assistant so the
-   centred search bar above stays usable, and stops short of Google's
-   attribution strip at the foot of the map.
-
-   The --settings-* names are the form's own, pointed at the cockpit's design
-   tokens (index.css), so it follows the day/night toggle.
-*/
+/* Panel shell over the map, shared by Vehicle Preferences, Contacts, Call and
+   User Settings. Starts below the search bar and stops above Google's
+   attribution strip. The --settings-* names map the form onto the theme tokens. */
 .prefs-panel {
-  --settings-section-bg: var(--surface-secondary);
+  --settings-section-bg: var(--surface-tertiary);
   --settings-text: var(--text-primary);
   --settings-heading: var(--text-primary);
   --settings-muted: var(--text-muted);
-  --settings-border: var(--border-subtle);
-  --settings-input-bg: var(--surface-sunken);
-  --settings-input-border: var(--border-default);
+  --settings-input-bg: var(--surface-primary);
   --settings-button: var(--accent-primary);
 
   position: absolute;
@@ -29,26 +18,25 @@
   display: flex;
   flex-direction: column;
   color: var(--settings-text);
-  background: var(--surface-primary);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
+  background: var(--surface-secondary);
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xl);
   overflow: hidden;
-  animation: fadeInUp 160ms ease forwards;
+  animation: arrive-from-above var(--motion-arrive);
 }
 
 .prefs-head {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-3) var(--space-4) var(--space-3) var(--space-5);
   border-bottom: 1px solid var(--border-subtle);
   flex-shrink: 0;
 }
 
 .prefs-head-icon {
   flex-shrink: 0;
-  color: var(--accent-primary);
+  color: var(--text-muted);
 }
 
 .prefs-head-title {
@@ -62,8 +50,8 @@
 .prefs-close {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   color: var(--text-muted);
   background: none;
   border: 0;
@@ -81,13 +69,13 @@
   outline-offset: 2px;
 }
 
-/* Only the form scrolls; the header and the save bar stay put. */
+/* Only the body scrolls; header and footer stay in place. */
 .prefs-body {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: var(--space-4);
+  padding: var(--space-4) var(--space-5);
 }
 
 .prefs-loading {
@@ -99,8 +87,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  background: var(--surface-secondary);
+  padding: var(--space-3) var(--space-5);
   border-top: 1px solid var(--border-subtle);
   flex-shrink: 0;
 }
@@ -122,22 +109,23 @@
 }
 
 .settings-section {
-  padding: 22px;
+  padding: var(--space-5);
   background: var(--settings-section-bg);
-  border: 1px solid var(--settings-border);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
 }
 
 .settings-section h2 {
-  margin: 0 0 22px;
+  margin: 0 0 var(--space-5);
   color: var(--settings-heading);
-  font-size: 1.15rem;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
 }
 
 .settings-section > h3 {
-  margin: 30px 0 16px;
+  margin: var(--space-8) 0 var(--space-4);
   color: var(--settings-heading);
-  font-size: 1.05rem;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
 }
 
 .settings-section > h3:first-of-type {
@@ -163,16 +151,24 @@
 .settings-field select {
   box-sizing: border-box;
   width: 100%;
-  padding: 11px 12px;
+  min-height: 44px;
+  padding: 10px 12px;
   color: var(--settings-text);
   background: var(--settings-input-bg);
-  border: 1px solid var(--settings-input-border);
-  border-radius: 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
   font: inherit;
+}
+
+.settings-field input:focus-visible,
+.settings-field select:focus-visible {
+  outline: none;
+  border-color: var(--accent-primary);
 }
 
 .settings-field input[type="range"] {
   width: 100%;
+  min-height: 0;
   padding: 0;
   accent-color: var(--settings-button);
   cursor: pointer;
@@ -223,8 +219,7 @@
   margin: 0;
 }
 
-/* Ambient lighting — styled as a cockpit surface, in the same tokens as the
-   dock and the climate panel */
+/* Ambient lighting */
 
 .ambient {
   display: grid;
@@ -239,7 +234,6 @@
   width: 100%;
   overflow: hidden;
   background: radial-gradient(ellipse at 50% 45%, var(--surface-tertiary), var(--surface-sunken) 72%);
-  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl);
   box-shadow: inset 0 0 28px var(--stage-inset);
 }
@@ -273,8 +267,8 @@
   fill: var(--surface-hover);
 }
 
-/* The light: a soft wash in the zone's colour, scaled by its brightness.
-   Screen blending lets overlapping zones mix the way real light does. */
+/* Each zone's light, scaled by its brightness. Screen blending mixes
+   overlapping zones. */
 .ambient-glow {
   position: absolute;
   width: 46%;
@@ -288,8 +282,7 @@
   transition: opacity var(--transition-slow), background var(--transition-slow);
 }
 
-/* Screen blending vanishes on a pale ground; in daylight the wash sits on
-   top as a tint instead. */
+/* Screen blending disappears on a light background, so day mode uses multiply. */
 :root[data-theme="light"] .ambient-glow {
   mix-blend-mode: multiply;
   opacity: calc(var(--zone-strength) * 0.55);
@@ -307,6 +300,14 @@
   cursor: pointer;
   transition: transform var(--transition-fast), border-color var(--transition-fast),
     box-shadow var(--transition-fast), background var(--transition-fast);
+}
+
+/* Small dots with a 44px tap area */
+.ambient-spot::before {
+  content: "";
+  position: absolute;
+  inset: -13px; /* from inside the 2px border: 18 + 26 = 44 */
+  border-radius: 50%;
 }
 
 .ambient-spot:hover {
@@ -342,20 +343,15 @@
   text-transform: uppercase;
   white-space: nowrap;
   color: var(--text-muted);
-  background: var(--surface-primary);
-  border: 1px solid var(--border-subtle);
+  background: var(--surface-secondary);
   border-radius: var(--radius-full);
 }
 
-/* Controls — the climate card's header pattern: icon, uppercase title, pill */
+/* Controls: header with icon, title and on/off toggle */
 .ambient-controls {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
-  padding: var(--space-4);
-  background: var(--surface-elevated);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
 }
 
 .ambient-head {
@@ -366,7 +362,7 @@
 
 .ambient-head-icon {
   flex-shrink: 0;
-  color: var(--accent-primary);
+  color: var(--text-muted);
 }
 
 .ambient-head h3 {
@@ -377,32 +373,27 @@
 }
 
 .ambient-toggle {
-  min-width: 52px;
-  min-height: 28px;
+  min-width: 56px;
+  min-height: 44px;
   padding: var(--space-1) var(--space-3);
   font-family: var(--font-sans);
   font-size: 11px;
   font-weight: var(--font-weight-semibold);
   letter-spacing: 0.8px;
   text-transform: uppercase;
-  color: var(--text-muted);
-  background: transparent;
-  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  background: var(--surface-hover);
+  border: 0;
   border-radius: var(--radius-full);
   cursor: pointer;
-  transition: color var(--transition-fast), border-color var(--transition-fast),
-    background-color var(--transition-fast);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
 }
 
-.ambient-toggle:hover {
-  color: var(--text-secondary);
-  border-color: var(--border-strong);
-}
+.ambient-toggle:hover { color: var(--text-primary); }
 
 .ambient-toggle.on {
-  color: var(--on-accent);
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
+  color: var(--surface-base);
+  background: var(--text-primary);
 }
 
 .ambient-field {
@@ -438,16 +429,24 @@
   gap: var(--space-2);
 }
 
+/* 36px swatches with a 44px tap area; the 8px gap keeps tap areas apart */
 .ambient-swatch {
   position: relative;
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   padding: 0;
   background: var(--swatch);
   border: 2px solid var(--border-default);
   border-radius: 50%;
   cursor: pointer;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.ambient-swatch::before {
+  content: "";
+  position: absolute;
+  inset: -6px; /* from inside the 2px border: 32 + 12 = 44 */
+  border-radius: 50%;
 }
 
 .ambient-swatch:hover {
@@ -466,7 +465,7 @@
   box-shadow: 0 0 0 2px var(--accent-primary);
 }
 
-/* The custom swatch is a colour wheel until a custom colour is chosen */
+/* Colour wheel until a custom colour is chosen */
 .ambient-swatch-custom {
   background: conic-gradient(#ff5f5f, #ffd166, #7fe08a, #5ee0d0, #88bdf2, #b58cff, #ff7ac6, #ff5f5f);
 }
@@ -486,6 +485,7 @@
 
 .ambient-apply {
   align-self: flex-start;
+  height: 44px;
 }
 
 .mirror-card h3 {
@@ -497,11 +497,10 @@
 
 .mirror-card {
   display: grid;
-  gap: 16px;
-  padding: 18px;
-  background: var(--settings-section-bg);
-  border: 1px solid var(--settings-border);
-  border-radius: 12px;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--surface-primary);
+  border-radius: var(--radius-lg);
 }
 
 .mirror-card .settings-field {

@@ -1,15 +1,8 @@
 import { useState, useEffect } from "react";
-import { Bot, Sun, Cloud, CloudRain, User, Moon, Settings, Phone, Users } from "lucide-react";
+import { ChatCircleDotsIcon, CloudIcon, CloudRainIcon, GearSixIcon, MoonIcon, PhoneIcon, SunIcon, UserIcon, UsersIcon } from "@phosphor-icons/react";
 import { APP_NAME } from "../../config/constants";
 import { useAppStore } from "../../store";
 
-/**
- * Opens the assistant.
- *
- * It lives up here beside Vehicle Preferences rather than floating over the
- * map, where as a round button in the bottom-right corner it sat on top of
- * Google's zoom controls and swallowed the clicks meant for them.
- */
 function AssistantButton() {
   const open = useAppStore((s) => s.assistantOpen);
   const toggleAssistant = useAppStore((s) => s.toggleAssistant);
@@ -17,18 +10,17 @@ function AssistantButton() {
   return (
     <button
       type="button"
-      className={`btn btn-secondary btn-sm ${open ? "is-on" : ""}`}
+      className={`top-nav-btn top-nav-copilot ${open ? "is-on" : ""}`}
       onClick={toggleAssistant}
       aria-pressed={open}
       aria-label={open ? "Close the AI assistant" : "Open the AI assistant"}
     >
-      <Bot size={14} />
-      AI Assistant
+      <ChatCircleDotsIcon size={16} weight={open ? "fill" : "regular"} aria-hidden="true" />
+      <span className="top-nav-label">Copilot</span>
     </button>
   );
 }
 
-/** Opens the Call panel, where a call to another driver starts. */
 function CallButton() {
   const open = useAppStore((s) => s.callOpen);
   const toggleCall = useAppStore((s) => s.toggleCall);
@@ -36,18 +28,17 @@ function CallButton() {
   return (
     <button
       type="button"
-      className={`btn btn-secondary btn-sm ${open ? "is-on" : ""}`}
+      className={`top-nav-btn ${open ? "is-on" : ""}`}
       onClick={toggleCall}
       aria-pressed={open}
       aria-label={open ? "Close the call panel" : "Open the call panel"}
     >
-      <Phone size={14} />
-      Call
+      <PhoneIcon size={16} weight={open ? "fill" : "regular"} aria-hidden="true" />
+      <span className="top-nav-label">Call</span>
     </button>
   );
 }
 
-/** Opens Contacts, where drivers are added and called by username. */
 function ContactsButton() {
   const open = useAppStore((s) => s.contactsOpen);
   const toggleContacts = useAppStore((s) => s.toggleContacts);
@@ -55,21 +46,18 @@ function ContactsButton() {
   return (
     <button
       type="button"
-      className={`btn btn-secondary btn-sm ${open ? "is-on" : ""}`}
+      className={`top-nav-btn ${open ? "is-on" : ""}`}
       onClick={toggleContacts}
       aria-pressed={open}
       aria-label={open ? "Close contacts" : "Open contacts"}
     >
-      <Users size={14} />
-      Contacts
+      <UsersIcon size={16} weight={open ? "fill" : "regular"} aria-hidden="true" />
+      <span className="top-nav-label">Contacts</span>
     </button>
   );
 }
 
-/**
- * The avatar, doubling as the way into User Settings. A button rather than a
- * picture, so it is reachable by keyboard and says what it does.
- */
+/** The avatar is also the User Settings button. */
 function UserSettingsButton({ photoURL }) {
   const open = useAppStore((s) => s.userSettingsOpen);
   const toggleUserSettings = useAppStore((s) => s.toggleUserSettings);
@@ -83,12 +71,11 @@ function UserSettingsButton({ photoURL }) {
       aria-label={open ? "Close user settings" : "Open user settings"}
       title="User settings"
     >
-      {photoURL ? <img src={photoURL} alt="" className="avatar-img" /> : <User size={18} />}
+      {photoURL ? <img src={photoURL} alt="" className="avatar-img" /> : <UserIcon size={20} weight={open ? "fill" : "regular"} aria-hidden="true" />}
     </button>
   );
 }
 
-/** Opens Vehicle Preferences over the map, the way the assistant opens. */
 function PreferencesButton() {
   const open = useAppStore((s) => s.preferencesOpen);
   const togglePreferences = useAppStore((s) => s.togglePreferences);
@@ -96,23 +83,18 @@ function PreferencesButton() {
   return (
     <button
       type="button"
-      className={`btn btn-secondary btn-sm ${open ? "is-on" : ""}`}
+      className={`top-nav-btn ${open ? "is-on" : ""}`}
       onClick={togglePreferences}
       aria-pressed={open}
       aria-label={open ? "Close vehicle preferences" : "Open vehicle preferences"}
     >
-      <Settings size={14} />
-      Vehicle Preferences
+      <GearSixIcon size={16} weight={open ? "fill" : "regular"} aria-hidden="true" />
+      <span className="top-nav-label">Vehicle Preferences</span>
     </button>
   );
 }
 
-/**
- * Day/night switch.
- *
- * Labelled by the mode it switches TO, since that is the question the driver
- * is actually asking — the icon shows the destination, not the current state.
- */
+/** Day/night switch, labelled with the mode it switches to. */
 function ThemeToggle() {
   const theme = useAppStore((s) => s.theme);
   const toggleTheme = useAppStore((s) => s.toggleTheme);
@@ -127,7 +109,7 @@ function ThemeToggle() {
       aria-label={goingToDark ? "Switch to night mode" : "Switch to day mode"}
       title={goingToDark ? "Night mode" : "Day mode"}
     >
-      {goingToDark ? <Moon size={16} aria-hidden="true" /> : <Sun size={16} aria-hidden="true" />}
+      {goingToDark ? <MoonIcon size={16} aria-hidden="true" /> : <SunIcon size={16} aria-hidden="true" />}
     </button>
   );
 }
@@ -161,19 +143,19 @@ function WeatherBadge() {
             });
           }
         } catch {
-          /* silent fail — weather is cosmetic */
+          /* weather is optional */
         }
       },
-      () => { /* geolocation denied — skip weather */ }
+      () => { /* no location: skip weather */ }
     );
   }, []);
 
   if (!weather) return null;
 
   const Icon =
-    weather.desc === "Rain" ? CloudRain
-    : weather.desc === "Clouds" ? Cloud
-    : Sun;
+    weather.desc === "Rain" ? CloudRainIcon
+    : weather.desc === "Clouds" ? CloudIcon
+    : SunIcon;
 
   return (
     <div className="weather-badge">
@@ -183,15 +165,15 @@ function WeatherBadge() {
   );
 }
 
-export default function TopBar({ user, onLogout, onAvatarClick }) {
+export default function TopBar({ user }) {
   const displayName = user?.displayName || user?.display_name || user?.email?.split("@")[0] || "Driver";
 
   return (
     <header className="top-bar">
       <div className="top-bar-left">
-        <div className="top-bar-logo">
+        <h1 className="top-bar-logo">
 	          {APP_NAME}<span>.</span>
-        </div>
+        </h1>
         <div className="top-bar-greeting">
           {getGreeting()}, <strong>{displayName}</strong>
         </div>
@@ -204,7 +186,7 @@ export default function TopBar({ user, onLogout, onAvatarClick }) {
         <WeatherBadge />
         <ThemeToggle />
         <div className="top-bar-user">
-          {/* Sign out lives in the User Settings panel this opens */}
+          {/* Sign out is in User Settings */}
           <UserSettingsButton photoURL={user?.photoURL || user?.avatar_url} />
         </div>
       </div>

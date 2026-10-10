@@ -97,9 +97,9 @@ export default function OnboardingWizard({ onComplete }) {
 
   return (
     <div className="onboarding-page">
-      <div className="onboarding-card glass-panel">
+      <div className="onboarding-card">
         <div className="onboarding-header">
-          <h2>Welcome to DavaX</h2>
+          <h1>Welcome to DavaX</h1>
           <p>Let's personalize your AI assistant.</p>
           <div className="progress-bar">
             <div

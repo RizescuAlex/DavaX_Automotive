@@ -1,33 +1,22 @@
 import { useState, useEffect } from "react";
-import {
-  Wifi, Lightbulb, CornerUpLeft, CornerUpRight, Car,
-  Minus, Plus, Snowflake,
-} from "lucide-react";
+import { ArrowBendUpLeftIcon, ArrowBendUpRightIcon, HeadlightsIcon, MinusIcon, PlusIcon, SnowflakeIcon, WifiHighIcon } from "@phosphor-icons/react";
 import { useAppStore, CLIMATE_LIMITS } from "../../store";
 import { DOCK_ICON } from "../../config/constants";
 import ClimatePanel from "./ClimatePanel";
 import SeatHeatButton from "./SeatHeatButton";
+import LevelMeter from "./LevelMeter";
 import { FrontDefogIcon, HazardIcon, RearDefogIcon, WiperIcon } from "./CarIcons";
 
 /**
- * Persistent control strip, in four groups: lights and signals, visibility,
- * comfort, temperature. Grouping is what lets a driver find a control by
- * position rather than by reading every glyph.
- *
- * Every button drives real state rather than standing in for hardware this app
- * cannot reach. Lights, signals and wipers are live simulation and are not
- * remembered between sessions; seat heat, A/C level, the defoggers and the
- * temperature persist to climate_settings.
- *
- * The temperature doubles as the opener for the climate panel, which holds the
- * settings you adjust once — fan and auto — so the strip carries only what you
- * reach for while moving.
+ * Bottom control strip: lights and signals, visibility, comfort, temperature.
+ * Lights, signals and wipers are simulation state and aren't saved; seat heat,
+ * A/C, defoggers and temperature are saved to climate_settings. The temperature
+ * opens the climate pop-up (fan, auto).
  */
 export default function BottomDock() {
   const [now, setNow] = useState(new Date());
   const [climateOpen, setClimateOpen] = useState(false);
 
-  const speed = useAppStore((s) => s.speed);
   const headlightsOn = useAppStore((s) => s.headlightsOn);
   const headlightsAuto = useAppStore(
     (s) => s.exteriorLights.headlights.automatic && s.headlightsOverride === null
@@ -67,29 +56,25 @@ export default function BottomDock() {
   return (
     <footer className="dock">
       <div className="dock-section dock-left">
-        <span className="dock-badge">
-          <Car size={16} aria-hidden="true" />
-          {Math.round(speed)} <small>km/h</small>
-        </span>
         <span className="dock-status">
-          <Wifi size={13} aria-hidden="true" />
+          <WifiHighIcon size={13} aria-hidden="true" />
           Connected
         </span>
       </div>
 
       <div className="dock-section dock-center">
-        {/* Lighting and signals — live vehicle state */}
+        {/* Lights and signals */}
         <div className="dock-group" role="group" aria-label="Lights and signals">
           <button
             type="button"
-            className={`dock-btn has-badge ${headlightsOn ? "on" : ""}`}
+            className={`dock-btn ${headlightsOn ? "on" : ""}`}
             aria-pressed={headlightsOn}
             aria-label={`Headlights${headlightsAuto ? ", automatic" : ""}`}
             title={headlightsAuto ? "Headlights (automatic)" : "Headlights"}
             onClick={toggleHeadlights}
           >
-            <Lightbulb size={DOCK_ICON} />
-            {headlightsAuto && <span className="dock-level" aria-hidden="true">A</span>}
+            <HeadlightsIcon size={DOCK_ICON} weight={headlightsOn ? "fill" : "regular"} />
+            <span className="dock-label" aria-hidden="true">{headlightsAuto ? "Auto" : "Lights"}</span>
           </button>
           <button
             type="button"
@@ -100,6 +85,7 @@ export default function BottomDock() {
             onClick={toggleHazards}
           >
             <HazardIcon size={DOCK_ICON} />
+            <span className="dock-label" aria-hidden="true">Hazard</span>
           </button>
           <button
             type="button"
@@ -109,7 +95,8 @@ export default function BottomDock() {
             title="Manual left signal"
             onClick={toggleLeftSignal}
           >
-            <CornerUpLeft size={DOCK_ICON} />
+            <ArrowBendUpLeftIcon size={DOCK_ICON} weight={leftSignal ? "fill" : "regular"} />
+            <span className="dock-label" aria-hidden="true">Left</span>
           </button>
           <button
             type="button"
@@ -119,11 +106,12 @@ export default function BottomDock() {
             title="Manual right signal"
             onClick={toggleRightSignal}
           >
-            <CornerUpRight size={DOCK_ICON} />
+            <ArrowBendUpRightIcon size={DOCK_ICON} weight={rightSignal ? "fill" : "regular"} />
+            <span className="dock-label" aria-hidden="true">Right</span>
           </button>
         </div>
 
-        {/* Visibility — wipers are live state, defoggers persist */}
+        {/* Visibility */}
         <div className="dock-group" role="group" aria-label="Visibility">
           <button
             type="button"
@@ -134,6 +122,7 @@ export default function BottomDock() {
             onClick={toggleWipers}
           >
             <WiperIcon size={DOCK_ICON} />
+            <span className="dock-label" aria-hidden="true">Wipers</span>
           </button>
           <button
             type="button"
@@ -144,6 +133,7 @@ export default function BottomDock() {
             onClick={toggleFrontDefrost}
           >
             <FrontDefogIcon size={DOCK_ICON} />
+            <span className="dock-label" aria-hidden="true">Front</span>
           </button>
           <button
             type="button"
@@ -154,10 +144,11 @@ export default function BottomDock() {
             onClick={toggleRearDefrost}
           >
             <RearDefogIcon size={DOCK_ICON} />
+            <span className="dock-label" aria-hidden="true">Rear</span>
           </button>
         </div>
 
-        {/* Comfort — persists to climate_settings */}
+        {/* Comfort */}
         <div className="dock-group" role="group" aria-label="Comfort">
           <SeatHeatButton side="left" />
           <SeatHeatButton side="right" />
@@ -168,16 +159,13 @@ export default function BottomDock() {
             title="Air conditioning"
             onClick={cycleAcLevel}
           >
-            <Snowflake size={DOCK_ICON} />
-            <span className="dock-ac-bars" aria-hidden="true">
-              {[1, 2, 3].map((step) => (
-                <span key={step} className={step <= acLevel ? "lit" : ""} />
-              ))}
-            </span>
+            <SnowflakeIcon size={DOCK_ICON} weight={acLevel > 0 ? "fill" : "regular"} />
+            <LevelMeter level={acLevel} max={CLIMATE_LIMITS.AC_MAX} />
+            <span className="dock-label" aria-hidden="true">A/C</span>
           </button>
         </div>
 
-        {/* Temperature, and the way into the rest of climate */}
+        {/* Temperature (opens the climate pop-up) */}
         <div className="dock-climate">
           <button
             type="button"
@@ -185,7 +173,7 @@ export default function BottomDock() {
             aria-label="Decrease target temperature"
             onClick={() => adjustTargetTemp(-CLIMATE_LIMITS.TEMP_STEP)}
           >
-            <Minus size={DOCK_ICON - 2} />
+            <MinusIcon size={DOCK_ICON - 2} />
           </button>
           <button
             type="button"
@@ -203,7 +191,7 @@ export default function BottomDock() {
             aria-label="Increase target temperature"
             onClick={() => adjustTargetTemp(CLIMATE_LIMITS.TEMP_STEP)}
           >
-            <Plus size={DOCK_ICON - 2} />
+            <PlusIcon size={DOCK_ICON - 2} />
           </button>
 
           {climateOpen && <ClimatePanel onClose={() => setClimateOpen(false)} />}

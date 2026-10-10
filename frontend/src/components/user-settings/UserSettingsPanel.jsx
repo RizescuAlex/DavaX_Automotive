@@ -1,13 +1,14 @@
-import { useEffect, useState } from "react";
-import { LogOut, User, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { SignOutIcon, UserIcon, XIcon } from "@phosphor-icons/react";
 import { useAuth } from "../../auth/useAuth";
 import { apiFetch } from "../../config/api";
 import { DESIGN_PREVIEW } from "../../config/devPreview";
 import { useAppStore } from "../../store";
+import { usePanelFocus } from "../../hooks/usePanelFocus";
 import "../vehicle-settings/VehiclePreferencesPanel.css";
 import "./UserSettingsPanel.css";
 
-/** The onboarding wizard's routing questions, asked again here. */
+/** The onboarding wizard's routing questions. */
 const PRIORITIES = [
   ["fastest_arrival", "Fastest arrival"],
   ["lowest_cost", "Lowest cost"],
@@ -23,16 +24,9 @@ const FUEL_TYPES = [
 ];
 
 /**
- * User Settings, opened from the person icon in the top bar — a panel over
- * the map like the assistant and Vehicle Preferences.
- *
- * Profile comes from /users/me and route preferences from /preferences/me,
- * the answers the onboarding wizard collected. A driver who skipped onboarding
- * has no preferences record (the endpoint 404s), so that section says so
- * instead of offering a form that could not save.
- *
- * Sign out sits in the footer, on the opposite side from Save, so the two are
- * never a mis-tap apart.
+ * User Settings. Profile from /users/me, route preferences from
+ * /preferences/me. Users who skipped onboarding have no preferences record
+ * (404), so that section shows a note instead of a form.
  */
 export default function UserSettingsPanel() {
   const open = useAppStore((s) => s.userSettingsOpen);
@@ -50,7 +44,7 @@ function UserSettingsContent({ onClose }) {
   const setBackendUser = useAppStore((s) => s.setBackendUser);
   const setCustomAuth = useAppStore((s) => s.setCustomAuth);
 
-  // Google sign-ins carry backendUser; email/password sign-ins carry customUser.
+  // Google sign-ins have backendUser; email/password sign-ins have customUser.
   const profile = backendUser ?? customUser ?? {};
   const savedName = profile.display_name ?? profile.displayName ?? "";
   const savedUsername = profile.username ?? "";
@@ -69,7 +63,7 @@ function UserSettingsContent({ onClose }) {
     let cancelled = false;
 
     async function load() {
-      // No session in preview mode, and a 401 would bounce to /login.
+      // No session in preview mode; a 401 would redirect to /login.
       if (DESIGN_PREVIEW) {
         setPreferencesNote("Route preferences load once you are signed in.");
         setLoading(false);
@@ -100,14 +94,9 @@ function UserSettingsContent({ onClose }) {
     };
   }, []);
 
-  // Escape closes, as it does the other panels.
-  useEffect(() => {
-    const onKey = (event) => {
-      if (event.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  // Focus in on open, Escape to close, focus back to the opener.
+  const panelRef = useRef(null);
+  usePanelFocus(panelRef, onClose);
 
   const setPreference = (field, value) =>
     setPreferences((previous) => ({ ...previous, [field]: value }));
@@ -119,9 +108,8 @@ function UserSettingsContent({ onClose }) {
     setError("");
 
     try {
-      // One PUT for both profile fields, sending only what changed. The
-      // backend lowercases and validates the username and answers 409 if
-      // someone else has it; that message goes straight to the status line.
+      // One PUT with only the changed fields. A taken username returns 409,
+      // shown as is.
       const name = displayName.trim();
       const handle = username.trim().replace(/^@/, "").toLowerCase();
       const profileChanges = {};
@@ -133,7 +121,7 @@ function UserSettingsContent({ onClose }) {
           method: "PUT",
           body: JSON.stringify(profileChanges),
         });
-        // The top bar reads these, so update whichever sign-in this driver used.
+        // Update whichever user object the top bar reads.
         const fresh = { display_name: updated.display_name, username: updated.username };
         if (backendUser) setBackendUser({ ...backendUser, ...fresh });
         if (customUser) setCustomAuth(customToken, { ...customUser, ...fresh });
@@ -158,9 +146,9 @@ function UserSettingsContent({ onClose }) {
   };
 
   return (
-    <section className="prefs-panel user-panel" aria-label="User Settings">
+    <section ref={panelRef} tabIndex={-1} className="prefs-panel user-panel" aria-label="User Settings">
       <header className="prefs-head">
-        <User size={16} className="prefs-head-icon" aria-hidden="true" />
+        <UserIcon size={16} className="prefs-head-icon" aria-hidden="true" />
         <h2 className="prefs-head-title">User Settings</h2>
         <button
           type="button"
@@ -168,7 +156,7 @@ function UserSettingsContent({ onClose }) {
           onClick={onClose}
           aria-label="Close user settings"
         >
-          <X size={18} />
+          <XIcon size={18} />
         </button>
       </header>
 
@@ -182,7 +170,7 @@ function UserSettingsContent({ onClose }) {
                 {profile.avatar_url || profile.photoURL ? (
                   <img src={profile.avatar_url || profile.photoURL} alt="" />
                 ) : (
-                  <User size={26} aria-hidden="true" />
+                  <UserIcon size={26} aria-hidden="true" />
                 )}
               </div>
               <div className="user-identity-text">
@@ -290,7 +278,7 @@ function UserSettingsContent({ onClose }) {
 
       <footer className="prefs-foot">
         <button type="button" className="btn btn-secondary user-signout" onClick={logout}>
-          <LogOut size={15} aria-hidden="true" />
+          <SignOutIcon size={15} aria-hidden="true" />
           Sign out
         </button>
         <span className={`prefs-status ${error ? "error" : ""}`} role="status">

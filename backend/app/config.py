@@ -22,12 +22,25 @@ class Settings(BaseSettings):
     MAPBOX_ACCESS_TOKEN: str = ""
     OPENWEATHERMAP_API_KEY: str = ""
 
+    # OpenAI (in-car assistant). Deliberately not VITE_-prefixed: the key must
+    # stay backend-side, which is the reason the assistant route exists at all.
+    OPENAI_API_KEY: str = ""
+    OPENAI_MODEL: str = "gpt-4.1-mini"
+    # Only for reasoning models (gpt-5 family): "none", "minimal", "low", ...
+    # Left empty, no reasoning setting is sent, which non-reasoning models need.
+    OPENAI_REASONING_EFFORT: str = ""
+
+    # LiveKit voice calls
+    LIVEKIT_URL: str = ""
+    LIVEKIT_API_KEY: str = ""
+    LIVEKIT_API_SECRET: str = ""
+    GESTURE_BRIDGE_TOKEN: str = ""
+
     # SmartRoute defaults
     FUEL_TANK_CAPACITY_L: int = 50
     FUEL_CONSUMPTION_L_PER_100KM: float = 7.5
     FUEL_RESERVE_THRESHOLD_PCT: int = 15
     WEATHER_API_URL: str = "https://api.open-meteo.com/v1/forecast"
-
 
     # Spotify
     SPOTIFY_CLIENT_ID: str = ""

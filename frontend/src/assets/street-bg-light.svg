@@ -1,37 +1,20 @@
 <svg width="1600" height="1200" viewBox="0 0 1600 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
-<!--
-  Daylight counterpart to street-bg.svg.
-
-  Same geometry, filters and luminance ORDER as the night scene — asphalt
-  darkest, lane marking brightest — but the whole range is lifted and
-  inverted in feel: in daylight the road is a mid grey read against pale
-  verges, rather than near-black read against slate.
-
-  Colours are the day tokens' neighbours, so the stage sits in the light
-  panel rather than punching a hole in it:
-    verge / mid / far   #dce4ed  #d2dbe5  #c8d3df
-    asphalt             #9aa8b6
-    lane marking        #1f6fb2  (the day accent, as the night scene uses
-                                  the night accent)
-
-  The road's inner shadow is softened from 0.47 to 0.28 alpha: the same
-  shadow that reads as depth on dark asphalt reads as grime on light.
--->
+<!-- Day version of street-bg.svg: same geometry, lighter palette, softer road shadow (0.28 instead of 0.47). -->
 <g clip-path="url(#street-clip)">
   <g transform="translate(0, -200)">
     <!-- Ground planes, light to dark -->
-    <rect x="-100" y="-600" width="1800" height="2200" fill="#dce4ed"/>
-    <path d="M853.135 1216C587.801 1058.67 3.39063 697.4 -12.6094 691L-12.6094 1500L853.135 1500Z" fill="#d2dbe5"/>
-    <path d="M-68.6094 18L-81 -546L1658.55 -175L1735.39 766L-68.6094 18Z" fill="#c8d3df"/>
+    <rect x="-100" y="-600" width="1800" height="2200" fill="#e6e6e3"/>
+    <path d="M853.135 1216C587.801 1058.67 3.39063 697.4 -12.6094 691L-12.6094 1500L853.135 1500Z" fill="#dcdcd8"/>
+    <path d="M-68.6094 18L-81 -546L1658.55 -175L1735.39 766L-68.6094 18Z" fill="#d2d2ce"/>
 
     <!-- Asphalt -->
     <g filter="url(#road-inner-shadow)">
-      <path d="M1602.5 780.5L-10 47L-10 698.5L1339.8 1500L1602.5 1500L1602.5 780.5Z" fill="#9aa8b6"/>
+      <path d="M1602.5 780.5L-10 47L-10 698.5L1339.8 1500L1602.5 1500L1602.5 780.5Z" fill="#8d8e8a"/>
     </g>
     <!-- Lane marking along the far edge -->
-    <path d="M-10.6094 54L-24.8652 -24L1669.13 666L1689.39 832L-10.6094 54Z" fill="#1f6fb2" opacity="0.72"/>
+    <path d="M-10.6094 54L-24.8652 -24L1669.13 666L1689.39 832L-10.6094 54Z" fill="#ffffff" opacity="0.72"/>
 
-    <!-- Distance haze — light and airy rather than a darkening toward the top -->
+    <!-- Haze -->
     <rect x="-100" y="-600" width="1800" height="2200" fill="url(#haze)"/>
     <rect x="-100" y="-600" width="1800" height="2200" filter="url(#grain)" opacity="0.10" style="mix-blend-mode:overlay"/>
   </g>
@@ -54,7 +37,7 @@
   <linearGradient id="haze" x1="800" y1="200" x2="800" y2="1400" gradientUnits="userSpaceOnUse">
     <stop stop-color="#ffffff" stop-opacity="0.62"/>
     <stop offset="0.45" stop-color="#ffffff" stop-opacity="0"/>
-    <stop offset="1" stop-color="#8f9fae" stop-opacity="0.22"/>
+    <stop offset="1" stop-color="#8d8e8a" stop-opacity="0.22"/>
   </linearGradient>
   <clipPath id="street-clip"><rect width="1600" height="1200" fill="white"/></clipPath>
 </defs>
