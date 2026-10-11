@@ -206,32 +206,66 @@ class PlatformBackendClient:
     # return 404 until you add them.
     # =========================================================
 
-    def volume_up(self):
+    VOLUME_STEP = 10
 
-        if not self._can_send(
-            "VOLUME_UP"
-        ):
+    def _get_current_volume(self):
+        url = f"{self.api_base}/spotify/current"
+
+        try:
+            response = requests.get(url, timeout=2.0)
+            response.raise_for_status()
+
+            data = response.json()
+            volume = data.get("volume_percent")
+
+            if volume is None:
+                print("Spotify did not report a volume level")
+                return None
+
+            return int(volume)
+
+        except (requests.RequestException, ValueError, TypeError) as error:
+            print("Could not read Spotify volume:", error)
+            return None
+
+    def _change_volume(self, delta):
+        current_volume = self._get_current_volume()
+
+        if current_volume is None:
             return
 
-        print(
-            "GESTURE -> VOLUME UP"
+        new_volume = max(
+            0,
+            min(100, current_volume + delta)
         )
 
-        self._post_async(
-            "/spotify/volume-up"
+        if new_volume == current_volume:
+            return
+
+        self._post(
+            "/spotify/volume",
+            json_data={
+                "volume_percent": new_volume
+            }
         )
+
+    def volume_up(self):
+        if not self._can_send("VOLUME_UP"):
+            return
+
+        threading.Thread(
+            target=self._change_volume,
+            args=(self.VOLUME_STEP,),
+            daemon=True,
+        ).start()
 
     def volume_down(self):
-
-        if not self._can_send(
-            "VOLUME_DOWN"
-        ):
+        if not self._can_send("VOLUME_DOWN"):
             return
 
-        print(
-            "GESTURE -> VOLUME DOWN"
-        )
-
-        self._post_async(
-            "/spotify/volume-down"
-        )
+        threading.Thread(
+            target=self._change_volume,
+            args=(-self.VOLUME_STEP,),
+            daemon=True,
+        ).start()
+        VOLUME_STEP=10

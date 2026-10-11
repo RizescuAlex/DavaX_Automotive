@@ -3,7 +3,7 @@ import math
 import time
 import os
 import numpy as np
-
+import threading
 from collections import deque
 
 from motion.platform_backend_client import PlatformBackendClient
@@ -1493,7 +1493,7 @@ def main():
                             print(
                                 "GESTURE: VOLUME UP"
                             )
-
+                            backend.volume_up()
                             # Enable this after adding
                             # the backend route:
                             #
@@ -1524,7 +1524,7 @@ def main():
                             print(
                                 "GESTURE: VOLUME DOWN"
                             )
-
+                            backend.volume_down()
                             # Enable this after adding
                             # the backend route:
                             #

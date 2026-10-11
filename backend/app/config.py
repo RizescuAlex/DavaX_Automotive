@@ -31,10 +31,10 @@ class Settings(BaseSettings):
     OPENAI_REASONING_EFFORT: str = ""
 
     # LiveKit voice calls
-    LIVEKIT_URL: str = ""
-    LIVEKIT_API_KEY: str = ""
-    LIVEKIT_API_SECRET: str = ""
-    GESTURE_BRIDGE_TOKEN: str = ""
+    LIVEKIT_URL: str = "wss://davax-automotive-hohl7l7d.livekit.cloud"
+    LIVEKIT_API_KEY: str = "APIfo3jFabFUwpR"
+    LIVEKIT_API_SECRET: str = "ADss7SCUo1aIDFU4z4df4IgExe7ODbk1mf6NO6oROkAA"
+    GESTURE_BRIDGE_TOKEN: str = "OrtcmywpENld3g9slTUnht9EedvElrgNd9phGWVL7UA"
 
     # SmartRoute defaults
     FUEL_TANK_CAPACITY_L: int = 50
