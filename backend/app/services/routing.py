@@ -68,6 +68,7 @@ def _build_request_body(
     avoid_highways: bool = False,
     departure_time: str | None = None,
     waypoints: list[dict] | None = None,
+    compute_alternatives: bool = True,
 ) -> dict[str, Any]:
     """Build the Routes API request body."""
     body: dict[str, Any] = {
@@ -83,7 +84,7 @@ def _build_request_body(
         },
         "travelMode": "DRIVE",
         "routingPreference": "TRAFFIC_AWARE",
-        "computeAlternativeRoutes": True,
+        "computeAlternativeRoutes": compute_alternatives,
         "routeModifiers": {
             "avoidTolls": avoid_tolls,
             "avoidHighways": avoid_highways,
@@ -101,7 +102,8 @@ def _build_request_body(
             {
                 "location": {
                     "latLng": {"latitude": wp["lat"], "longitude": wp["lng"]}
-                }
+                },
+                **({"via": True} if wp.get("via") else {}),
             }
             for wp in waypoints
         ]
@@ -203,6 +205,7 @@ def _parse_route(route: dict, index: int) -> dict[str, Any]:
     return {
         "index": index,
         "polylines": polylines,
+        "overview_polyline": route.get("polyline", {}).get("encodedPolyline"),
         "distance_m": distance_m,
         "distance_text": _format_distance(distance_m),
         "duration_s": duration_s,
@@ -223,6 +226,7 @@ async def compute_routes(
     avoid_highways: bool = False,
     departure_time: str | None = None,
     waypoints: list[dict] | None = None,
+    compute_alternatives: bool = True,
 ) -> list[dict[str, Any]]:
     """
     Call the Google Routes API and return parsed candidate routes.
@@ -237,6 +241,7 @@ async def compute_routes(
         avoid_highways=avoid_highways,
         departure_time=departure_time,
         waypoints=waypoints,
+        compute_alternatives=compute_alternatives,
     )
 
     headers = {

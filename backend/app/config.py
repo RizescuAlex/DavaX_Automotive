@@ -39,7 +39,8 @@ class Settings(BaseSettings):
     # SmartRoute defaults
     FUEL_TANK_CAPACITY_L: int = 50
     FUEL_CONSUMPTION_L_PER_100KM: float = 7.5
-    FUEL_RESERVE_THRESHOLD_PCT: int = 15
+    # Refueling plans preserve a practical reserve instead of targeting empty.
+    FUEL_RESERVE_THRESHOLD_PCT: int = 20
     WEATHER_API_URL: str = "https://api.open-meteo.com/v1/forecast"
 
     # Spotify

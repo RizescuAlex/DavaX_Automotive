@@ -1,9 +1,11 @@
 .PHONY: dev stop migrate seed test lint clean
 
 dev:
+	docker compose down --volumes --remove-orphans
 	docker compose up --build
 
 dev-detached:
+	docker compose down --volumes --remove-orphans
 	docker compose up --build -d
 
 stop:

@@ -16,7 +16,23 @@ class RouteRequest(BaseModel):
     departure_time: str | None = None
     waypoints: list[Waypoint] | None = None
     overrides: RouteOverrides | None = None
-    current_fuel_level: int | None = None
+    current_fuel_level: float | None = Field(default=None, ge=0, le=100)
+
+
+class RouteFuelStopRequest(BaseModel):
+    # The frontend sends the untraveled route, starting at the simulated car.
+    encoded_route: str = Field(min_length=2, max_length=100_000)
+
+
+class RouteFuelStopResponse(BaseModel):
+    place_id: str
+    name: str
+    address: str = ""
+    lat: float
+    lng: float
+    distance_ahead_m: int
+    distance_to_route_m: int
+    station_type: str
 
 
 class RouteLocation(BaseModel):
@@ -38,6 +54,21 @@ class RouteScores(BaseModel):
     weather_risk: float
     utility: float
 
+class SuggestedStop(BaseModel):
+    place_id: str
+    name: str
+    type: str = "fuel"
+    lat: float
+    lng: float
+    arrival_fuel_pct: int | None = None
+    arrival_fuel_liters: float | None = None
+    arrival_fuel_amount: float | None = None
+    distance_from_start_km: float | None = None
+    detour_min: int = 0
+    fuel_price: float | None = None
+    fuel_currency: str | None = None
+
+
 class RouteCandidate(BaseModel):
     index: int
     selected: bool
@@ -48,10 +79,17 @@ class RouteCandidate(BaseModel):
     duration_text: str
     destination_address: str | None = None
     toll_estimate: dict | None = None
+    estimated_fuel_stops: int = 0
     labels: list[str] = Field(default_factory=list)
     maneuvers: list[RouteManeuver] = Field(default_factory=list)
     scores: RouteScores
     explanation: str
+    estimated_trip_cost: float | None = None
+    estimated_fuel_litres: float | None = None
+    fuel_price_per_l: float | None = None
+    fuel_currency: str | None = None
+    suggested_stops: list[SuggestedStop] = Field(default_factory=list)
+
 
 class WeatherWarning(BaseModel):
     location: str
@@ -61,15 +99,6 @@ class WeatherWarning(BaseModel):
     condition: str
     message: str
 
-class SuggestedStop(BaseModel):
-    place_id: str
-    name: str
-    type: str
-    lat: float
-    lng: float
-    arrival_fuel_pct: int
-    detour_min: int
-    fuel_price: float | None = None
 
 class RouteResponse(BaseModel):
     polylines: list[str]
@@ -81,6 +110,8 @@ class RouteResponse(BaseModel):
     suggested_stops: list[SuggestedStop] = Field(default_factory=list)
     trip_id: str | None = None
     maneuvers: list[RouteManeuver] = Field(default_factory=list)
+    fuel_currency: str | None = None
+
 
 class TripConfirmRequest(BaseModel):
     selected_route_index: int

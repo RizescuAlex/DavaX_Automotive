@@ -29,30 +29,14 @@ def main():
     is_build = "--build" in sys.argv
 
     if is_build:
-        print("🛠️  Building images and starting services...")
-        run_cmd(get_prefix() + ["docker", "compose", "up", "-d", "--build"])
-        
-        print("🧹 Cleaning up intermediate build artifacts immediately...")
-        run_cmd(get_prefix() + ["docker", "builder", "prune", "-f"])
+        print("⚠️  Removing Compose volumes (Postgres and Redis data will be deleted)...")
+        run_cmd(get_prefix() + ["docker", "compose", "down", "--volumes", "--remove-orphans"])
+
+        print("🛠️  Building images and starting services with a fresh database...")
+        run_cmd(get_prefix() + ["docker", "compose", "up", "-d", "--build", "--wait"])
     else:
         print("⚡ Starting services (using existing cache)...")
-        run_cmd(get_prefix() + ["docker", "compose", "up", "-d"])
-
-    # Python packages setup inside backend
-    print("📦 Synchronizing Python dependencies...")
-    run_cmd(get_prefix() + ["docker", "compose", "exec", "backend", "pip", "install", "--quiet", "--disable-pip-version-check", "-r", "requirements.txt"])
-
-    # Reconcile split migration histories if any exist
-    print("🔄 Resolving potential database migration conflicts...")
-    subprocess.run(
-        get_prefix() + ["docker", "compose", "exec", "backend", "alembic", "merge", "-m", "Auto-reconciled divergent heads", "heads"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL
-    )
-
-    # Apply database migrations safely
-    print("🗄️  Applying database migrations...")
-    run_cmd(get_prefix() + ["docker", "compose", "exec", "backend", "alembic", "upgrade", "head"])
+        run_cmd(get_prefix() + ["docker", "compose", "up", "-d", "--wait"])
     
     print("✅ App is up and running smoothly!")
 

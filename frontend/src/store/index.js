@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { getVehicleSettings, saveClimateSettings, saveExteriorLights } from "../api/vehicle";
+import { calculateFuelLevelAfterDistance } from "../utils/fuelConsumption";
 
 const CUSTOM_TOKEN_KEY = "davax_token";
 const CUSTOM_USER_KEY = "davax_user";
@@ -409,6 +410,43 @@ export const useAppStore = create((set, get) => ({
   // ── Vehicle simulation ────────────────────────────────────────────────────
   speed: 0,
   fuelLevel: 78,
+  fuelCapacity: 50,
+  fuelCapacityUnit: "L",
+  fuelConsumption: 7.5,
+  fuelConsumptionUnit: "L/100 km",
+  fuelConsumptionSource: "default",
+  fuelReservePct: 20,
+  fuelProfileSource: "default",
+  fuelProfileTrim: null,
+  setFuelProfile: (profile) => {
+    if (!profile || !Number.isFinite(Number(profile.capacity))) return;
+    set({
+      fuelCapacity: Number(profile.capacity),
+      fuelCapacityUnit: profile.capacity_unit || "L",
+      fuelConsumption: Number(profile.consumption) || 0,
+      fuelConsumptionUnit: profile.consumption_unit || "L/100 km",
+      fuelConsumptionSource: profile.consumption_source || "default",
+      fuelReservePct: Number(profile.reserve_threshold_pct) || 20,
+      fuelProfileSource: profile.source || "default",
+      fuelProfileTrim: profile.selected_trim_name || null,
+    });
+  },
+  setFuelAmount: (amount) => {
+    const { fuelCapacity } = get();
+    const litersOrKwh = Number(amount);
+    if (!Number.isFinite(litersOrKwh) || fuelCapacity <= 0) return;
+    set({ fuelLevel: Math.max(0, Math.min(100, litersOrKwh / fuelCapacity * 100)) });
+  },
+  consumeFuelForDistance: (distanceMeters) => {
+    const { fuelLevel, fuelCapacity, fuelConsumption } = get();
+    const nextFuelLevel = calculateFuelLevelAfterDistance(
+      fuelLevel,
+      distanceMeters,
+      fuelConsumption,
+      fuelCapacity
+    );
+    if (nextFuelLevel !== fuelLevel) set({ fuelLevel: nextFuelLevel });
+  },
   engineTemp: 88,
   headlightsOn: isDark(),
   leftSignal: false,
@@ -474,8 +512,6 @@ export const useAppStore = create((set, get) => ({
         // Speed oscillates around 30–80 km/h
         const newSpeed = 55 + 25 * Math.sin(tick * 0.04) + (Math.random() - 0.5) * 4;
 
-        const newFuel = Math.max(0, s.fuelLevel - 0.005);
-
         // Engine temp hovers around 85–95°C
         const newTemp = 90 + 5 * Math.sin(tick * 0.02) + (Math.random() - 0.5) * 2;
 
@@ -489,7 +525,6 @@ export const useAppStore = create((set, get) => ({
 
         return {
           speed: Math.max(0, newSpeed),
-          fuelLevel: newFuel,
           engineTemp: Math.max(60, Math.min(130, newTemp)),
           cabinTemp: newCabin,
         };

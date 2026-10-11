@@ -18,11 +18,13 @@ class RouteFeatures:
     distance_m: int = 0
     toll_cost: float = 0.0
     fuel_cost: float = 0.0
+    fuel_stop_count: int = 0
     highway_fraction: float = 1.0       # 0.0 = all local roads, 1.0 = all highway
     scenic_score: float = 0.0           # density of parks/viewpoints (Phase 4)
     family_stop_score: float = 0.0      # quality/spacing of family stops (Phase 4)
     weather_risk: float = 0.0           # 0.0 = clear, 1.0 = severe (Phase 3)
     labels: list[str] = field(default_factory=list)
+    corridor_via_name: str = ""
 
 
 @dataclass
@@ -97,7 +99,9 @@ def _compute_cost_scores(
     costs = []
     for r in routes:
         fuel = (r.distance_m / 100_000) * consumption_l_per_100km * fuel_price_per_l
-        total = fuel + r.toll_cost
+        # A modest allowance captures the extra time/detour burden of each
+        # required fuel stop; its count depends on the driver's current level.
+        total = fuel + r.toll_cost + (r.fuel_stop_count * 10.0)
         costs.append(total)
         r.fuel_cost = fuel  # store for explanation
 
@@ -129,27 +133,30 @@ def _compute_scenic_scores(routes: list[RouteFeatures]) -> list[float]:
 def _compute_family_scores(routes: list[RouteFeatures]) -> list[float]:
     """
     Score routes on family-friendliness (0–10).
-
-    In Phase 4, this will use actual stop quality/spacing.
-    For now, shorter routes with lower weather risk score higher.
+    Heavily rewards routes rich in family tourist attractions, museums, and amusement spots.
     """
     if not routes:
         return []
 
-    # Placeholder: use family_stop_score directly (populated in Phase 4)
     raw = [r.family_stop_score for r in routes]
-    max_r = max(raw) if raw else 0
-    if max_r == 0:
-        # Fallback: prefer shorter, safer routes for families
-        durations = [r.duration_s for r in routes]
-        min_d, max_d = min(durations), max(durations)
-        if max_d == min_d:
-            return [5.0] * len(routes)
-        return [
-            5.0 + 5.0 * (1.0 - (d - min_d) / (max_d - min_d)) * (1.0 - r.weather_risk)
-            for d, r in zip(durations, routes)
-        ]
-    return [10.0 * (v / max_r) if max_r > 0 else 5.0 for v in raw]
+    max_r = max(raw) if raw else 0.0
+
+    if max_r > 0.05:
+        scores = []
+        for r in routes:
+            attraction_part = min(8.0, r.family_stop_score * 8.0)
+            scores.append(round(min(10.0, attraction_part + 2.0 * (1.0 - r.weather_risk)), 1))
+        return scores
+
+    # Fallback when no tourist attractions are along the corridor (e.g. short city commutes):
+    durations = [r.duration_s for r in routes]
+    min_d, max_d = min(durations), max(durations)
+    if max_d == min_d:
+        return [5.0] * len(routes)
+    return [
+        round(5.0 + 5.0 * (1.0 - (d - min_d) / (max_d - min_d)) * (1.0 - r.weather_risk), 1)
+        for d, r in zip(durations, routes)
+    ]
 
 
 # ── Pareto Filter ─────────────────────────────────────────────────────────────
@@ -294,9 +301,23 @@ def _build_explanation(
     elif s.weather_risk >= 0.3:
         parts.append("— moderate weather concerns")
 
-    # Fuel efficiency label
+    # Special route labels
     feat = next((f for f in features if f.index == s.index), None)
-    if feat and "FUEL_EFFICIENT" in feat.labels:
-        parts.append("🌿 fuel-efficient")
+    if feat:
+        via_name = getattr(feat, "corridor_via_name", "") or ""
+        if "MOUNTAIN_CORRIDOR" in feat.labels:
+            if via_name and via_name != "Scenic corridor":
+                parts.append(f"🏔️ scenic mountain corridor via {via_name}")
+            else:
+                parts.append("🏔️ scenic mountain & regional corridor")
+        elif "TOURIST_CORRIDOR" in feat.labels:
+            if via_name and via_name != "Scenic corridor":
+                parts.append(f"🏰 cultural corridor via {via_name}")
+            else:
+                parts.append("🏰 passes through tourist attraction corridor")
+        elif "SCENIC_REGIONAL" in feat.labels:
+            parts.append("🌿 scenic regional roads")
+        if "FUEL_EFFICIENT" in feat.labels:
+            parts.append("🌿 fuel-efficient")
 
     return ". ".join(parts) + "."

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { GearSixIcon, MinusIcon, PlusIcon, XIcon } from "@phosphor-icons/react";
+import { Link } from "react-router-dom";
 import { getVehicleSettings, saveVehicleSettings } from "../../api/vehicle";
 import { useAppStore, CLIMATE_LIMITS, EXTERIOR_LIGHT_DEFAULTS } from "../../store";
 import { usePanelFocus } from "../../hooks/usePanelFocus";
@@ -135,6 +136,16 @@ export default function VehiclePreferencesPanel() {
 
 function PreferencesContent({ onClose }) {
   const applyVehicleSettings = useAppStore((s) => s.applyVehicleSettings);
+  const fuelLevel = useAppStore((s) => s.fuelLevel);
+  const fuelCapacity = useAppStore((s) => s.fuelCapacity);
+  const fuelCapacityUnit = useAppStore((s) => s.fuelCapacityUnit);
+  const fuelConsumption = useAppStore((s) => s.fuelConsumption);
+  const fuelConsumptionUnit = useAppStore((s) => s.fuelConsumptionUnit);
+  const fuelConsumptionSource = useAppStore((s) => s.fuelConsumptionSource);
+  const fuelProfileSource = useAppStore((s) => s.fuelProfileSource);
+  const fuelProfileTrim = useAppStore((s) => s.fuelProfileTrim);
+  const setFuelAmount = useAppStore((s) => s.setFuelAmount);
+  const currentFuelAmount = Math.max(0, fuelCapacity * fuelLevel / 100);
 
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [selectedLight, setSelectedLight] = useState("driver_leg");
@@ -308,6 +319,7 @@ function PreferencesContent({ onClose }) {
 
       <nav className="prefs-sections" aria-label="Vehicle preference sections">
         {[
+          ["fuel", "Fuel & range"],
           ["climate", "Climate"],
           ["ambient", "Cabin lighting"],
           ["exterior", "Exterior lights"],
@@ -332,6 +344,51 @@ function PreferencesContent({ onClose }) {
             className="vehicle-settings-form"
             onSubmit={handleSave}
           >
+            <section className="settings-section" id="prefs-fuel">
+              <h2>Fuel &amp; range</h2>
+              <p className="fuel-settings-description">
+                Set the simulated amount currently in the tank. This updates the dashboard immediately.
+              </p>
+
+              <div className="fuel-settings-readout">
+                <strong>{Math.round(fuelLevel)}%</strong>
+                <span>{currentFuelAmount.toFixed(1)} {fuelCapacityUnit} in a {fuelCapacity.toFixed(1)} {fuelCapacityUnit} tank</span>
+              </div>
+              <label className="settings-field fuel-settings-field" htmlFor="prefs-fuel-amount">
+                Current amount ({fuelCapacityUnit})
+                <input
+                  id="prefs-fuel-amount"
+                  className="fuel-settings-slider"
+                  type="range"
+                  min="0"
+                  max={fuelCapacity}
+                  step="0.1"
+                  value={currentFuelAmount}
+                  onChange={(event) => setFuelAmount(event.target.value)}
+                  aria-valuetext={`${currentFuelAmount.toFixed(1)} ${fuelCapacityUnit}, ${Math.round(fuelLevel)} percent`}
+                />
+                <span className="fuel-settings-range-labels">
+                  <span>Empty</span>
+                  <span>{fuelCapacity.toFixed(1)} {fuelCapacityUnit}</span>
+                </span>
+              </label>
+
+              <div className="fuel-settings-profile">
+                <div>
+                  <strong>Vehicle efficiency</strong>
+                  <span>
+                    {fuelConsumption
+                      ? `${fuelConsumption.toFixed(1)} ${fuelConsumptionUnit} · ${fuelConsumptionSource === "carapi" ? "CarAPI average" : "Default estimate"}`
+                      : "Using default vehicle data"}
+                    {fuelProfileTrim ? ` · ${fuelProfileTrim}` : ""}
+                  </span>
+                </div>
+                <Link className="fuel-profile-link btn btn-secondary" to="/vehicle-test">
+                  {fuelProfileSource === "carapi" ? "Change vehicle configuration" : "Set vehicle configuration"}
+                </Link>
+              </div>
+            </section>
+
             <section className="settings-section" id="prefs-climate">
               <h2>Climate</h2>
 
@@ -698,7 +755,7 @@ function PreferencesContent({ onClose }) {
           className={`prefs-status ${error ? "error" : message ? "success" : ""}`}
           role="status"
         >
-          {error || message || "Changes apply when saved."}
+          {error || message || "Fuel level updates immediately; other preferences apply when saved."}
         </span>
         <button
           className="btn btn-primary prefs-save"

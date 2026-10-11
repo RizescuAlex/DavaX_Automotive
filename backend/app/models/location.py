@@ -13,8 +13,11 @@ class FrequentedLocation(Base):
     user_id: Mapped[str] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
+    place_id: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
+    category: Mapped[str | None] = mapped_column(String(50), nullable=True)
     label: Mapped[str | None] = mapped_column(String(100))
     address: Mapped[str | None] = mapped_column(Text)
+
     latitude: Mapped[float] = mapped_column(Double, nullable=False)
     longitude: Mapped[float] = mapped_column(Double, nullable=False)
     visit_count: Mapped[int] = mapped_column(Integer, default=0)
