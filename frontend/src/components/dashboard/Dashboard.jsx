@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useAuth } from "../../auth/useAuth";
+import { apiFetch } from "../../config/api";
 import { useAppStore } from "../../store";
 import TopBar from "./TopBar";
 import CarVisualization from "./CarVisualization";
@@ -20,11 +21,26 @@ export default function Dashboard() {
   const { user } = useAuth();
   const startSimulation = useAppStore((s) => s.startSimulation);
   const stopSimulation = useAppStore((s) => s.stopSimulation);
+  const setFuelProfile = useAppStore((s) => s.setFuelProfile);
 
   useEffect(() => {
     startSimulation();
     return () => stopSimulation();
   }, [startSimulation, stopSimulation]);
+
+  useEffect(() => {
+    let active = true;
+    apiFetch("/vehicles/me/fuel-profile")
+      .then((profile) => {
+        if (active) setFuelProfile(profile);
+      })
+      .catch((error) => {
+        // The dashboard keeps its conservative configured display defaults if
+        // no saved vehicle profile is available.
+        console.warn("Unable to load vehicle fuel profile:", error.message);
+      });
+    return () => { active = false; };
+  }, [setFuelProfile]);
 
   return (
     <div className="dashboard">

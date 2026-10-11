@@ -176,8 +176,11 @@ async def boost_nearby_locations(
 
 
 
+import uuid
+
+
 async def upsert_frequented_location(
-    user_id: str,
+    user_id: str | uuid.UUID,
     lat: float,
     lng: float,
     db: AsyncSession,
@@ -195,12 +198,13 @@ async def upsert_frequented_location(
     """
     now = datetime.now(timezone.utc)
     increment = 3 if is_arrival else 1
+    user_uuid = uuid.UUID(str(user_id)) if isinstance(user_id, str) else user_id
 
     # 1. Try to find by place_id
     if place_id:
         result = await db.execute(
             select(FrequentedLocation)
-            .where(FrequentedLocation.user_id == user_id, FrequentedLocation.place_id == place_id)
+            .where(FrequentedLocation.user_id == user_uuid, FrequentedLocation.place_id == place_id)
         )
         existing = result.scalar_one_or_none()
         if existing:
@@ -214,7 +218,7 @@ async def upsert_frequented_location(
 
     # 2. Try to find by proximity
     result = await db.execute(
-        select(FrequentedLocation).where(FrequentedLocation.user_id == user_id)
+        select(FrequentedLocation).where(FrequentedLocation.user_id == user_uuid)
     )
     locations = result.scalars().all()
 
@@ -236,7 +240,7 @@ async def upsert_frequented_location(
 
     # 3. Insert new location
     new_loc = FrequentedLocation(
-        user_id=user_id,
+        user_id=user_uuid,
         place_id=place_id,
         label=label,
         category=category,
@@ -246,3 +250,4 @@ async def upsert_frequented_location(
         last_visited_at=now,
     )
     db.add(new_loc)
+

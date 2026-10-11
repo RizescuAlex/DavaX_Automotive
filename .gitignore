@@ -42,3 +42,6 @@ firebase-adminsdk.json
 training/data/*.csv
 .DS_Store
 frontend/.vite/
+
+.agents/
+.specify/

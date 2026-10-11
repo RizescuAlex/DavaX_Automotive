@@ -1,8 +1,8 @@
 """
 Places service for searching stops along a route.
 
-Uses Google Places API (New) Text Search with searchAlongRouteParameters
-to find fuel stations, EV chargers, rest stops, and family-friendly places.
+Uses Google Places API (New) Text Search with searchAlongRouteParameters to find
+fuel stations, EV chargers, and family-friendly places along a route.
 """
 
 from __future__ import annotations
@@ -68,6 +68,9 @@ class PlaceResult:
     has_restroom: bool = False
     fuel_prices: list[dict] | None = None
     ev_charge_options: dict | None = None
+    # Set by route planning after projecting this place onto the route geometry.
+    route_distance_m: float | None = None
+    distance_to_route_m: float | None = None
 
 
 def _parse_place(place: dict) -> PlaceResult:
@@ -190,12 +193,68 @@ async def find_fuel_stops(
     return [r for r in results if r.has_fuel or r.has_ev_charging]
 
 
+FAMILY_ATTRACTION_TYPES = {
+    "tourist_attraction",
+    "amusement_park",
+    "theme_park",
+    "water_park",
+    "zoo",
+    "aquarium",
+    "museum",
+    "historical_landmark",
+    "historical_place",
+    "castle",
+    "palace",
+    "national_park",
+    "botanical_garden",
+    "cultural_center",
+    "planetarium",
+}
+
+
+def compute_family_place_points(place: PlaceResult) -> float:
+    """
+    Score a place based on its tourist attraction value, kid-friendliness,
+    and visitor rating.
+    """
+    points = 0.0
+    place_types = set(place.types)
+
+    # 1. Tourist Attraction & Landmark (primary weight: +2.5 pts)
+    is_attraction = bool(place_types & FAMILY_ATTRACTION_TYPES)
+    name_lower = place.name.lower()
+    attraction_keywords = (
+        "castle", "palace", "museum", "zoo", "aquarium", "fortress",
+        "monument", "amusement", "theme park", "water park", "botanical"
+    )
+    if is_attraction or any(kw in name_lower for kw in attraction_keywords):
+        points += 2.5
+
+    # 2. Kid-friendly amenities (+1.0 pt)
+    if place.good_for_children:
+        points += 1.0
+
+    # 3. Restroom / comfort facility (+0.5 pt)
+    if place.has_restroom:
+        points += 0.5
+
+    # 4. Rating bonus: 4.0+ stars gets a 1.25x multiplier
+    if place.rating and place.rating >= 4.0:
+        points *= 1.25
+
+    return points
+
+
 async def find_family_stops(
     encoded_polyline: str,
     max_results: int = 8,
 ) -> list[PlaceResult]:
-    """Search for family-friendly rest stops along the route."""
-    results = await search_along_route("rest area restaurant family", encoded_polyline, max_results)
+    """Search for family tourist attractions, museums, landmarks, and kid-friendly rest spots along the route."""
+    results = await search_along_route(
+        "family tourist attraction museum landmark amusement park zoo playground",
+        encoded_polyline,
+        max_results,
+    )
     return results
 
 
@@ -206,3 +265,112 @@ async def find_scenic_stops(
     """Search for scenic viewpoints and parks along the route."""
     results = await search_along_route("scenic viewpoint park nature", encoded_polyline, max_results)
     return results
+
+
+async def search_places_in_region(
+    query: str,
+    center_lat: float,
+    center_lng: float,
+    radius_m: float = 40_000,
+    max_results: int = 10,
+) -> list[PlaceResult]:
+    """
+    Search for places within a geographic region (circle) using Google Places API (New).
+    Used to discover attractions and scenic corridors beyond the primary highway path.
+    """
+    body = {
+        "textQuery": query,
+        "locationBias": {
+            "circle": {
+                "center": {
+                    "latitude": center_lat,
+                    "longitude": center_lng,
+                },
+                "radius": min(float(radius_m), 48_000.0),
+            }
+        },
+        "maxResultCount": min(max_results, 20),
+        "languageCode": "en",
+    }
+
+    headers = {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": settings.GOOGLE_MAPS_API_KEY,
+        "X-Goog-FieldMask": FIELD_MASK,
+    }
+
+    client = _get_client()
+
+    try:
+        resp = await client.post(PLACES_SEARCH_URL, json=body, headers=headers)
+    except httpx.TransportError as e:
+        logger.error("Places API regional search transport error: %s", e)
+        return []
+
+    if resp.status_code != 200:
+        logger.error("Places API regional search error %d: %s", resp.status_code, resp.text[:300])
+        return []
+
+    data = resp.json()
+    raw_places = data.get("places", [])
+
+    return [_parse_place(p) for p in raw_places]
+
+
+async def find_regional_family_attractions(
+    center_lat: float,
+    center_lng: float,
+    radius_m: float = 40_000,
+    max_results: int = 10,
+) -> list[PlaceResult]:
+    """Search for top family tourist attractions, museums, castles, and theme parks in a region."""
+    return await search_places_in_region(
+        "tourist attraction castle museum landmark amusement park zoo aquarium botanical garden",
+        center_lat,
+        center_lng,
+        radius_m,
+        max_results,
+    )
+
+
+async def find_regional_scenic_spots(
+    center_lat: float,
+    center_lng: float,
+    radius_m: float = 40_000,
+    max_results: int = 10,
+) -> list[PlaceResult]:
+    """Search for scenic viewpoints, mountain passes, nature reserves, and national parks in a region."""
+    return await search_places_in_region(
+        "scenic viewpoint mountain pass nature reserve national park panorama lake",
+        center_lat,
+        center_lng,
+        radius_m,
+        max_results,
+    )
+
+
+async def find_corridor_hub(
+    anchor_lat: float,
+    anchor_lng: float,
+    radius_m: float = 40_000,
+) -> tuple[float, float, str] | None:
+    """
+    Find a prominent tourist attraction, scenic viewpoint, or landmark in a lateral corridor.
+    Queries Google Places using clean keywords.
+    Returns (lat, lng, name) of a verified real-world place, or None if no place is found.
+    """
+    for query in ("tourist attraction", "scenic viewpoint"):
+        places = await search_places_in_region(
+            query=query,
+            center_lat=anchor_lat,
+            center_lng=anchor_lng,
+            radius_m=min(float(radius_m), 45_000.0),
+            max_results=8,
+        )
+        if places:
+            best = max(places, key=lambda p: (p.rating or 3.5) + (2.0 if p.good_for_children else 0.0))
+            logger.info("Found corridor landmark '%s' at (%.4f, %.4f) for query '%s'", best.name, best.lat, best.lng, query)
+            return best.lat, best.lng, best.name
+
+    logger.info("No corridor landmark found near (%.4f, %.4f)", anchor_lat, anchor_lng)
+    return None

@@ -5,7 +5,13 @@ import {
   Marker,
 } from "@react-google-maps/api";
 import { destinationIcon, fuelStopIcon, weatherIcon } from "./mapMarkers";
-import { ClockIcon, GasPumpIcon, PathIcon, WarningIcon, XIcon } from "@phosphor-icons/react";
+import {
+  ClockIcon,
+  GasPumpIcon,
+  PathIcon,
+  WarningIcon,
+  XIcon,
+} from "@phosphor-icons/react";
 import { MAP_CONFIG } from "../../config/constants";
 import MapSearch from "./MapSearch";
 import { apiFetch } from "../../config/api";
@@ -14,6 +20,9 @@ import {
   advanceTurnSignal,
   detectRouteTurns,
 } from "../../utils/routeManeuvers";
+import {
+  shouldShowFuelStopWarning,
+} from "../../utils/fuelStopPrompt";
 
 function token(name) {
   return getComputedStyle(document.documentElement)
@@ -48,7 +57,8 @@ const DRIVING = {
 
 export default function MapPanel() {
   const theme = useAppStore((s) => s.theme);
-  const fuelLevel = useAppStore((s) => Math.round(s.fuelLevel));
+  const fuelLevel = useAppStore((s) => s.fuelLevel);
+  const consumeFuelForDistance = useAppStore((s) => s.consumeFuelForDistance);
   const setAutomaticTurnSignal = useAppStore((s) => s.setAutomaticTurnSignal);
 
   const [center, setCenter] = useState(FALLBACK_LOCATION);
@@ -65,16 +75,27 @@ export default function MapPanel() {
   const [geoError, setGeoError] = useState(false);
   const [navigationError, setNavigationError] = useState("");
   const [searchResetKey, setSearchResetKey] = useState(0);
+  const [isFindingFuelStop, setIsFindingFuelStop] = useState(false);
+  const [showFuelStopWarning, setShowFuelStopWarning] = useState(false);
 
   const mapRef = useRef(null);
   const carMarkerRef = useRef(null);
   const routePolylinesRef = useRef(new Set());
+  const drivingPolylineRef = useRef(null);
   const animationFrameRef = useRef(null);
   const savedCameraRef = useRef(null);
   const drivingRef = useRef(false);
   const hasCenteredRef = useRef(false);
   const routeRequestRef = useRef(0);
   const latestLocationRef = useRef(null);
+  const simulatedPositionRef = useRef(null);
+  const drivingElapsedSecondsRef = useRef(0);
+  const fuelLevelRef = useRef(fuelLevel);
+  const fuelStopWarningRef = useRef(false);
+  const gasStopLookupControllerRef = useRef(null);
+  const routeProgressRef = useRef(0);
+  const fuelConsumedThroughRef = useRef(0);
+  const autoStartAfterRouteRef = useRef(false);
 
   const selectedRoute = tripData?.routes?.[selectedIndex] ?? null;
   const routeData = useMemo(() => {
@@ -85,8 +106,10 @@ export default function MapPanel() {
       distance: selectedRoute.distance_text,
       duration: selectedRoute.duration_text,
       maneuvers: selectedRoute.maneuvers ?? [],
+      suggested_stops: selectedRoute.suggested_stops ?? tripData?.suggested_stops ?? [],
     };
-  }, [selectedRoute]);
+  }, [selectedRoute, tripData]);
+
 
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "",
@@ -125,6 +148,21 @@ export default function MapPanel() {
   const stopDrivingSimulation = useCallback((restoreCamera = true) => {
     drivingRef.current = false;
     setAutomaticTurnSignal(null);
+    const remainingFuelDistance = Math.max(
+      0,
+      routeProgressRef.current - fuelConsumedThroughRef.current
+    );
+    if (remainingFuelDistance > 0) {
+      consumeFuelForDistance(remainingFuelDistance);
+    }
+    fuelConsumedThroughRef.current = routeProgressRef.current;
+    drivingElapsedSecondsRef.current = 0;
+    routeProgressRef.current = 0;
+    fuelStopWarningRef.current = false;
+    setShowFuelStopWarning(false);
+    gasStopLookupControllerRef.current?.abort();
+    gasStopLookupControllerRef.current = null;
+    setIsFindingFuelStop(false);
 
     if (animationFrameRef.current !== null) {
       cancelAnimationFrame(animationFrameRef.current);
@@ -134,6 +172,12 @@ export default function MapPanel() {
     if (carMarkerRef.current) {
       carMarkerRef.current.setMap(null);
       carMarkerRef.current = null;
+    }
+
+    if (drivingPolylineRef.current) {
+      drivingPolylineRef.current.setPath([]);
+      drivingPolylineRef.current.setMap(null);
+      drivingPolylineRef.current = null;
     }
 
     const map = mapRef.current;
@@ -152,7 +196,7 @@ export default function MapPanel() {
 
     savedCameraRef.current = null;
     setIsDriving(false);
-  }, [setAutomaticTurnSignal]);
+  }, [consumeFuelForDistance, setAutomaticTurnSignal]);
 
   const clearRoutePolylines = useCallback(() => {
     routePolylinesRef.current.forEach((polyline) => {
@@ -160,12 +204,18 @@ export default function MapPanel() {
       polyline.setMap(null);
     });
     routePolylinesRef.current.clear();
+
+    if (drivingPolylineRef.current) {
+      drivingPolylineRef.current.setPath([]);
+      drivingPolylineRef.current.setMap(null);
+      drivingPolylineRef.current = null;
+    }
   }, []);
 
   // Keep explicit ownership of Google Maps overlays so replacement and
   // cancellation detach every rendered route before React updates the preview.
   useEffect(() => {
-    if (!mapInstance || !tripData?.routes?.length || !window.google?.maps) {
+    if (!mapInstance || !tripData?.routes?.length || !window.google?.maps || isDriving) {
       return undefined;
     }
 
@@ -266,6 +316,19 @@ export default function MapPanel() {
       drivingRef.current = false;
       routeRequestRef.current += 1;
       setAutomaticTurnSignal(null);
+      const remainingFuelDistance = Math.max(
+        0,
+        routeProgressRef.current - fuelConsumedThroughRef.current
+      );
+      if (remainingFuelDistance > 0) {
+        consumeFuelForDistance(remainingFuelDistance);
+      }
+      fuelConsumedThroughRef.current = routeProgressRef.current;
+      gasStopLookupControllerRef.current?.abort();
+      gasStopLookupControllerRef.current = null;
+      routeProgressRef.current = 0;
+      drivingElapsedSecondsRef.current = 0;
+      fuelStopWarningRef.current = false;
       clearRoutePolylines();
 
       if (animationFrameRef.current !== null) {
@@ -273,8 +336,17 @@ export default function MapPanel() {
       }
 
       carMarkerRef.current?.setMap(null);
+      if (drivingPolylineRef.current) {
+        drivingPolylineRef.current.setPath([]);
+        drivingPolylineRef.current.setMap(null);
+        drivingPolylineRef.current = null;
+      }
     };
-  }, [clearRoutePolylines, setAutomaticTurnSignal]);
+  }, [clearRoutePolylines, consumeFuelForDistance, setAutomaticTurnSignal]);
+
+  useEffect(() => {
+    fuelLevelRef.current = fuelLevel;
+  }, [fuelLevel]);
 
   const onMapLoad = useCallback((map) => {
     mapRef.current = map;
@@ -334,7 +406,7 @@ export default function MapPanel() {
       return false;
     }
 
-    const positionAtDistance = (distance) => {
+    const getDrivingState = (distance) => {
       const clamped = Math.max(0, Math.min(distance, totalDistance));
 
       let low = 0;
@@ -359,12 +431,17 @@ export default function MapPanel() {
         )
       );
 
-      return spherical.interpolate(
-        segment.start,
-        segment.end,
-        fraction
-      );
+      return {
+        position: spherical.interpolate(
+          segment.start,
+          segment.end,
+          fraction
+        ),
+        segmentIndex: low,
+      };
     };
+
+    const positionAtDistance = (distance) => getDrivingState(distance).position;
 
     savedCameraRef.current = {
       center: map.getCenter()?.toJSON() ?? center,
@@ -375,6 +452,7 @@ export default function MapPanel() {
 
     const initialCamera = savedCameraRef.current;
     const startPosition = positionAtDistance(0);
+    simulatedPositionRef.current = startPosition.toJSON();
 
     let heading = spherical.computeHeading(
       startPosition,
@@ -396,6 +474,17 @@ export default function MapPanel() {
       },
     });
 
+    drivingPolylineRef.current = new maps.Polyline({
+      map,
+      path: [startPosition, ...segments.map((s) => s.end)],
+      ...polylineOptions,
+      strokeColor: polylineOptions.strokeColor,
+      strokeOpacity: 0.95,
+      strokeWeight: 6,
+      zIndex: 10,
+      clickable: false,
+    });
+
     map.setOptions({
       gestureHandling: "none",
       keyboardShortcuts: false,
@@ -413,8 +502,14 @@ export default function MapPanel() {
     let previousTimestamp = null;
     let distanceTravelled = 0;
     let animationTime = 0;
+    drivingElapsedSecondsRef.current = 0;
+    routeProgressRef.current = 0;
+    fuelConsumedThroughRef.current = 0;
     let nextTurnIndex = 0;
     let automaticSignal = null;
+    const initialFuelWarning = shouldShowFuelStopWarning(0, fuelLevelRef.current);
+    fuelStopWarningRef.current = initialFuelWarning;
+    setShowFuelStopWarning(initialFuelWarning);
 
     const animate = (timestamp) => {
       if (!drivingRef.current || mapRef.current !== map) return;
@@ -426,11 +521,27 @@ export default function MapPanel() {
 
       previousTimestamp = timestamp;
       animationTime += deltaSeconds;
+      drivingElapsedSecondsRef.current += deltaSeconds;
 
       distanceTravelled = Math.min(
         distanceTravelled + DRIVING.SPEED * deltaSeconds,
         totalDistance
       );
+      routeProgressRef.current = distanceTravelled;
+
+      if (distanceTravelled - fuelConsumedThroughRef.current >= DRIVING.SPEED) {
+        consumeFuelForDistance(distanceTravelled - fuelConsumedThroughRef.current);
+        fuelConsumedThroughRef.current = distanceTravelled;
+      }
+
+      const fuelWarning = shouldShowFuelStopWarning(
+        drivingElapsedSecondsRef.current,
+        fuelLevelRef.current
+      );
+      if (fuelWarning !== fuelStopWarningRef.current) {
+        fuelStopWarningRef.current = fuelWarning;
+        setShowFuelStopWarning(fuelWarning);
+      }
 
       const signalProgress = advanceTurnSignal(
         turns,
@@ -443,7 +554,16 @@ export default function MapPanel() {
         setAutomaticTurnSignal(automaticSignal);
       }
 
-      const position = positionAtDistance(distanceTravelled);
+      const { position, segmentIndex } = getDrivingState(distanceTravelled);
+      simulatedPositionRef.current = position.toJSON();
+
+      if (drivingPolylineRef.current) {
+        const remainingPath = [position];
+        for (let i = segmentIndex; i < segments.length; i += 1) {
+          remainingPath.push(segments[i].end);
+        }
+        drivingPolylineRef.current.setPath(remainingPath);
+      }
       const lookAheadDistance = Math.min(
         distanceTravelled + DRIVING.LOOK_AHEAD,
         totalDistance
@@ -492,11 +612,14 @@ export default function MapPanel() {
 
     animationFrameRef.current = requestAnimationFrame(animate);
     return true;
-  }, [center, destLocation, routeData, setAutomaticTurnSignal, stopDrivingSimulation]);
+  }, [center, consumeFuelForDistance, destLocation, routeData, setAutomaticTurnSignal, stopDrivingSimulation]);
 
   const loadRoute = useCallback(
-    async (destLoc, stops = []) => {
+    async (destLoc, stops = [], originOverride = null) => {
+      if (!originOverride) autoStartAfterRouteRef.current = false;
       stopDrivingSimulation();
+      setIsFindingFuelStop(false);
+      setNavigationError("");
       clearRoutePolylines();
 
       const requestId = ++routeRequestRef.current;
@@ -513,11 +636,11 @@ export default function MapPanel() {
         // A destination can be selected before watchPosition delivers its first
         // fix. Request a fresh fix in that case instead of routing from the map
         // fallback, which is only intended for the initial camera position.
-        let origin = currentLocation ?? FALLBACK_LOCATION;
+        let origin = originOverride ?? currentLocation ?? FALLBACK_LOCATION;
         const recentLocation = latestLocationRef.current;
-        if (recentLocation && Date.now() - recentLocation.timestamp < 20_000) {
+        if (!originOverride && recentLocation && Date.now() - recentLocation.timestamp < 20_000) {
           origin = recentLocation.location;
-        } else if (navigator.geolocation) {
+        } else if (!originOverride && navigator.geolocation) {
           origin = await new Promise((resolve) => {
             navigator.geolocation.getCurrentPosition(
               (position) => {
@@ -571,6 +694,7 @@ export default function MapPanel() {
             }];
         const decodedRoutes = candidateRoutes.map((route) => ({
           ...route,
+          suggested_stops: route.suggested_stops ?? data.suggested_stops ?? [],
           maneuvers:
             route.maneuvers ?? (route.selected ? data.maneuvers ?? [] : []),
           decodedPath: (route.polylines ?? []).flatMap((encoded) =>
@@ -592,6 +716,7 @@ export default function MapPanel() {
         setSelectedIndex(firstRouteIndex);
       } catch (error) {
         if (requestId !== routeRequestRef.current) return;
+        autoStartAfterRouteRef.current = false;
 
         console.error("Routing failed:", error);
         setNavigationError(
@@ -621,7 +746,6 @@ export default function MapPanel() {
   const addSuggestedStop = useCallback((stop) => {
     if (!destLocation || isDriving || tripConfirmed || isRouting) return;
     if (plannedStops.some((planned) => planned.place_id === stop.place_id)) return;
-
     loadRoute(destLocation, [...plannedStops, stop]);
   }, [destLocation, isDriving, isRouting, loadRoute, plannedStops, tripConfirmed]);
 
@@ -632,6 +756,7 @@ export default function MapPanel() {
       plannedStops.filter((stop) => stop.place_id !== placeId)
     );
   }, [destLocation, isDriving, isRouting, loadRoute, plannedStops, tripConfirmed]);
+
 
   const handleStartDriving = useCallback(() => {
     if (!routeData || isConfirming) return;
@@ -663,7 +788,77 @@ export default function MapPanel() {
     }
   }, [destLocation, isConfirming, plannedStops, routeData, startDrivingSimulation, tripConfirmed, tripData]);
 
+  const handleFuelStopDetour = useCallback(async () => {
+    const origin = simulatedPositionRef.current;
+    const path = routeData?.path;
+    const maps = window.google?.maps;
+    if (!destLocation || !origin || !path || path.length < 2 || isRouting || isFindingFuelStop) return;
+    if (!maps?.geometry?.encoding || !maps.geometry.spherical) {
+      setNavigationError("Route geometry is unavailable for finding a station.");
+      return;
+    }
+
+    const remainingPoints = [new maps.LatLng(origin.lat, origin.lng)];
+    let distanceAtPoint = 0;
+    const traveledDistance = routeProgressRef.current;
+    for (let index = 0; index < path.length - 1; index += 1) {
+      const current = new maps.LatLng(path[index].lat, path[index].lng);
+      const next = new maps.LatLng(path[index + 1].lat, path[index + 1].lng);
+      distanceAtPoint += maps.geometry.spherical.computeDistanceBetween(current, next);
+      if (distanceAtPoint > traveledDistance + 1) remainingPoints.push(next);
+    }
+    if (remainingPoints.length < 2) {
+      setNavigationError("There is no remaining route ahead to search.");
+      return;
+    }
+
+    const controller = new AbortController();
+    gasStopLookupControllerRef.current = controller;
+    setIsFindingFuelStop(true);
+    setNavigationError("");
+
+    try {
+      const station = await apiFetch("/navigation/route-fuel-stop", {
+        method: "POST",
+        body: JSON.stringify({
+          encoded_route: maps.geometry.encoding.encodePath(remainingPoints),
+        }),
+        signal: controller.signal,
+      });
+      if (controller.signal.aborted || !drivingRef.current) return;
+      if (!station) {
+        setNavigationError("No gas station with a small detour was found ahead.");
+        return;
+      }
+
+      gasStopLookupControllerRef.current = null;
+      const stop = {
+        ...station,
+        type: station.station_type === "charging" ? "ev_charging" : "fuel",
+      };
+      autoStartAfterRouteRef.current = true;
+      loadRoute(destLocation, [stop, ...plannedStops], origin);
+    } catch (error) {
+      if (!controller.signal.aborted) {
+        console.warn("Unable to find a fuel stop along the route:", error.message);
+        setNavigationError("Unable to find a gas station along this route. Try again.");
+      }
+    } finally {
+      if (gasStopLookupControllerRef.current === controller) {
+        gasStopLookupControllerRef.current = null;
+      }
+      if (!controller.signal.aborted) setIsFindingFuelStop(false);
+    }
+  }, [destLocation, isFindingFuelStop, isRouting, loadRoute, plannedStops, routeData]);
+
+  useEffect(() => {
+    if (!autoStartAfterRouteRef.current || isRouting || !routeData) return;
+    autoStartAfterRouteRef.current = false;
+    handleStartDriving();
+  }, [handleStartDriving, isRouting, routeData]);
+
   const cancelRoute = useCallback(() => {
+    autoStartAfterRouteRef.current = false;
     routeRequestRef.current += 1;
     stopDrivingSimulation();
     clearRoutePolylines();
@@ -760,7 +955,7 @@ export default function MapPanel() {
 
         {[
           ...plannedStops.map((stop) => ({ ...stop, planned: true })),
-          ...(tripData?.suggested_stops ?? []).filter(
+          ...(routeData?.suggested_stops ?? []).filter(
             (suggestion) => !plannedStops.some((stop) => stop.place_id === suggestion.place_id)
           ),
         ].map((stop) => (
@@ -798,6 +993,11 @@ export default function MapPanel() {
                   <strong>{route.duration_text}</strong>
                   <span>{route.distance_text}</span>
                 </span>
+                {route.estimated_trip_cost > 0 && (
+                  <span className="route-option-fuel-cost">
+                    ~{route.estimated_trip_cost} {route.fuel_currency || "RON"} ({route.estimated_fuel_litres}L)
+                  </span>
+                )}
                 {route.explanation && (
                   <span className="route-option-why">
                     {route.explanation}
@@ -811,6 +1011,15 @@ export default function MapPanel() {
                   )}
                   {route.labels?.includes("FUEL_EFFICIENT") && (
                     <span className="route-option-tag eco">Eco</span>
+                  )}
+                  {route.labels?.includes("MOUNTAIN_CORRIDOR") && (
+                    <span className="route-option-tag mountain">Mountain</span>
+                  )}
+                  {route.labels?.includes("SCENIC_REGIONAL") && !route.labels?.includes("MOUNTAIN_CORRIDOR") && (
+                    <span className="route-option-tag scenic">Scenic</span>
+                  )}
+                  {route.labels?.includes("TOURIST_CORRIDOR") && (
+                    <span className="route-option-tag attraction">Touristic</span>
                   )}
                   {route.scores?.weather_risk > 0.3 && (
                     <span className="route-option-tag risk">Weather risk</span>
@@ -844,14 +1053,14 @@ export default function MapPanel() {
             </section>
           )}
 
-          {(tripData.suggested_stops ?? []).some(
+          {(routeData?.suggested_stops ?? []).some(
             (stop) => !plannedStops.some((planned) => planned.place_id === stop.place_id)
           ) && (
             <section className="route-stops suggested">
               <strong className="route-stops-title">
                 Suggested fuel stops
               </strong>
-              {(tripData.suggested_stops ?? [])
+              {(routeData?.suggested_stops ?? [])
                 .filter((stop) => !plannedStops.some((planned) => planned.place_id === stop.place_id))
                 .map((stop) => (
                   <div key={stop.place_id} className="route-stop">
@@ -874,12 +1083,35 @@ export default function MapPanel() {
                 ))}
             </section>
           )}
+
+        </aside>
+      )}
+
+      {isDriving && showFuelStopWarning && (
+        <aside className="fuel-stop-advisory" aria-live="polite" role="status">
+          <span className="fuel-stop-advisory-icon" aria-hidden="true">
+            <GasPumpIcon size={18} weight="fill" />
+          </span>
+          <span className="fuel-stop-advisory-copy">
+            <strong>Consider a quick stop</strong>
+            <span>
+              {fuelLevel < 30 && drivingElapsedSecondsRef.current > 7_200
+                ? "Fuel is below 30% and you have been driving for over two hours."
+                : fuelLevel < 30
+                  ? "Your fuel level is below 30%."
+                  : "You have been driving for over two hours."}
+            </span>
+          </span>
         </aside>
       )}
 
       {isRouting && (
         <div className="route-status" role="status">
-          {plannedStops.length > 0 ? "Updating route through selected stops…" : "Finding route…"}
+          {autoStartAfterRouteRef.current
+            ? "Rerouting through gas station…"
+            : plannedStops.length > 0
+              ? "Updating route through selected stops…"
+              : "Finding route…"}
         </div>
       )}
 
@@ -895,6 +1127,17 @@ export default function MapPanel() {
             {routeData.distance}
           </div>
 
+          {routeData.estimated_trip_cost > 0 && (
+            <div
+              className="route-summary-item"
+              title={`${routeData.estimated_fuel_litres}L @ ${routeData.fuel_price_per_l} ${routeData.fuel_currency || "RON"}/L`}
+            >
+              <GasPumpIcon size={18} className="route-summary-icon" aria-hidden="true" />
+              ~{routeData.estimated_trip_cost} {routeData.fuel_currency || "RON"}
+            </div>
+          )}
+
+
           {destLocation && !isDriving && (
             <button
               type="button"
@@ -907,13 +1150,25 @@ export default function MapPanel() {
           )}
 
           {isDriving && (
-            <button
-              type="button"
-              onClick={() => stopDrivingSimulation()}
-              className="route-drive-btn"
-            >
-              Stop Driving
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={handleFuelStopDetour}
+                disabled={isRouting || isFindingFuelStop}
+                aria-label="Find a gas station ahead and reroute through it"
+                className="route-gas-station-btn"
+              >
+                <GasPumpIcon size={17} weight="fill" aria-hidden="true" />
+                {isFindingFuelStop ? "Finding…" : "Gas station"}
+              </button>
+              <button
+                type="button"
+                onClick={() => stopDrivingSimulation()}
+                className="route-drive-btn"
+              >
+                Stop Driving
+              </button>
+            </>
           )}
 
           {!isDriving && (

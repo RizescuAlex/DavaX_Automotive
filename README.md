@@ -7,7 +7,7 @@ pipeline that reads hand landmarks from an iPhone's LiDAR camera.
 
 ```bash
 cp .env.example .env
-docker compose up --build
+python start.py --build
 ```
 
 Then open <http://localhost> and register with **email and password**.
@@ -15,6 +15,13 @@ Then open <http://localhost> and register with **email and password**.
 That is the whole setup. The example values are enough to get a working app —
 Postgres, Redis, the API and the UI all come up, and the backend runs
 `alembic upgrade head` on start, so the schema is created for you.
+
+`python start.py --build` deliberately removes the Compose volumes before
+building, so each build starts with a blank Postgres database and Alembic
+recreates its schema. This deletes saved accounts and app data (and clears
+Redis). Run `python start.py` without `--build` to restart while preserving
+data. `docker compose up --build` by itself preserves existing named volumes;
+use the startup script or `make dev` when you want a clean database.
 
 > **Google sign-in will not work with the example values**, because they are
 > placeholders for a Firebase project you do not have. Email/password auth is
@@ -76,7 +83,8 @@ production build. Delete the file (or the line) to restore the real login flow.
 ## Common commands
 
 ```bash
-docker compose up --build        # start everything
+python start.py --build          # clean database, build, and start everything
+python start.py                  # start while keeping database data
 docker compose logs -f backend   # tail the API
 docker compose down              # stop
 make migrate-new msg="..."       # create a migration after changing a model

@@ -10,8 +10,31 @@ from app.models.vehicle import Vehicle
 from app.models.vehicle_fuel_spec import VehicleFuelSpec
 from app.schemas.vehicle import VehicleOut
 from app.schemas.vehicle_fuel_spec import VehicleFuelSpecOut
+from app.schemas.vehicle_fuel_profile import VehicleFuelProfileOut
+from app.services.vehicle_fuel import get_user_vehicle_fuel_profile
 
 router = APIRouter()
+
+
+@router.get("/me/fuel-profile", response_model=VehicleFuelProfileOut)
+async def get_my_vehicle_fuel_profile(
+    db: AsyncSession = Depends(get_db),
+    token: dict = Depends(get_current_token),
+):
+    current_user = await _get_user_from_token(token, db)
+    profile = await get_user_vehicle_fuel_profile(db, str(current_user.id))
+    config = profile.config
+    return VehicleFuelProfileOut(
+        fuel_type=config.fuel_type,
+        capacity=config.tank_capacity_l,
+        capacity_unit=profile.capacity_unit,
+        consumption=config.consumption_l_per_100km,
+        consumption_unit=profile.consumption_unit,
+        consumption_source=profile.consumption_source,
+        reserve_threshold_pct=config.reserve_threshold_pct,
+        source=profile.source,
+        selected_trim_name=profile.selected_trim_name,
+    )
 
 
 @router.get("/me", response_model=VehicleOut)
